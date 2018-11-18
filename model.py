@@ -16,3 +16,7 @@ class Model:
     def g(self, x1: float, x2: float) -> float:
         return (self.b2 / (self.px * self.py)) * \
                (self.a2 * x2 * (self.b2 - self.px * x2) + self.d21 * x1 * (self.b1 - self.px * x1))
+
+    def __str__(self):
+        return f'Model: a1 = {self.a1}, a2 = {self.a2}, b1 = {self.b1}, b2 = {self.b2}, px = {self.px}, ' \
+               f'py = {self.py}, d12 = {self.d12}, d21 = {self.d21}'
