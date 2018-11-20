@@ -1,24 +1,26 @@
 from math import fabs
 from model import Model
-from typing import List, Tuple, Any
-
-x_max, t1, t2 = 100, 2000, 1000
+from typing import Set, Tuple
 
 
-def build_phase_trajectory(model: Model, x01: float, x02: float) -> List[Tuple[Any]]:
-    x1t, x2t = x01, x02
-    points = {(x1t, x2t)}
+from model import State
+
+
+def get_phase_trajectory(model: Model, state_0: State, t1: int, t2: int, x_count: int, x_max=100) -> \
+        Set[Tuple[float, float]]:
+    state = state_0
+    points = set()
 
     for t in range(t1 + t2):
-        x1t_i, x2t_i = model.f(x1t, x2t), model.g(x1t, x2t)
+        next_state = model.next_state(state)
 
-        if fabs(x1t_i) > x_max or fabs(x2t_i) > x_max:
-            print(f'(x01 = {x01}, x02 = {x02}) -> inf')
-            break
+        if fabs(next_state.x1) > x_max or fabs(next_state.x2) > x_max:
+            print(f'{state_0} -> inf')
+            return set()
 
-        if t >= t1:
-            points.add((x1t_i, x2t_i))
+        if t >= t1 and (t - t1) < x_count:
+            points.add(next_state.to_point())
 
-        x1t, x2t = x1t_i, x2t_i
+        state = next_state
 
-    return list(zip(*points))
+    return points
