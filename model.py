@@ -1,3 +1,4 @@
+from math import fabs
 from typing import Tuple
 
 
@@ -8,6 +9,9 @@ class State:
 
     def to_point(self) -> Tuple[float, float]:
         return self.x1, self.x2
+
+    def equals(self, other: object, eps=0.00001):
+        return isinstance(other, State) and fabs(self.x1 - other.x1) < eps and fabs(self.x2 - other.x2) < eps
 
     def __str__(self):
         return f'({self.x1}, {self.x2})'
