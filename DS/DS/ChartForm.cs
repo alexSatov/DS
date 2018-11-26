@@ -7,36 +7,45 @@ namespace DS
 {
 	public class ChartForm : Form
 	{
-		public int PointsCount { get; }
+		public Chart Chart { get; }
+		public ChartArea ChartArea { get; }
 
-		public ChartForm(IEnumerable<(double x, double y)> points, double ox1, double ox2, double oy1, double oy2)
+		public readonly Dictionary<string, int> SeriesPointCount = new Dictionary<string, int>();
+
+		public ChartForm(IEnumerable<(double x, double y)> points, double ox1, double ox2, double oy1, double oy2,
+			Color? color = null)
 		{
-			Size = new Size(900, 600);
-
-			var chart = new Chart { Parent = this, Dock = DockStyle.Fill };
-			var chartArea = new ChartArea
+			Size = new Size(700, 600);
+			Chart = new Chart { Parent = this, Dock = DockStyle.Fill };
+			ChartArea = new ChartArea
 			{
 				AxisX = { Minimum = ox1, Maximum = ox2 },
 				AxisY = { Minimum = oy1, Maximum = oy2 }
 			};
 
-			chart.ChartAreas.Add(chartArea);
+			Chart.ChartAreas.Add(ChartArea);
+			AddSeries("main", points, color ?? Color.DodgerBlue);
+		}
 
+		public void AddSeries(string name, IEnumerable<(double x, double y)> points, Color color)
+		{
+			SeriesPointCount[name] = 0;
 			var series = new Series
 			{
-				Name = "model",
+				Name = name,
 				ChartType = SeriesChartType.FastPoint,
-				ChartArea = chartArea.Name,
-				MarkerStyle = MarkerStyle.Circle
+				ChartArea = ChartArea.Name,
+				MarkerStyle = MarkerStyle.Circle,
+				Color = color
 			};
 
 			foreach (var (x, y) in points)
 			{
-				PointsCount++;
+				SeriesPointCount[name]++;
 				series.Points.AddXY(x, y);
 			}
 
-			chart.Series.Add(series);
+			Chart.Series.Add(series);
 		}
 	}
 }

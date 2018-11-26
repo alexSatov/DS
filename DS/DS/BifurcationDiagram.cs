@@ -8,13 +8,13 @@ namespace DS
 	{
 		public class D12VsD21Result
 		{
-			public List<PointD> EquilibriumPoints { get; }
+			public List<(PointD D, PointX X)> EquilibriumPoints { get; }
 			public List<PointD> InfinityPoints { get; }
 			public Dictionary<int, List<PointD>> CyclePoints { get; }
 
 			public D12VsD21Result()
 			{
-				EquilibriumPoints = new List<PointD>();
+				EquilibriumPoints = new List<(PointD, PointX)>();
 				InfinityPoints = new List<PointD>();
 				CyclePoints = new Dictionary<int, List<PointD>>();
 
@@ -28,9 +28,13 @@ namespace DS
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsX(Model model, PointX start,
 			double d12End, double step)
 		{
+			var previous = start;
 			for (; model.D12 < d12End; model.D12 += step)
 			{
-				var points = PhaseTrajectory.Get(model, start, 10000, 2000);
+				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
+				previous = points[points.Count - 1];
+
+				points.AddRange(PhaseTrajectory.Get(model, start, 10000, 2000));
 
 				if (points[0].IsInfinity()) continue;
 
@@ -69,26 +73,7 @@ namespace DS
 			{
 				model.D21 = d21Start;
 				for (; model.D21 < d21End; model.D21 += step2)
-				{
-					var point = PhaseTrajectory.Get(model, start, 10000, 1)[0];
-
-					if (point.IsInfinity())
-						result.InfinityPoints.Add(new PointD(model.D12, model.D21));
-
-					var next = model.GetNextPoint(point);
-
-					if (point.AlmostEquals(next))
-					{
-						result.EquilibriumPoints.Add(new PointD(model.D12, model.D21));
-						continue;
-					}
-
-					var cycle = FindCycle(model, point, next);
-
-					if (!cycle.Found) continue;
-
-					result.CyclePoints[cycle.Period].Add(new PointD(model.D12, model.D21));
-				}
+					TryAddToResult(model, PhaseTrajectory.Get(model, start, 10000, 1)[0], result);
 			}
 
 			return result;
@@ -123,6 +108,26 @@ namespace DS
 			}
 
 			return result;
+		}
+
+		private static void TryAddToResult(Model model, PointX point, D12VsD21Result result)
+		{
+			if (point.IsInfinity())
+				result.InfinityPoints.Add(new PointD(model.D12, model.D21));
+
+			var next = model.GetNextPoint(point);
+
+			if (point.AlmostEquals(next))
+			{
+				result.EquilibriumPoints.Add((new PointD(model.D12, model.D21), point));
+				return;
+			}
+
+			var cycle = FindCycle(model, point, next);
+
+			if (!cycle.Found) return;
+
+			result.CyclePoints[cycle.Period].Add(new PointD(model.D12, model.D21));
 		}
 
 		private static (bool Found, int Period) FindCycle(Model model, PointX first, PointX second)

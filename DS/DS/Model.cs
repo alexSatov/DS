@@ -40,7 +40,7 @@
 
 		private double F(double x1, double x2)
 		{
-			return B1 * (A1 * x1 * (B2 - Px * x2) + D12 * x2 * (B2 - Px * x2)) / (Px * Py);
+			return B1 * (A1 * x1 * (B1 - Px * x1) + D12 * x2 * (B2 - Px * x2)) / (Px * Py);
 		}
 
 		private double G(double x1, double x2)

@@ -52,5 +52,16 @@ namespace DS
 			D12 = d12;
 			D21 = d21;
 		}
+
+		public override string ToString()
+		{
+			return $"({D12}, {D21})";
+		}
+
+		public void Deconstruct(out double d12, out double d21)
+		{
+			d12 = D12;
+			d21 = D21;
+		}
 	}
 }
