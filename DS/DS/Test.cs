@@ -61,32 +61,7 @@ namespace DS
 			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.004, 0.016,
 				0.00002, 0.00008);
 
-			var infs = points.InfinityPoints
-				.Select(p => (p.D12, p.D21));
-
-			var eqX1EqX2Eq0 = points.EquilibriumPoints
-				.Where(t => t.X.AlmostEquals(new PointX(0, 0)))
-				.Select(t => (t.D.D12, t.D.D21));
-
-			var eqX2Gt2X1 = points.EquilibriumPoints
-				.Where(t => t.X.X2 > 2 * t.X.X1)
-				.Select(t => (t.D.D12, t.D.D21));
-
-			var eqX2Lt2X1 = points.EquilibriumPoints
-				.Where(t => t.X.X2 < 2 * t.X.X1)
-				.Select(t => (t.D.D12, t.D.D21));
-
-			var chart = new ChartForm(infs, 0, 0.004, 0, 0.016, Color.Gray);
-
-			chart.AddSeries("eqX2Lt2X1", eqX2Lt2X1, Color.ForestGreen);
-			chart.AddSeries("eqX2Gt2X1", eqX2Gt2X1, Color.DeepSkyBlue);
-			chart.AddSeries("eqX1EqX2Eq0", eqX1EqX2Eq0, Color.Goldenrod);
-
-			Console.WriteLine($"equilibrium x2 < 2x1 count: {chart.SeriesPointCount["eqX2Lt2X1"]}");
-			Console.WriteLine($"equilibrium x2 > 2x1 count: {chart.SeriesPointCount["eqX2Gt2X1"]}");
-			Console.WriteLine($"equilibrium x1 = x2 = 0 count: {chart.SeriesPointCount["eqX1EqX2Eq0"]}");
-
-			return chart;
+			return GetCyclesChart(points, 0, 0.004, 0, 0.016);
 		}
 
 		public static ChartForm Test5(Model model)
@@ -97,34 +72,7 @@ namespace DS
 			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.008,
 				0.00001225, 0.000005);
 
-			var infs = points.InfinityPoints
-				.Select(p => (p.D12, p.D21));
-
-			var eqX1EqX2Eq0 = points.EquilibriumPoints
-				.Where(t => t.X.AlmostEquals(new PointX(0, 0)))
-				.Select(t => (t.D.D12, t.D.D21));
-
-			var eqX2Gt2X1 = points.EquilibriumPoints
-				.Where(t => t.X.X2 > 2 * t.X.X1)
-				.Select(t => (t.D.D12, t.D.D21));
-
-			var eqX2Lt2X1 = points.EquilibriumPoints
-				.Where(t => t.X.X2 < 2 * t.X.X1)
-				.Select(t => (t.D.D12, t.D.D21));
-
-			var chart = new ChartForm(infs, 0, 0.00245, 0.007, 0.008, Color.Gray);
-
-			chart.AddSeries("eqX2Lt2X1", eqX2Lt2X1, Color.ForestGreen);
-			chart.AddSeries("eqX2Gt2X1", eqX2Gt2X1, Color.DeepSkyBlue);
-			chart.AddSeries("eqX1EqX2Eq0", eqX1EqX2Eq0, Color.Goldenrod);
-
-			Console.WriteLine($"equilibrium x2 < 2x1 count: {chart.SeriesPointCount["eqX2Lt2X1"]}");
-			Console.WriteLine($"equilibrium x2 > 2x1 count: {chart.SeriesPointCount["eqX2Gt2X1"]}");
-			Console.WriteLine($"equilibrium x1 = x2 = 0 count: {chart.SeriesPointCount["eqX1EqX2Eq0"]}");
-
-			AddCycles(chart, points.CyclePoints);
-
-			return chart;
+			return GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 		}
 
 		// 3 аттрактора
@@ -181,6 +129,49 @@ namespace DS
 			return new ChartForm(points, 0, 0.00245, 0, 45);
 		}
 
+		//public static ChartForm Test7(Model model)
+		//{
+		//	model.D12 = 0.00158;
+		//	model.D21 = 0.0075;
+
+		//	var points = AttractorPool.GetX1VsX2(model, new PointX(-5, -5), new PointX(45, 85), 0.5, 0.9);
+		//}
+
+		private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
+			double ox1, double ox2, double oy1, double oy2)
+		{
+			var zeroPoint = new PointX(0, 0);
+
+			var infs = points.InfinityPoints
+				.Select(p => (p.D12, p.D21));
+
+			var eqX1EqX2Eq0 = points.EquilibriumPoints
+				.Where(t => t.X.AlmostEquals(zeroPoint))
+				.Select(t => (t.D.D12, t.D.D21));
+
+			var eqX2Gt2X1 = points.EquilibriumPoints
+				.Where(t => t.X.X2 > 2 * t.X.X1)
+				.Select(t => (t.D.D12, t.D.D21));
+
+			var eqX2Lt2X1 = points.EquilibriumPoints
+				.Where(t => t.X.X2 < 2 * t.X.X1)
+				.Select(t => (t.D.D12, t.D.D21));
+
+			var chart = new ChartForm(infs, ox1, ox2, oy1, oy2, Color.Gray);
+
+			chart.AddSeries("eqX2Lt2X1", eqX2Lt2X1, Color.ForestGreen);
+			chart.AddSeries("eqX2Gt2X1", eqX2Gt2X1, Color.DeepSkyBlue);
+			chart.AddSeries("eqX1EqX2Eq0", eqX1EqX2Eq0, Color.Goldenrod);
+
+			Console.WriteLine($"equilibrium x2 < 2x1 count: {chart.SeriesPointCount["eqX2Lt2X1"]}");
+			Console.WriteLine($"equilibrium x2 > 2x1 count: {chart.SeriesPointCount["eqX2Gt2X1"]}");
+			Console.WriteLine($"equilibrium x1 = x2 = 0 count: {chart.SeriesPointCount["eqX1EqX2Eq0"]}");
+
+			AddCycles(chart, points.CyclePoints);
+
+			return chart;
+		}
+
 		private static void AddCycles(ChartForm chart, IReadOnlyDictionary<int, List<PointD>> cyclePoints)
 		{
 			var colors = new[]
@@ -195,6 +186,11 @@ namespace DS
 				chart.AddSeries($"cycle{i}", cyclePoints[i].Select(p => (p.D12, p.D21)), colors[i - 2]);
 				Console.WriteLine($"cycle{i} count: {chart.SeriesPointCount[$"cycle{i}"]}");
 			}
+		}
+
+		private static void GetAttractorPoolChart()
+		{
+			
 		}
 	}
 }

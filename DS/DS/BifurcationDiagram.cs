@@ -198,7 +198,7 @@ namespace DS
 				var d21PartEnd = model.D21 + d21Part * (i + 1);
 				copy.D21 = model.D21 + d21Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD12(copy, start, d12End, d21PartEnd, step1, step2));
+				tasks[i] = Task.Run(() => GetD12VsD21(copy, start, d12End, d21PartEnd, step1, step2));
 			}
 
 			foreach (var task in tasks)
