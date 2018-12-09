@@ -113,7 +113,47 @@ namespace DS
 			return result;
 		}
 
-		public static D12VsD21Result GetD12VsD21Parallel(Model model, PointX start, double d12End, double d21End,
+		public static D12VsD21Result GetD12VsD21ByPreviousD21(Model model, PointX start, double d12End, double d21End,
+			double step1, double step2)
+		{
+			var d21Start = model.D21;
+			var result = new D12VsD21Result();
+
+			for (; model.D12 < d12End; model.D12 += step1)
+			{
+				model.D21 = d21Start;
+				var previous = start;
+				for (; model.D21 < d21End; model.D21 += step2)
+				{
+					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
+					TryAddToResult(model, previous, result);
+				}
+			}
+
+			return result;
+		}
+
+		public static D12VsD21Result GetD12VsD21ByPreviousD12(Model model, PointX start, double d12End, double d21End,
+			double step1, double step2)
+		{
+			var d12Start = model.D12;
+			var result = new D12VsD21Result();
+
+			for (; model.D21 < d21End; model.D21 += step2)
+			{
+				model.D12 = d12Start;
+				var previous = start;
+				for (; model.D12 < d12End; model.D12 += step1)
+				{
+					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
+					TryAddToResult(model, previous, result);
+				}
+			}
+
+			return result;
+		}
+
+		public static D12VsD21Result GetD12VsD21ParallelByD12(Model model, PointX start, double d12End, double d21End,
 			double step1, double step2)
 		{
 			var result = new D12VsD21Result();
@@ -127,7 +167,38 @@ namespace DS
 				var d12PartEnd = model.D12 + d12Part * (i + 1);
 				copy.D12 = model.D12 + d12Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21(copy, start, d12PartEnd, d21End, step1, step2));
+				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD21(copy, start, d12PartEnd, d21End, step1, step2));
+			}
+
+			foreach (var task in tasks)
+			{
+				var taskResult = task.Result;
+
+				result.EquilibriumPoints.AddRange(taskResult.EquilibriumPoints);
+				result.InfinityPoints.AddRange(taskResult.InfinityPoints);
+
+				foreach (var period in taskResult.CyclePoints.Keys)
+					result.CyclePoints[period].AddRange(taskResult.CyclePoints[period]);
+			}
+
+			return result;
+		}
+
+		public static D12VsD21Result GetD12VsD21ParallelByD21(Model model, PointX start, double d12End, double d21End,
+			double step1, double step2)
+		{
+			var result = new D12VsD21Result();
+			var processorCount = Environment.ProcessorCount;
+			var tasks = new Task<D12VsD21Result>[processorCount];
+			var d21Part = (d21End - model.D21) / processorCount;
+
+			for (var i = 0; i < processorCount; i++)
+			{
+				var copy = model.Copy();
+				var d21PartEnd = model.D21 + d21Part * (i + 1);
+				copy.D21 = model.D21 + d21Part * i;
+
+				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD12(copy, start, d12End, d21PartEnd, step1, step2));
 			}
 
 			foreach (var task in tasks)

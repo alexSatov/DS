@@ -35,7 +35,7 @@ namespace DS
 			model.D12 = 0.0017;
 			model.D21 = 0.005;
 
-			var points = BifurcationDiagram.GetD12VsD21Parallel(model, new PointX(20, 40), 0.00245, 0.00792,
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.00245, 0.00792,
 				0.000005, 0.00002);
 
 			var eqX2Gt2X1 = points.EquilibriumPoints
@@ -58,7 +58,7 @@ namespace DS
 
 		public static ChartForm Test4(Model model)
 		{
-			var points = BifurcationDiagram.GetD12VsD21Parallel(model, new PointX(20, 40), 0.004, 0.016,
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.004, 0.016,
 				0.00002, 0.00008);
 
 			var infs = points.InfinityPoints
@@ -91,9 +91,10 @@ namespace DS
 
 		public static ChartForm Test5(Model model)
 		{
+			model.D12 = 0.00005;
 			model.D21 = 0.007;
 
-			var points = BifurcationDiagram.GetD12VsD21Parallel(model, new PointX(20, 40), 0.00245, 0.008,
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.008,
 				0.00001225, 0.000005);
 
 			var infs = points.InfinityPoints
