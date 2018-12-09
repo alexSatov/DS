@@ -28,13 +28,9 @@ namespace DS
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsX(Model model, PointX start,
 			double d12End, double step)
 		{
-			var previous = start;
 			for (; model.D12 < d12End; model.D12 += step)
 			{
-				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
-				previous = points[points.Count - 1];
-
-				points.AddRange(PhaseTrajectory.Get(model, start, 10000, 2000));
+				var points = PhaseTrajectory.Get(model, start, 10000, 2000);
 
 				if (points[0].IsInfinity()) continue;
 
@@ -43,7 +39,45 @@ namespace DS
 			}
 		}
 
-		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start, double d12End, double step)
+		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(Model model, PointX start,
+			double d12End, double step, bool rightToLeft = false)
+		{
+			var previous = start;
+			var min = double.MaxValue;
+			var max = 0.0;
+			Func<bool> condition;
+
+			if (rightToLeft)
+			{
+				condition = () => model.D12 >= d12End;
+				step = -step;
+			}
+			else
+				condition = () => model.D12 <= d12End;
+
+			for (; condition(); model.D12 += step)
+			{
+				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
+				previous = points[points.Count - 1];
+
+				if (!points[0].AlmostEquals(points[1]) && points[0].AlmostEquals(points[3]))
+				{
+					if (model.D12 < min)
+						min = model.D12;
+					if (model.D12 > max)
+						max = model.D12;
+				}
+
+				if (points[0].IsInfinity()) continue;
+
+				foreach (var (x1, x2) in points)
+					yield return (model.D12, x1, x2);
+			}
+			Console.WriteLine($"Min = {min}, Max = {max}");
+		}
+
+		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start,
+			double d12End, double step)
 		{
 			var processorCount = Environment.ProcessorCount;
 			var tasks = new Task<IEnumerable<(double D12, double X1, double X2)>>[processorCount];

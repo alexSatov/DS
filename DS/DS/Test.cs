@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace DS
@@ -48,18 +51,7 @@ namespace DS
 			chart.AddSeries("eqX2Lt2X1", eqX2Lt2X1, Color.Aqua);
 			Console.WriteLine($"equilibrium x2 < 2x1 count: {chart.SeriesPointCount["eqX2Lt2X1"]}");
 
-			var colors = new[]
-			{
-				Color.DarkBlue, Color.Red, Color.Blue, Color.Green, Color.DarkGreen, Color.DarkOliveGreen,
-				Color.DeepSkyBlue, Color.Orange, Color.Coral, Color.DarkGoldenrod, Color.Violet,
-				Color.SaddleBrown, Color.Thistle, Color.SlateBlue
-			};
-
-			for (var i = 2; i < 16; i++)
-			{
-				chart.AddSeries($"cycle{i}", points.CyclePoints[i].Select(p => (p.D12, p.D21)), colors[i - 2]);
-				Console.WriteLine($"cycle{i} count: {chart.SeriesPointCount[$"cycle{i}"]}");
-			}
+			AddCycles(chart, points.CyclePoints);
 
 			return chart;
 		}
@@ -129,7 +121,79 @@ namespace DS
 			Console.WriteLine($"equilibrium x2 > 2x1 count: {chart.SeriesPointCount["eqX2Gt2X1"]}");
 			Console.WriteLine($"equilibrium x1 = x2 = 0 count: {chart.SeriesPointCount["eqX1EqX2Eq0"]}");
 
+			AddCycles(chart, points.CyclePoints);
+
 			return chart;
+		}
+
+		// 3 аттрактора
+		public static ChartForm Test6(Model model)
+		{
+			const double step = 0.000005;
+			model.D21 = 0.0075;
+
+			IEnumerable<(double D12, double X1)> FirstAttractor()
+			{
+				model.D12 = 0.000045;
+				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00245, step)
+					.Distinct()
+					.Select(v => (v.D12, v.X1));
+			}
+
+			IEnumerable<(double D12, double X1)> SecondAttractor()
+			{
+				model.D12 = 0.00158;
+				var lrResult = BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00245, step)
+					.Distinct()
+					.Select(v => (v.D12, v.X1));
+				var rlResult = BifurcationDiagram.GetD12VsXByPrevious(model.Copy(), new PointX(20, 40), 0, step, true)
+					.Distinct()
+					.Select(v => (v.D12, v.X1));
+				return lrResult
+					.Concat(rlResult)
+					.OrderBy(p => p.Item1)
+					.Where(p => p.Item1 >= 0.0014499999 && p.Item1 <= 0.0019700001);
+			}
+
+			// [0.00217, 0.00238]
+			IEnumerable<(double D12, double X1)> ThirdAttractor()
+			{
+				model.D12 = 0.00227;
+				var lrResult = BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00245, step)
+					.Distinct()
+					.Select(v => (v.D12, v.X1));
+				var rlResult = BifurcationDiagram.GetD12VsXByPrevious(model.Copy(), new PointX(20, 40), 0, step, true)
+					.Distinct()
+					.Select(v => (v.D12, v.X1));
+				return lrResult
+					.Concat(rlResult)
+					.Where(p => p.Item2 > 31)
+					.OrderBy(p => p.Item1);
+			}
+
+			var points = FirstAttractor().ToList();
+			var lines = points
+				.Select(p => $"{p.D12.ToString(CultureInfo.InvariantCulture)} {p.X1.ToString(CultureInfo.InvariantCulture)}");
+
+			File.WriteAllLines("d12_x1_1.txt", lines);
+
+			return new ChartForm(points, 0, 0.00245, 0, 45);
+		}
+
+		private static void AddCycles(ChartForm chart, IReadOnlyDictionary<int, List<PointD>> cyclePoints)
+		{
+			var colors = new[]
+			{
+				Color.DarkBlue, Color.Red, Color.Blue, Color.Green, Color.DarkGreen, Color.DarkOliveGreen,
+				Color.DeepSkyBlue, Color.Orange, Color.Coral, Color.DarkGoldenrod, Color.Violet,
+				Color.SaddleBrown, Color.Thistle, Color.SlateBlue
+			};
+
+			for (var i = 2; i < 16; i++)
+			{
+				chart.AddSeries($"cycle{i}", cyclePoints[i].Select(p => (p.D12, p.D21)), colors[i - 2]);
+				Console.WriteLine($"cycle{i} count: {chart.SeriesPointCount[$"cycle{i}"]}");
+			}
 		}
 	}
 }
