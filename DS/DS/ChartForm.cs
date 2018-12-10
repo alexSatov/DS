@@ -27,7 +27,7 @@ namespace DS
 			AddSeries("main", points, color ?? Color.DodgerBlue);
 		}
 
-		public void AddSeries(string name, IEnumerable<(double x, double y)> points, Color color)
+		public void AddSeries(string name, IEnumerable<(double x, double y)> points, Color? color = null)
 		{
 			SeriesPointCount[name] = 0;
 			var series = new Series
@@ -35,9 +35,11 @@ namespace DS
 				Name = name,
 				ChartType = SeriesChartType.FastPoint,
 				ChartArea = ChartArea.Name,
-				MarkerStyle = MarkerStyle.Circle,
-				Color = color
+				MarkerStyle = MarkerStyle.Circle
 			};
+
+			if (color.HasValue)
+				series.Color = color.Value;
 
 			foreach (var (x, y) in points)
 			{

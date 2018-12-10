@@ -17,7 +17,7 @@ namespace DS
 
 		public bool AlmostEquals(PointX other, double eps = 0.00001)
 		{
-			return Math.Abs(X1 - other.X1) < eps && Math.Abs(X2 - other.X2) < eps;
+			return Math.Abs(X1 - other.X1) <= eps && Math.Abs(X2 - other.X2) <= eps;
 		}
 
 		public bool IsInfinity()

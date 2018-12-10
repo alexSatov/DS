@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DS
 {
@@ -10,25 +11,29 @@ namespace DS
 			var result = new Dictionary<PointX, HashSet<PointX>>();
 
 			for (var x1 = leftBottom.X1; x1 <= rightTop.X1; x1 += step1)
+			for (var x2 = leftBottom.X2; x2 <= rightTop.X2; x2 += step2)
 			{
-				for (var x2 = leftBottom.X2; x2 <= rightTop.X2; x2 += step2)
+				var startPoint = new PointX(x1, x2);
+				var point = PhaseTrajectory.Get(model, startPoint, 10000, 1)[0];
+
+				if (point.IsInfinity()) continue;
+
+				var key = new PointX((int) Math.Round(point.X1), (int) Math.Round(point.X2));
+				var found = false;
+
+				foreach (var attractor in result.Keys)
 				{
-					var point = PhaseTrajectory.Get(model, new PointX(x1, x2), 10000, 1)[0];
-					var found = false;
+					found = key.AlmostEquals(attractor, 0);
 
-					foreach (var attractor in result.Keys)
-					{
-						found = point.AlmostEquals(attractor);
+					if (!found) continue;
 
-						if (!found) continue;
+					result[key].Add(startPoint);
 
-						result[attractor].Add(point);
-						break;
-					}
-
-					if (!found)
-						result[point] = new HashSet<PointX>();
+					break;
 				}
+
+				if (!found)
+					result[key] = new HashSet<PointX>();
 			}
 
 			return result;
