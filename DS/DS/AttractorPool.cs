@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DS
 {
@@ -37,6 +39,27 @@ namespace DS
 			}
 
 			return result;
+		}
+
+		public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2Parallel(Model model, PointX leftBottom,
+			PointX rightTop, double step1, double step2)
+		{
+			var processorCount = Environment.ProcessorCount;
+			var tasks = new Task<Dictionary<PointX, HashSet<PointX>>>[processorCount];
+			var x1Part = (rightTop.X1 - leftBottom.X1) / processorCount;
+
+			for (var i = 0; i < processorCount; i++)
+			{
+				var leftBottomPart = new PointX(leftBottom.X1 + x1Part * i, leftBottom.X2);
+				var rightTopPart = new PointX(leftBottom.X1 + x1Part * (i + 1), rightTop.X2);
+
+				tasks[i] = Task.Run(() => GetX1VsX2(model, leftBottomPart, rightTopPart, step1, step2));
+			}
+
+			return tasks
+				.SelectMany(t => t.Result)
+				.ToLookup(g => g.Key, g => g.Value)
+				.ToDictionary(g => g.Key, g => g.SelectMany(v => v).ToHashSet());
 		}
 	}
 }

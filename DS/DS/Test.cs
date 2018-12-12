@@ -70,7 +70,7 @@ namespace DS
 			model.D21 = 0.007;
 
 			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.008,
-				0.000006, 0.0000025);
+				0.000004, 0.0000017);
 
 			return GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 		}
@@ -132,9 +132,9 @@ namespace DS
 			model.D12 = 0.00158;
 			model.D21 = 0.0075;
 
-			var points = AttractorPool.GetX1VsX2(model, new PointX(-5, -5), new PointX(45, 85), 0.25, 0.45);
+			var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.25, 0.45);
 
-			return GetAttractorPoolChart(points, -10, 50, -10, 90);
+			return GetAttractorPoolChart(points, -5, 45, -5, 85);
 		}
 
 		private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
@@ -230,6 +230,8 @@ namespace DS
 				Console.WriteLine($"{name} count: {chart.SeriesPointCount[name]}");
 				SaveToFile($"pool\\{name}.txt", points);
 			}
+
+			chart.AddSeries("attractors", attractorPoints.Keys.Select(p => (p.X1, p.X2)), Color.Blue);
 
 			return chart;
 		}
