@@ -16,7 +16,7 @@ namespace DS
 			var watch = new Stopwatch();
 
 			watch.Start();
-			var chart = Test.Test7(model);
+			var chart = Test.Test5(model);
 			watch.Stop();
 
 			Console.WriteLine($"main count: {chart.SeriesPointCount["main"]}");

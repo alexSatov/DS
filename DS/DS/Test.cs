@@ -14,7 +14,8 @@ namespace DS
 			model.D12 = 0.002;
 			model.D21 = 0.0063;
 
-			var points = PhaseTrajectory.Get(model, new PointX(20, 40), 2000, 1000).Select(p => (p.X1, p.X2));
+			var points = PhaseTrajectory.Get(model, new PointX(20, 40), 2000, 1000)
+				.Select(p => (p.X1, p.X2));
 
 			return new ChartForm(points, 0, 40, 0, 80);
 		}
@@ -69,7 +70,7 @@ namespace DS
 			model.D12 = 0.00005;
 			model.D21 = 0.007;
 
-			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.008,
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.00245, 0.008,
 				0.000004, 0.0000017);
 
 			return GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
@@ -78,7 +79,7 @@ namespace DS
 		// 3 аттрактора
 		public static ChartForm Test6(Model model)
 		{
-			const double step = 0.000005;
+			const double step = 0.000001;
 			model.D21 = 0.0075;
 
 			IEnumerable<(double D12, double X1)> FirstAttractor()
@@ -120,9 +121,9 @@ namespace DS
 					.OrderBy(p => p.Item1);
 			}
 
-			var points = FirstAttractor().ToList();
+			var points = ThirdAttractor().ToList();
 
-			SaveToFile("d12_x1_1.txt", points);
+			SaveToFile("d12_x1_3.txt", points);
 
 			return new ChartForm(points, 0, 0.00245, 0, 45);
 		}

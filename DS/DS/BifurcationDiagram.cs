@@ -103,10 +103,10 @@ namespace DS
 			var d21Start = model.D21;
 			var result = new D12VsD21Result();
 
-			for (; model.D12 < d12End; model.D12 += step1)
+			for (; model.D12 <= d12End; model.D12 += step1)
 			{
 				model.D21 = d21Start;
-				for (; model.D21 < d21End; model.D21 += step2)
+				for (; model.D21 <= d21End; model.D21 += step2)
 					TryAddToResult(model, PhaseTrajectory.Get(model, start, 10000, 1)[0], result);
 			}
 
@@ -119,11 +119,31 @@ namespace DS
 			var d21Start = model.D21;
 			var result = new D12VsD21Result();
 
-			for (; model.D12 < d12End; model.D12 += step1)
+			for (; model.D12 <= d12End; model.D12 += step1)
 			{
 				model.D21 = d21Start;
 				var previous = start;
-				for (; model.D21 < d21End; model.D21 += step2)
+				for (; model.D21 <= d21End; model.D21 += step2)
+				{
+					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
+					TryAddToResult(model, previous, result);
+				}
+			}
+
+			return result;
+		}
+
+		public static D12VsD21Result GetD12VsD21ByPreviousD21UpToDown(Model model, PointX start, double d12End,
+			double d21End, double step1, double step2)
+		{
+			var d21Start = model.D21;
+			var result = new D12VsD21Result();
+
+			for (; model.D12 <= d12End; model.D12 += step1)
+			{
+				model.D21 = d21End;
+				var previous = start;
+				for (; model.D21 >= d21Start; model.D21 -= step2)
 				{
 					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
 					TryAddToResult(model, previous, result);
@@ -139,11 +159,11 @@ namespace DS
 			var d12Start = model.D12;
 			var result = new D12VsD21Result();
 
-			for (; model.D21 < d21End; model.D21 += step2)
+			for (; model.D21 <= d21End; model.D21 += step2)
 			{
 				model.D12 = d12Start;
 				var previous = start;
-				for (; model.D12 < d12End; model.D12 += step1)
+				for (; model.D12 <= d12End; model.D12 += step1)
 				{
 					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
 					TryAddToResult(model, previous, result);
@@ -167,7 +187,7 @@ namespace DS
 				var d12PartEnd = model.D12 + d12Part * (i + 1);
 				copy.D12 = model.D12 + d12Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD21(copy, start, d12PartEnd, d21End, step1, step2));
+				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD21UpToDown(copy, start, d12PartEnd, d21End, step1, step2));
 			}
 
 			foreach (var task in tasks)
