@@ -67,13 +67,39 @@ namespace DS
 
 		public static ChartForm Test5(Model model)
 		{
-			model.D12 = 0.00005;
-			model.D21 = 0.007;
+			//model.D12 = 0.00005;
+			//model.D21 = 0.008;
+			//var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.00245, 0.007,
+			//	0.000004, 0.0000017, upToDown: true);
 
-			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.00245, 0.008,
-				0.000004, 0.0000017);
+			//(0.0015899999999999996, 0.0072622000000000051)
+			//model.D12 = 0.00159;
+			//model.D21 = 0.0072622;
+			//var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.0076,
+			//	0.000004, 0.0000017);
 
-			return GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
+			//(0.00200600000000001, 0.0075274500000000024); (19,9106940008894, 62,4944666763375)
+			//model.D12 = 0.002006;
+			//model.D21 = 0.00752745;
+			//var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(19.9106940008894, 62.4944666763375),
+			//	0.0018, 0.0078, 0.000004, 0.0000017, true);
+
+			//(0.00200600000000001, 0.0075274500000000024); (19,9106940008894, 62,4944666763375)
+			model.D12 = 0.002006;
+			model.D21 = 0.00752745;
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(19.9106940008894, 62.4944666763375),
+				0.00245, 0.0078, 0.000004, 0.0000017);
+
+			//var keks = points.CyclePoints[3]
+			//	.OrderByDescending(p => p.D.D12)
+			//	.Take(5)
+			//	.Select(p => (p.D.D12, p.D.D21));
+
+			var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
+
+			//chart.AddSeries("kek", keks, Color.Black);
+
+			return chart;
 		}
 
 		// 3 аттрактора
@@ -135,7 +161,7 @@ namespace DS
 
 			var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.25, 0.45);
 
-			return GetAttractorPoolChart(points, -5, 45, -5, 85);
+			return GetAttractorPoolChartExact(points, -5, 45, -5, 85);
 		}
 
 		private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
@@ -182,7 +208,7 @@ namespace DS
 			return chart;
 		}
 
-		private static void AddCycles(ChartForm chart, IReadOnlyDictionary<int, List<PointD>> cyclePoints)
+		private static void AddCycles(ChartForm chart, IReadOnlyDictionary<int, List<(PointD D, PointX X)>> cyclePoints)
 		{
 			var colors = new[]
 			{
@@ -193,7 +219,7 @@ namespace DS
 
 			for (var i = 2; i < 16; i++)
 			{
-				var points = cyclePoints[i].Select(p => (p.D12, p.D21)).ToList();
+				var points = cyclePoints[i].Select(p => (p.D.D12, p.D.D21)).ToList();
 				var name = $"cycle{i}";
 
 				chart.AddSeries(name, points, colors[i - 2]);
@@ -233,6 +259,32 @@ namespace DS
 			}
 
 			chart.AddSeries("attractors", attractorPoints.Keys.Select(p => (p.X1, p.X2)), Color.Blue);
+
+			return chart;
+		}
+
+		private static ChartForm GetAttractorPoolChartExact(Dictionary<PointX, HashSet<PointX>> attractorPoints,
+			double ox1, double ox2, double oy1, double oy2)
+		{
+			var cyclePoints = new HashSet<PointX> {new PointX(5, 57), new PointX(21, 40), new PointX(26, 77)};
+
+			var cycle = attractorPoints
+				.Where(kv => cyclePoints.Contains(kv.Key))
+				.SelectMany(kv => kv.Value)
+				.Select(p => (p.X1, p.X2))
+				.ToList();
+
+			var other = attractorPoints
+				.Where(kv => !cyclePoints.Contains(kv.Key))
+				.SelectMany(kv => kv.Value)
+				.Select(p => (p.X1, p.X2))
+				.ToList();
+
+			var chart = new ChartForm(cycle, ox1, ox2, oy1, oy2);
+
+			chart.AddSeries("other", other, Color.DarkOrange);
+			SaveToFile($"pool\\cycle3.txt", cycle);
+			SaveToFile($"pool\\other.txt", other);
 
 			return chart;
 		}

@@ -10,17 +10,17 @@ namespace DS
 		{
 			public List<(PointD D, PointX X)> EquilibriumPoints { get; }
 			public List<PointD> InfinityPoints { get; }
-			public Dictionary<int, List<PointD>> CyclePoints { get; }
+			public Dictionary<int, List<(PointD D, PointX X)>> CyclePoints { get; }
 
 			public D12VsD21Result()
 			{
 				EquilibriumPoints = new List<(PointD, PointX)>();
 				InfinityPoints = new List<PointD>();
-				CyclePoints = new Dictionary<int, List<PointD>>();
+				CyclePoints = new Dictionary<int, List<(PointD D, PointX X)>>();
 
 				for (var i = 2; i < 16; i++)
 				{
-					CyclePoints[i] = new List<PointD>();
+					CyclePoints[i] = new List<(PointD D, PointX X)>();
 				}
 			}
 		}
@@ -114,16 +114,30 @@ namespace DS
 		}
 
 		public static D12VsD21Result GetD12VsD21ByPreviousD21(Model model, PointX start, double d12End, double d21End,
-			double step1, double step2)
+			double step1, double step2, bool rightToLeft = false, bool upToDown = false)
 		{
 			var d21Start = model.D21;
 			var result = new D12VsD21Result();
+			Func<bool> conditionD12 = () => model.D12 <= d12End;
+			Func<bool> conditionD21 = () => model.D21 <= d21End;
 
-			for (; model.D12 <= d12End; model.D12 += step1)
+			if (rightToLeft)
+			{
+				conditionD12 = () => model.D12 >= d12End;
+				step1 = -step1;
+			}
+
+			if (upToDown)
+			{
+				conditionD21 = () => model.D21 >= d21End;
+				step2 = -step2;
+			}
+
+			for (; conditionD12(); model.D12 += step1)
 			{
 				model.D21 = d21Start;
 				var previous = start;
-				for (; model.D21 <= d21End; model.D21 += step2)
+				for (; conditionD21(); model.D21 += step2)
 				{
 					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
 					TryAddToResult(model, previous, result);
@@ -174,7 +188,7 @@ namespace DS
 		}
 
 		public static D12VsD21Result GetD12VsD21ParallelByD12(Model model, PointX start, double d12End, double d21End,
-			double step1, double step2)
+			double step1, double step2, bool rightToLeft = false, bool upToDown = false)
 		{
 			var result = new D12VsD21Result();
 			var processorCount = Environment.ProcessorCount;
@@ -187,7 +201,8 @@ namespace DS
 				var d12PartEnd = model.D12 + d12Part * (i + 1);
 				copy.D12 = model.D12 + d12Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD21UpToDown(copy, start, d12PartEnd, d21End, step1, step2));
+				tasks[i] = Task.Run(() =>
+					GetD12VsD21ByPreviousD21(copy, start, d12PartEnd, d21End, step1, step2, rightToLeft, upToDown));
 			}
 
 			foreach (var task in tasks)
@@ -252,7 +267,7 @@ namespace DS
 
 			if (!cycle.Found) return;
 
-			result.CyclePoints[cycle.Period].Add(new PointD(model.D12, model.D21));
+			result.CyclePoints[cycle.Period].Add((new PointD(model.D12, model.D21), point));
 		}
 
 		private static (bool Found, int Period) FindCycle(Model model, PointX first, PointX second)
