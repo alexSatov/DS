@@ -91,7 +91,7 @@ namespace DS
 				0.00245, 0.0078, 0.000004, 0.0000017);
 
 			//var keks = points.CyclePoints[3]
-			//	.OrderByDescending(p => p.D.D12)
+			//	.OrderByDescending(p => p.D.D21)
 			//	.Take(5)
 			//	.Select(p => (p.D.D12, p.D.D21));
 
@@ -162,6 +162,15 @@ namespace DS
 			var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.25, 0.45);
 
 			return GetAttractorPoolChartExact(points, -5, 45, -5, 85);
+		}
+
+		public static ChartForm Test8(Model model)
+		{
+			var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
+				new PointD(0.00159, 0.0072622), 0.00245, 0.008, 0.01, 0.000004, 0.0000017);
+			var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
+
+			return chart;
 		}
 
 		private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,

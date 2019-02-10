@@ -73,7 +73,7 @@ namespace DS
 				foreach (var (x1, x2) in points)
 					yield return (model.D12, x1, x2);
 			}
-			Console.WriteLine($"Min = {min}, Max = {max}");
+			//Console.WriteLine($"Min = {min}, Max = {max}");
 		}
 
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start,
@@ -190,7 +190,6 @@ namespace DS
 		public static D12VsD21Result GetD12VsD21ParallelByD12(Model model, PointX start, double d12End, double d21End,
 			double step1, double step2, bool rightToLeft = false, bool upToDown = false)
 		{
-			var result = new D12VsD21Result();
 			var processorCount = Environment.ProcessorCount;
 			var tasks = new Task<D12VsD21Result>[processorCount];
 			var d12Part = (d12End - model.D12) / processorCount;
@@ -205,24 +204,12 @@ namespace DS
 					GetD12VsD21ByPreviousD21(copy, start, d12PartEnd, d21End, step1, step2, rightToLeft, upToDown));
 			}
 
-			foreach (var task in tasks)
-			{
-				var taskResult = task.Result;
-
-				result.EquilibriumPoints.AddRange(taskResult.EquilibriumPoints);
-				result.InfinityPoints.AddRange(taskResult.InfinityPoints);
-
-				foreach (var period in taskResult.CyclePoints.Keys)
-					result.CyclePoints[period].AddRange(taskResult.CyclePoints[period]);
-			}
-
-			return result;
+			return UniteResults(tasks);
 		}
 
 		public static D12VsD21Result GetD12VsD21ParallelByD21(Model model, PointX start, double d12End, double d21End,
 			double step1, double step2)
 		{
-			var result = new D12VsD21Result();
 			var processorCount = Environment.ProcessorCount;
 			var tasks = new Task<D12VsD21Result>[processorCount];
 			var d21Part = (d21End - model.D21) / processorCount;
@@ -236,18 +223,58 @@ namespace DS
 				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD12(copy, start, d12End, d21PartEnd, step1, step2));
 			}
 
-			foreach (var task in tasks)
+			return UniteResults(tasks);
+		}
+
+		public static D12VsD21Result GetD12VsD21ByPreviousPolar(Model model, PointX startX, PointD startD,
+			double d12End, double d21End, double angleStep, double step1, double step2,
+			double startAngle = 0, double endAngle = 2 * Math.PI)
+		{
+			var result = new D12VsD21Result();
+			var startVector = new Vector2D(1, 0);
+			var area = new Rect(model.D12, d12End, model.D21, d21End);
+
+			for (var angle = startAngle; angle < endAngle; angle += angleStep)
 			{
-				var taskResult = task.Result;
+				var previous = startX;
+				var vector = startVector.Rotate(angle);
+				var shiftVector = new Vector2D(vector.X * step1, vector.Y * step2);
 
-				result.EquilibriumPoints.AddRange(taskResult.EquilibriumPoints);
-				result.InfinityPoints.AddRange(taskResult.InfinityPoints);
+				model.D12 = startD.D12;
+				model.D21 = startD.D21;
 
-				foreach (var period in taskResult.CyclePoints.Keys)
-					result.CyclePoints[period].AddRange(taskResult.CyclePoints[period]);
+				while (area.Contains(model.D12, model.D21))
+				{
+					model.D12 += shiftVector.X; 
+					model.D21 += shiftVector.Y; 
+					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
+					TryAddToResult(model, previous, result);
+				}
 			}
 
 			return result;
+		}
+
+		public static D12VsD21Result GetD12VsD21ByPreviousPolarParallel(Model model, PointX startX, PointD startD,
+			double d12End, double d21End, double angleStep, double step1, double step2,
+			double startAngle = 0, double endAngle = 2 * Math.PI)
+		{
+			var processorCount = Environment.ProcessorCount;
+			var tasks = new Task<D12VsD21Result>[processorCount];
+			var anglePart = (endAngle - startAngle) / processorCount;
+
+			for (var i = 0; i < processorCount; i++)
+			{
+				var copy = model.Copy();
+				var startAnglePart = startAngle + anglePart * i;
+				var endAnglePart = startAngle + anglePart * (i + 1);
+
+				tasks[i] = Task.Run(() =>
+					GetD12VsD21ByPreviousPolar(copy, startX, startD, d12End, d21End, angleStep, step1, step2,
+						startAnglePart, endAnglePart));
+			}
+
+			return UniteResults(tasks);
 		}
 
 		private static void TryAddToResult(Model model, PointX point, D12VsD21Result result)
@@ -285,6 +312,24 @@ namespace DS
 			}
 
 			return (false, 0);
+		}
+
+		private static D12VsD21Result UniteResults(IEnumerable<Task<D12VsD21Result>> tasks)
+		{
+			var result = new D12VsD21Result();
+
+			foreach (var task in tasks)
+			{
+				var taskResult = task.Result;
+
+				result.EquilibriumPoints.AddRange(taskResult.EquilibriumPoints);
+				result.InfinityPoints.AddRange(taskResult.InfinityPoints);
+
+				foreach (var period in taskResult.CyclePoints.Keys)
+					result.CyclePoints[period].AddRange(taskResult.CyclePoints[period]);
+			}
+
+			return result;
 		}
 	}
 }
