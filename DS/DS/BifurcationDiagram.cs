@@ -231,14 +231,14 @@ namespace DS
 			double startAngle = 0, double endAngle = 2 * Math.PI)
 		{
 			var result = new D12VsD21Result();
-			var startVector = new Vector2D(1, 0);
+			var startVector = new Vector(1, 0);
 			var area = new Rect(model.D12, d12End, model.D21, d21End);
 
 			for (var angle = startAngle; angle < endAngle; angle += angleStep)
 			{
 				var previous = startX;
 				var vector = startVector.Rotate(angle);
-				var shiftVector = new Vector2D(vector.X * step1, vector.Y * step2);
+				var shiftVector = new Vector(vector.X * step1, vector.Y * step2);
 
 				model.D12 = startD.D12;
 				model.D21 = startD.D21;

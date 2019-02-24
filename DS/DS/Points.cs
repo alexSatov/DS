@@ -2,10 +2,13 @@
 
 namespace DS
 {
-	public struct PointX
+	public struct PointX : IPoint
 	{
 		public double X1 { get; set; }
 		public double X2 { get; set; }
+
+		public double X => X1;
+		public double Y => X2;
 
 		public static PointX Infinity => new PointX(double.MaxValue, double.MaxValue);
 
@@ -42,10 +45,13 @@ namespace DS
 		}
 	}
 
-	public struct PointD
+	public struct PointD : IPoint
 	{
 		public double D12 { get; set; }
 		public double D21 { get; set; }
+
+		public double X => D12;
+		public double Y => D21;
 
 		public PointD(double d12, double d21)
 		{
@@ -63,5 +69,11 @@ namespace DS
 			d12 = D12;
 			d21 = D21;
 		}
+	}
+
+	public interface IPoint
+	{
+		double X { get; }
+		double Y { get; }
 	}
 }
