@@ -116,38 +116,25 @@ namespace DS
 					.Select(v => (v.D12, v.X1));
 			}
 
+			// [0.00145, 0.00197]
 			IEnumerable<(double D12, double X1)> SecondAttractor()
 			{
-				model.D12 = 0.00158;
-				var lrResult = BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00245, step)
+				model.D12 = 0.00145;
+				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00197, step)
 					.Distinct()
 					.Select(v => (v.D12, v.X1));
-				var rlResult = BifurcationDiagram.GetD12VsXByPrevious(model.Copy(), new PointX(20, 40), 0, step, true)
-					.Distinct()
-					.Select(v => (v.D12, v.X1));
-				return lrResult
-					.Concat(rlResult)
-					.OrderBy(p => p.Item1)
-					.Where(p => p.Item1 >= 0.0014499999 && p.Item1 <= 0.0019700001);
 			}
 
-			// [0.00217, 0.00238]
+			// [0.00218, 0.00238]
 			IEnumerable<(double D12, double X1)> ThirdAttractor()
 			{
-				model.D12 = 0.00227;
-				var lrResult = BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00245, step)
+				model.D12 = 0.00218;
+				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00238, step)
 					.Distinct()
 					.Select(v => (v.D12, v.X1));
-				var rlResult = BifurcationDiagram.GetD12VsXByPrevious(model.Copy(), new PointX(20, 40), 0, step, true)
-					.Distinct()
-					.Select(v => (v.D12, v.X1));
-				return lrResult
-					.Concat(rlResult)
-					.Where(p => p.Item2 > 31)
-					.OrderBy(p => p.Item1);
 			}
 
-			var points = FirstAttractor().ToList();
+			var points = SecondAttractor().ToList();
 
 			SaveToFile("d12_x1_3.txt", points);
 
@@ -178,12 +165,23 @@ namespace DS
 			model.D12 = 0.000045;
 			model.D21 = 0.0075;
 
-			var points = Lyapunov.GetIndicators(model, new PointX(20, 40), 0.00245, 0.00001)
+			var points = Lyapunov.GetIndicatorsParallel(model, new PointX(20, 40), 0.00245, 0.000001, true)
 				.ToList();
 
-			var chart = new ChartForm(points.Select(p => (p.D12, p.L1)), 0, 0.00245, 0, 1);
+			var l1Points = points.Select(p => (p.D12, p.L1)).ToList();
+			var l2Points = points.Select(p => (p.D12, p.L2)).ToList();
 
-			chart.AddSeries("D12vsL2", points.Select(p => (p.D12, p.L2)), Color.Red);
+			Console.WriteLine($"Max l1: {l1Points.Max(p => p.Item2)}");
+			Console.WriteLine($"Min l1: {l1Points.Min(p => p.Item2)}");
+			Console.WriteLine($"Max l2: {l2Points.Max(p => p.Item2)}");
+			Console.WriteLine($"Min l2: {l2Points.Min(p => p.Item2)}");
+
+			var chart = new ChartForm(l1Points, 0, 0.00245, -6.5, 1);
+
+			chart.AddSeries("D12vsL2", l2Points, Color.Red);
+
+			SaveToFile("lyapunov\\l1.txt", l1Points);
+			SaveToFile("lyapunov\\l2.txt", l2Points);
 
 			return chart;
 		}

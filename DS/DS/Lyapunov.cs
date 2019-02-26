@@ -7,13 +7,14 @@ namespace DS
 	public static class Lyapunov
 	{
 		public static IEnumerable<(double D12, double L1, double L2)> GetIndicators(Model model, PointX start,
-			double d12End, double step, double eps = 0.00000001, double t = 1000000)
+			double d12End, double step, bool byPrevious = false, double eps = 0.00001, double t = 1000000)
 		{
 			var result = new List<(double D12, double L1, double L2)>();
+			var previous = start;
 
 			for (; model.D12 < d12End; model.D12 += step)
 			{
-				var o = start;
+				var o = byPrevious ? previous : start;
 				var a = new PointX(o.X1 + eps, o.X2);
 				var b = new PointX(o.X1, o.X2 + eps);
 
@@ -38,6 +39,8 @@ namespace DS
 					b = new PointX(b2.X + p.X, b2.Y + p.Y);
 				}
 
+				previous = o;
+
 				var (l1, l2) = (z1 / t, z2 / t);
 
 				result.Add((model.D12, l1, l2));
@@ -47,7 +50,7 @@ namespace DS
 		}
 
 		public static IEnumerable<(double D12, double L1, double L2)> GetIndicatorsParallel(Model model, PointX start,
-			double d12End, double step, double eps = 0.00000001, double t = 10000000)
+			double d12End, double step, bool byPrevious = false, double eps = 0.00001, double t = 1000000)
 		{
 			var processorCount = Environment.ProcessorCount;
 			var tasks = new Task<IEnumerable<(double D12, double L1, double L2)>>[processorCount];
@@ -59,7 +62,7 @@ namespace DS
 				var d12PartEnd = model.D12 + d12Part * (i + 1);
 				copy.D12 = model.D12 + d12Part * i;
 
-				tasks[i] = Task.Run(() => GetIndicators(copy, start, d12PartEnd, step, eps, t));
+				tasks[i] = Task.Run(() => GetIndicators(copy, start, d12PartEnd, step, byPrevious, eps, t));
 			}
 
 			foreach (var task in tasks)
