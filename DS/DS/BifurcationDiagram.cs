@@ -60,7 +60,7 @@ namespace DS
 				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
 				previous = points[points.Count - 1];
 
-				if (!points[0].AlmostEquals(points[1]) && points[0].AlmostEquals(points[3]))
+				if (points[0].X1 > 30)
 				{
 					if (model.D12 < min)
 						min = model.D12;
@@ -73,7 +73,7 @@ namespace DS
 				foreach (var (x1, x2) in points)
 					yield return (model.D12, x1, x2);
 			}
-			//Console.WriteLine($"Min = {min}, Max = {max}");
+			Console.WriteLine($"Min = {min}, Max = {max}");
 		}
 
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start,

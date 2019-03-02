@@ -105,7 +105,7 @@ namespace DS
 		// 3 аттрактора
 		public static ChartForm Test6(Model model)
 		{
-			const double step = 0.000001;
+			const double step = 0.0000002;
 			model.D21 = 0.0075;
 
 			IEnumerable<(double D12, double X1)> FirstAttractor()
@@ -116,25 +116,25 @@ namespace DS
 					.Select(v => (v.D12, v.X1));
 			}
 
-			// [0.00145, 0.00197]
+			// [0.00145, 0,0019746]
 			IEnumerable<(double D12, double X1)> SecondAttractor()
 			{
 				model.D12 = 0.00145;
-				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00197, step)
+				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.0019746, step)
 					.Distinct()
 					.Select(v => (v.D12, v.X1));
 			}
 
-			// [0.00218, 0.00238]
+			// [*0.002166* 0.0021749, 0,0023825]
 			IEnumerable<(double D12, double X1)> ThirdAttractor()
 			{
-				model.D12 = 0.00218;
-				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.00238, step)
+				model.D12 = 0.0021749;
+				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.0023825, step)
 					.Distinct()
 					.Select(v => (v.D12, v.X1));
 			}
 
-			var points = SecondAttractor().ToList();
+			var points = ThirdAttractor().ToList();
 
 			SaveToFile("d12_x1_3.txt", points);
 
@@ -154,7 +154,7 @@ namespace DS
 		public static ChartForm Test8(Model model)
 		{
 			var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
-				new PointD(0.00159, 0.0072622), 0.00245, 0.008, 0.01, 0.000004, 0.0000017);
+				new PointD(0.00159, 0.0072622), 0.00245, 0.008, 0.001, 0.000004, 0.0000017);
 			var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 
 			return chart;
@@ -162,10 +162,10 @@ namespace DS
 
 		public static ChartForm Test9(Model model)
 		{
-			model.D12 = 0.000045;
+			model.D12 = 0.00218;
 			model.D21 = 0.0075;
 
-			var points = Lyapunov.GetIndicatorsParallel(model, new PointX(20, 40), 0.00245, 0.000001, true)
+			var points = Lyapunov.GetIndicatorsParallel(model, new PointX(20, 40), 0.00238, 0.000001, true)
 				.ToList();
 
 			var l1Points = points.Select(p => (p.D12, p.L1)).ToList();
@@ -176,7 +176,7 @@ namespace DS
 			Console.WriteLine($"Max l2: {l2Points.Max(p => p.Item2)}");
 			Console.WriteLine($"Min l2: {l2Points.Min(p => p.Item2)}");
 
-			var chart = new ChartForm(l1Points, 0, 0.00245, -6.5, 1);
+			var chart = new ChartForm(l1Points, 0, 0.00245, -3.5, 1);
 
 			chart.AddSeries("D12vsL2", l2Points, Color.Red);
 
