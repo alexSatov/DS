@@ -147,26 +147,6 @@ namespace DS
 			return result;
 		}
 
-		public static D12VsD21Result GetD12VsD21ByPreviousD21UpToDown(Model model, PointX start, double d12End,
-			double d21End, double step1, double step2)
-		{
-			var d21Start = model.D21;
-			var result = new D12VsD21Result();
-
-			for (; model.D12 <= d12End; model.D12 += step1)
-			{
-				model.D21 = d21End;
-				var previous = start;
-				for (; model.D21 >= d21Start; model.D21 -= step2)
-				{
-					previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
-					TryAddToResult(model, previous, result);
-				}
-			}
-
-			return result;
-		}
-
 		public static D12VsD21Result GetD12VsD21ByPreviousD12(Model model, PointX start, double d12End, double d21End,
 			double step1, double step2)
 		{
@@ -200,8 +180,7 @@ namespace DS
 				var d12PartEnd = model.D12 + d12Part * (i + 1);
 				copy.D12 = model.D12 + d12Part * i;
 
-				tasks[i] = Task.Run(() =>
-					GetD12VsD21ByPreviousD21(copy, start, d12PartEnd, d21End, step1, step2, rightToLeft, upToDown));
+				tasks[i] = Task.Run(() => GetD12VsD21(copy, start, d12PartEnd, d21End, step1, step2));
 			}
 
 			return UniteResults(tasks);
@@ -220,7 +199,7 @@ namespace DS
 				var d21PartEnd = model.D21 + d21Part * (i + 1);
 				copy.D21 = model.D21 + d21Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD12(copy, start, d12End, d21PartEnd, step1, step2));
+				tasks[i] = Task.Run(() => GetD12VsD21(copy, start, d12End, d21PartEnd, step1, step2));
 			}
 
 			return UniteResults(tasks);

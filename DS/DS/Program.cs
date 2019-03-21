@@ -16,13 +16,14 @@ namespace DS
 			var watch = new Stopwatch();
 
 			watch.Start();
-			var chart = Test.Test6(model);
+			var chart = Test.Test7(model);
 			watch.Stop();
 
-			Console.WriteLine($"main count: {chart.SeriesPointCount["main"]}");
 			Console.WriteLine(watch.Elapsed);
+			//Console.ReadKey();
 
-			Application.Run(chart);
+			if (chart != null)
+				Application.Run(chart);
 		}
 	}
 }

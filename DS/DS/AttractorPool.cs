@@ -16,9 +16,10 @@ namespace DS
 			for (var x2 = leftBottom.X2; x2 <= rightTop.X2; x2 += step2)
 			{
 				var startPoint = new PointX(x1, x2);
-				var point = PhaseTrajectory.Get(model, startPoint, 10000, 1)[0];
+				var point = PhaseTrajectory.Get(model, startPoint, 100000, 1)[0];
 
-				if (point.IsInfinity()) continue;
+				if (point.IsInfinity())
+					continue;
 
 				var key = new PointX((int) Math.Round(point.X1), (int) Math.Round(point.X2));
 				var found = false;
@@ -27,7 +28,8 @@ namespace DS
 				{
 					found = key.AlmostEquals(attractor, 0);
 
-					if (!found) continue;
+					if (!found)
+						continue;
 
 					result[key].Add(startPoint);
 
@@ -35,7 +37,7 @@ namespace DS
 				}
 
 				if (!found)
-					result[key] = new HashSet<PointX>();
+					result[key] = new HashSet<PointX> { startPoint };
 			}
 
 			return result;

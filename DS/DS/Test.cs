@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace DS
 {
@@ -24,7 +25,7 @@ namespace DS
 		{
 			model.D21 = 0.0063;
 
-			var points = BifurcationDiagram.GetD12VsX(model, new PointX(10, 10), 0.0025, 0.000005)
+			var points = BifurcationDiagram.GetD12VsXParallel(model, new PointX(10, 10), 0.0025, 0.000001)
 				.Distinct()
 				.Select(v => (v.D12, v.X1));
 
@@ -36,7 +37,7 @@ namespace DS
 			model.D12 = 0.0017;
 			model.D21 = 0.005;
 
-			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.00245, 0.00792,
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.00792,
 				0.000005, 0.00002);
 
 			var eqX2Gt2X1 = points.EquilibriumPoints
@@ -49,8 +50,7 @@ namespace DS
 
 			var chart = new ChartForm(eqX2Gt2X1, 0.0017, 0.00245, 0.005, 0.00792);
 
-			chart.AddSeries("eqX2Lt2X1", eqX2Lt2X1, Color.Aqua);
-			Console.WriteLine($"equilibrium x2 < 2x1 count: {chart.SeriesPointCount["eqX2Lt2X1"]}");
+			chart.AddSeries("equilibrium x2 < 2x1", eqX2Lt2X1, Color.Aqua);
 
 			AddCycles(chart, points.CyclePoints);
 
@@ -67,10 +67,10 @@ namespace DS
 
 		public static ChartForm Test5(Model model)
 		{
-			//model.D12 = 0.00005;
-			//model.D21 = 0.008;
-			//var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.00245, 0.007,
-			//	0.000004, 0.0000017, upToDown: true);
+			model.D12 = 0.00005;
+			model.D21 = 0.007;
+			var points = BifurcationDiagram.GetD12VsD21(model, new PointX(20, 40), 0.00245, 0.008,
+				0.000004, 0.0000016);
 
 			//(0.0015899999999999996, 0.0072622000000000051)
 			//model.D12 = 0.00159;
@@ -85,10 +85,10 @@ namespace DS
 			//	0.0018, 0.0078, 0.000004, 0.0000017, true);
 
 			//(0.00200600000000001, 0.0075274500000000024); (19,9106940008894, 62,4944666763375)
-			model.D12 = 0.002006;
-			model.D21 = 0.00752745;
-			var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(19.9106940008894, 62.4944666763375),
-				0.00245, 0.0078, 0.000004, 0.0000017);
+			//model.D12 = 0.002006;
+			//model.D21 = 0.00752745;
+			//var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(19.9106940008894, 62.4944666763375),
+			//	0.00245, 0.0078, 0.000004, 0.0000017);
 
 			//var keks = points.CyclePoints[3]
 			//	.OrderByDescending(p => p.D.D21)
@@ -105,7 +105,7 @@ namespace DS
 		// 3 аттрактора
 		public static ChartForm Test6(Model model)
 		{
-			const double step = 0.0000002;
+			const double step = 0.000002;
 			model.D21 = 0.0075;
 
 			IEnumerable<(double D12, double X1)> FirstAttractor()
@@ -116,7 +116,7 @@ namespace DS
 					.Select(v => (v.D12, v.X1));
 			}
 
-			// [0.00145, 0,0019746]
+			// [0.00145, 0.0019746]
 			IEnumerable<(double D12, double X1)> SecondAttractor()
 			{
 				model.D12 = 0.00145;
@@ -125,28 +125,34 @@ namespace DS
 					.Select(v => (v.D12, v.X1));
 			}
 
-			// [*0.002166* 0.0021749, 0,0023825]
+			// [0.002166, 0.0023825 - (34.5964044040563, 44.473609663403728)]
 			IEnumerable<(double D12, double X1)> ThirdAttractor()
 			{
-				model.D12 = 0.0021749;
-				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(20, 40), 0.0023825, step)
+				model.D12 = 0.002166;
+				
+				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(34.5964044040563, 44.473609663403728),
+						0.0023825, step)
 					.Distinct()
-					.Select(v => (v.D12, v.X1));
+					.Select(p => (p.D12, p.X1));
 			}
 
-			var points = ThirdAttractor().ToList();
+			var points = FirstAttractor().ToList();
 
-			SaveToFile("d12_x1_3.txt", points);
+			SaveToFile("d12_x1_1.txt", points);
 
 			return new ChartForm(points, 0, 0.00245, 0, 45);
 		}
 
+		// d12 = 0.00145 - ЗИК и 3х цикл: (6, 62); (17, 44); (24, 75)
+		// d12 = 0.00197 - равновесие и 3х цикл: (12, 65); (20, 62); (23, 72)
+		// d12 = 0.00217 - равновесие и равновесие: (18, 68) и (35, 44)
+		// d12 = 0.00238 - хаос и равновесие: (20, 68)
 		public static ChartForm Test7(Model model)
 		{
-			model.D12 = 0.00158;
+			model.D12 = 0.00238;
 			model.D21 = 0.0075;
 
-			var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.25, 0.45);
+			var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.05, 0.09);
 
 			return GetAttractorPoolChartExact(points, -5, 45, -5, 85);
 		}
@@ -162,10 +168,10 @@ namespace DS
 
 		public static ChartForm Test9(Model model)
 		{
-			model.D12 = 0.00218;
+			model.D12 = 0.002166;
 			model.D21 = 0.0075;
 
-			var points = Lyapunov.GetIndicatorsParallel(model, new PointX(20, 40), 0.00238, 0.000001, true)
+			var points = Lyapunov.GetD12Indicators(model, new PointX(34.5964044040563, 44.473609663403728), 0.0023825, 0.0000002, true)
 				.ToList();
 
 			var l1Points = points.Select(p => (p.D12, p.L1)).ToList();
@@ -184,6 +190,48 @@ namespace DS
 			SaveToFile("lyapunov\\l2.txt", l2Points);
 
 			return chart;
+		}
+
+		// 0.000003, 0.00000136
+		public static ChartForm Test10(Model model)
+		{
+			model.D12 = 0.0002;
+			model.D21 = 0.007;
+
+			var points = Lyapunov.GetIndicatorsParallel(model, new PointX(20, 40), 0.0024, 0.008, 0.000003, 0.00000136)
+				.OrderByDescending(p => p.D21)
+				.ThenBy(p => p.D12)
+				.ToList();
+
+			var l1Result = new StringBuilder(Format(points[0].L1));
+			var l2Result = new StringBuilder(Format(points[0].L2));
+
+			var currentD21 = points[0].D21;
+
+			foreach (var point in points.Skip(1))
+			{
+				if (point.D21 != currentD21)
+				{
+					currentD21 = point.D21;
+
+					l1Result.AppendLine();
+					l2Result.AppendLine();
+					l1Result.Append(Format(point.L1));
+					l2Result.Append(Format(point.L2));
+
+					continue;
+				}
+
+				l1Result.Append(" ");
+				l2Result.Append(" ");
+				l1Result.Append(Format(point.L1));
+				l2Result.Append(Format(point.L2));
+			}
+
+			File.WriteAllText("lyapunovMap\\l1.txt", l1Result.ToString());
+			File.WriteAllText("lyapunovMap\\l2.txt", l2Result.ToString());
+
+			return null;
 		}
 
 		private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
@@ -210,16 +258,11 @@ namespace DS
 				.Select(t => (t.D.D12, t.D.D21))
 				.ToList();
 
-			var chart = new ChartForm(infinity, ox1, ox2, oy1, oy2, Color.Gray);
+			var chart = new ChartForm(infinity, ox1, ox2, oy1, oy2, Color.Gray, "infinity");
 
-			chart.AddSeries("eqX2Lt2X1", eqX2Lt2X1, Color.ForestGreen);
-			chart.AddSeries("eqX2Gt2X1", eqX2Gt2X1, Color.DeepSkyBlue);
-			chart.AddSeries("eqX1EqX2Eq0", eqX1EqX2Eq0, Color.Goldenrod);
-
-			Console.WriteLine($"infinities count: {chart.SeriesPointCount["main"]}");
-			Console.WriteLine($"equilibrium x2 < 2x1 count: {chart.SeriesPointCount["eqX2Lt2X1"]}");
-			Console.WriteLine($"equilibrium x2 > 2x1 count: {chart.SeriesPointCount["eqX2Gt2X1"]}");
-			Console.WriteLine($"equilibrium x1 = x2 = 0 count: {chart.SeriesPointCount["eqX1EqX2Eq0"]}");
+			chart.AddSeries("equilibrium x2 < 2x1", eqX2Lt2X1, Color.ForestGreen);
+			chart.AddSeries("equilibrium x2 > 2x1", eqX2Gt2X1, Color.DeepSkyBlue);
+			chart.AddSeries("equilibrium x1 = x2 = 0", eqX1EqX2Eq0, Color.Goldenrod);
 
 			SaveToFile("map\\infinity.txt", infinity);
 			SaveToFile("map\\eqX2Lt2X1.txt", eqX2Lt2X1);
@@ -245,15 +288,13 @@ namespace DS
 				var name = $"cycle{i}";
 
 				chart.AddSeries(name, points, colors[i - 2]);
-				Console.WriteLine($"{name} count: {chart.SeriesPointCount[name]}");
 				SaveToFile($"map\\{name}.txt", points);
 			}
 		}
 
 		private static void SaveToFile(string filename, IEnumerable<(double, double)> points)
 		{
-			var lines = points
-				.Select(p => $"{Format(p.Item1)} {Format(p.Item2)}");
+			var lines = points.Select(p => $"{Format(p.Item1)} {Format(p.Item2)}");
 
 			File.WriteAllLines(filename, lines);
 		}
@@ -276,37 +317,48 @@ namespace DS
 				var name = $"attractor {attractor}";
 
 				chart.AddSeries(name, points);
-				Console.WriteLine($"{name} count: {chart.SeriesPointCount[name]}");
 				SaveToFile($"pool\\{name}.txt", points);
 			}
 
-			chart.AddSeries("attractors", attractorPoints.Keys.Select(p => (p.X1, p.X2)), Color.Blue);
+			chart.AddSeries("attractors", attractorPoints.Keys.Select(p => (p.X1, p.X2)), Color.DeepPink);
 
 			return chart;
 		}
 
+		// d12 = 0.00145 - ЗИК и 3х цикл: (6, 62); (17, 44); (24, 75)
+		// d12 = 0.00197 - равновесие и 3х цикл: (12, 65); (20, 62); (23, 72)
+		// d12 = 0.00217 - равновесие и равновесие: (18, 68) и (35, 44)
+		// d12 = 0.00238 - хаос и равновесие: (20, 68)
 		private static ChartForm GetAttractorPoolChartExact(Dictionary<PointX, HashSet<PointX>> attractorPoints,
 			double ox1, double ox2, double oy1, double oy2)
 		{
-			var cyclePoints = new HashSet<PointX> {new PointX(5, 57), new PointX(21, 40), new PointX(26, 77)};
+			var eqAttractor = new HashSet<PointX> { new PointX(20, 68) };
 
-			var cycle = attractorPoints
-				.Where(kv => cyclePoints.Contains(kv.Key))
+			var eq = attractorPoints
+				.Where(kv => eqAttractor.Contains(kv.Key))
 				.SelectMany(kv => kv.Value)
 				.Select(p => (p.X1, p.X2))
 				.ToList();
 
-			var other = attractorPoints
-				.Where(kv => !cyclePoints.Contains(kv.Key))
+			var chaos = attractorPoints
+				.Where(kv => !eqAttractor.Contains(kv.Key))
 				.SelectMany(kv => kv.Value)
 				.Select(p => (p.X1, p.X2))
 				.ToList();
 
-			var chart = new ChartForm(cycle, ox1, ox2, oy1, oy2);
+			var chaosAttractors = attractorPoints.Keys
+				.Where(p => !eqAttractor.Contains(p))
+				.Select(p => (p.X1, p.X2)).ToList();
 
-			chart.AddSeries("other", other, Color.DarkOrange);
-			SaveToFile($"pool\\cycle3.txt", cycle);
-			SaveToFile($"pool\\other.txt", other);
+			var chart = new ChartForm(eq, ox1, ox2, oy1, oy2);
+			chart.AddSeries(nameof(chaos), chaos, Color.DarkOrange);
+			chart.AddSeries(nameof(chaosAttractors), chaosAttractors, Color.DeepPink);
+			chart.AddSeries(nameof(eqAttractor), eqAttractor.Select(p => (p.X1, p.X2)), Color.Yellow);
+
+			SaveToFile($"pool_simple\\{nameof(eqAttractor)}.txt", eqAttractor.Select(p => (p.X1, p.X2)));
+			SaveToFile($"pool_simple\\{nameof(chaosAttractors)}.txt", chaosAttractors.Select(p => (p.X1, p.X2)));
+			SaveToFile($"pool_simple\\{nameof(eq)}.txt", eq);
+			SaveToFile($"pool_simple\\{nameof(chaos)}.txt", chaos);
 
 			return chart;
 		}
