@@ -43,8 +43,8 @@ namespace DS
 			double d12End, double step, bool rightToLeft = false)
 		{
 			var previous = start;
-			var min = double.MaxValue;
-			var max = 0.0;
+			//var min = double.MaxValue;
+			//var max = 0.0;
 			Func<bool> condition;
 
 			if (rightToLeft)
@@ -60,20 +60,21 @@ namespace DS
 				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
 				previous = points[points.Count - 1];
 
-				if (points[0].X1 > 30)
-				{
-					if (model.D12 < min)
-						min = model.D12;
-					if (model.D12 > max)
-						max = model.D12;
-				}
+				//if (points[0].X1 > 30)
+				//{
+				//	if (model.D12 < min)
+				//		min = model.D12;
+				//	if (model.D12 > max)
+				//		max = model.D12;
+				//}
 
-				if (points[0].IsInfinity()) continue;
+				if (points[0].IsInfinity())
+					continue;
 
 				foreach (var (x1, x2) in points)
 					yield return (model.D12, x1, x2);
 			}
-			Console.WriteLine($"Min = {min}, Max = {max}");
+			//Console.WriteLine($"Min = {min}, Max = {max}");
 		}
 
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start,

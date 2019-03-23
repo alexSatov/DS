@@ -28,16 +28,21 @@ namespace DS
 				{
 					found = key.AlmostEquals(attractor, 0);
 
-					if (!found)
-						continue;
-
-					result[key].Add(startPoint);
-
-					break;
+					if (found)
+					{
+						result[key].Add(startPoint);
+						break;
+					}
 				}
 
 				if (!found)
 					result[key] = new HashSet<PointX> { startPoint };
+			}
+
+			foreach (var attractor in result.Keys.ToList())
+			{
+				if (result[attractor].Count == 1)
+					result.Remove(attractor);
 			}
 
 			return result;

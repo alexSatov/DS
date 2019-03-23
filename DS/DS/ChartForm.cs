@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -26,6 +27,18 @@ namespace DS
 			AddSeries(name ?? "main", points, color ?? Color.DodgerBlue);
 		}
 
+		public ChartForm(IEnumerable<PointX> points, double ox1, double ox2, double oy1, double oy2,
+			Color? color = null, string name = null)
+			: this(points.Select(p => (p.X1, p.X2)), ox1, ox2, oy1, oy2, color, name)
+		{
+		}
+
+		public ChartForm(IEnumerable<PointD> points, double ox1, double ox2, double oy1, double oy2,
+			Color? color = null, string name = null)
+			: this(points.Select(p => (p.D12, p.D21)), ox1, ox2, oy1, oy2, color, name)
+		{
+		}
+
 		public void AddSeries(string name, IEnumerable<(double x, double y)> points, Color? color = null)
 		{
 			var seriesPointCount = 0;
@@ -48,6 +61,16 @@ namespace DS
 
 			Console.WriteLine($"'{name}' points count: {seriesPointCount}");
 			Chart.Series.Add(series);
+		}
+
+		public void AddSeries(string name, IEnumerable<PointX> points, Color? color = null)
+		{
+			AddSeries(name, points.Select(p => (p.X1, p.X2)), color);
+		}
+
+		public void AddSeries(string name, IEnumerable<PointD> points, Color? color = null)
+		{
+			AddSeries(name, points.Select(p => (p.D12, p.D21)), color);
 		}
 	}
 }
