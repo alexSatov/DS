@@ -142,10 +142,10 @@ namespace DS
 		// d12 = 0.00145 - ЗИК и 3х цикл: (6, 62); (17, 44); (24, 75)
 		// d12 = 0.00197 - равновесие и 3х цикл: (12, 65); (20, 62); (23, 72)
 		// d12 = 0.00217 - равновесие и равновесие: (18, 68) и (35, 44)
-		// d12 = 0.00238 - хаос и равновесие: (20, 68)
+		// d12 = 0.002382 - хаос и равновесие: (20, 68)
 		public static ChartForm Test7(DeterministicModel model)
 		{
-			model.D12 = 0.00238;
+			model.D12 = 0.002382;
 			model.D21 = 0.0075;
 
 			var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.05, 0.09);
@@ -205,13 +205,13 @@ namespace DS
 			return chart;
 		}
 
-		// 0.000003, 0.00000136
+		// 0.000003, 0.000001363 (по 734)
 		public static ChartForm Test10(DeterministicModel model)
 		{
 			model.D12 = 0.0002;
 			model.D21 = 0.007;
 
-			var points = Lyapunov.GetIndicatorsParallel(model, new PointX(20, 40), 0.0024, 0.008, 0.000003, 0.00000136)
+			var points = Lyapunov.GetIndicatorsParallelByD21(model, new PointX(20, 40), 0.0024, 0.008, 0.000003, 0.000001363)
 				.OrderByDescending(p => p.D21)
 				.ThenBy(p => p.D12)
 				.ToList();
@@ -245,6 +245,19 @@ namespace DS
 			File.WriteAllText("lyapunovMap\\l2.txt", l2Result.ToString());
 
 			return null;
+		}
+
+		public static ChartForm Test11(DeterministicModel model)
+		{
+			model.D12 = 0.002382;
+			model.D21 = 0.0075;
+
+			var points = PhaseTrajectory.Get(model, new PointX(32.95, 47.38), 10000, 10000);
+			var chart = new ChartForm(points, -5, 45, -5, 85);
+
+			PointSaver.SaveToFile("chaosAttractor.txt", points);
+
+			return chart;
 		}
 
 		private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
@@ -329,7 +342,7 @@ namespace DS
 		// d12 = 0.00145 - ЗИК и 3х цикл: (6, 62); (17, 44); (24, 75)
 		// d12 = 0.00197 - равновесие и 3х цикл: (12, 65); (20, 62); (23, 72)
 		// d12 = 0.00217 - равновесие и равновесие: (18, 68) и (35, 44)
-		// d12 = 0.00238 - хаос и равновесие: (20, 68)
+		// d12 = 0.002382 - хаос и равновесие: (20, 68)
 		private static ChartForm GetAttractorPoolChartExact(Dictionary<PointX, HashSet<PointX>> attractorPoints,
 			double ox1, double ox2, double oy1, double oy2)
 		{

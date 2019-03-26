@@ -17,8 +17,8 @@ namespace DS
 			var watch = new Stopwatch();
 
 			watch.Start();
-			var chart = DeterministicTest.Test9(deterministicModel);
-			//var chart = StochasticTest.Test1(stochasticModel);
+			var chart = DeterministicTest.Test10(deterministicModel);
+			//var chart = StochasticTest.Test1(deterministicModel, stochasticModel);
 			watch.Stop();
 
 			Console.WriteLine(watch.Elapsed);

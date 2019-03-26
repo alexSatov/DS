@@ -58,6 +58,10 @@ namespace DS
 			for (; condition(); model.D12 += step)
 			{
 				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
+
+				if (points[0].IsInfinity())
+					continue;
+
 				previous = points[points.Count - 1];
 
 				//if (points[0].X1 > 30)
@@ -68,11 +72,51 @@ namespace DS
 				//		max = model.D12;
 				//}
 
+				foreach (var (x1, x2) in points)
+					yield return (model.D12, x1, x2);
+			}
+			//Console.WriteLine($"Min = {min}, Max = {max}");
+		}
+
+		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(DeterministicModel dModel,
+			StochasticModel sModel, PointX start, double d12End, double step, bool rightToLeft = false)
+		{
+			var previous = start;
+			var d12 = dModel.D12;
+			//var min = double.MaxValue;
+			//var max = 0.0;
+			Func<bool> condition;
+
+			if (rightToLeft)
+			{
+				condition = () => d12 >= d12End;
+				step = -step;
+			}
+			else
+				condition = () => d12 <= d12End;
+
+			for (; condition(); d12 += step)
+			{
+				dModel.D12 = d12;
+				sModel.D12 = d12;
+				var attractor = PhaseTrajectory.Get(dModel, previous, 9999, 1)[0];
+				var points = PhaseTrajectory.Get(sModel, attractor, 0, 2000);
+
 				if (points[0].IsInfinity())
 					continue;
 
+				previous = attractor;
+
+				//if (points[0].X1 > 30)
+				//{
+				//	if (model.D12 < min)
+				//		min = model.D12;
+				//	if (model.D12 > max)
+				//		max = model.D12;
+				//}
+
 				foreach (var (x1, x2) in points)
-					yield return (model.D12, x1, x2);
+					yield return (d12, x1, x2);
 			}
 			//Console.WriteLine($"Min = {min}, Max = {max}");
 		}
