@@ -1,11 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Accord.Math;
+using Matrix = Accord.Math.Matrix;
 
 namespace DS
 {
 	public static class Lyapunov
 	{
+		/// <summary>
+		/// Решение матричного уравнения X = A X AT + B
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <param name="n">Количество итераций</param>
+		/// <returns></returns>
+		public static double[,] SolveDiscreteEquation(double[,] a, double[,] b, int n = 400)
+		{
+			var x = Matrix.Identity(2);
+			var at = a.Transpose();
+
+			for (var i = 0; i < n; i++)
+				x = a.Dot(x).Dot(at).Add(b);
+
+			return x;
+		}
+
 		public static IEnumerable<(double D12, double L1, double L2)> GetD12Indicators(Model model, PointX start,
 			double d12End, double step, bool byPrevious = false, double eps = 0.00001, double t = 100000)
 		{
@@ -167,7 +187,7 @@ namespace DS
 			for (var i = 0; i < t; i++)
 			{
 				var (p, p1, p2) = (model.GetNextPoint(o), model.GetNextPoint(a), model.GetNextPoint(b));
-				var (v1, v2) = (new Vector(p1, p), new Vector(p2, p));
+				var (v1, v2) = (new Vector2D(p1, p), new Vector2D(p2, p));
 
 				var b1 = v1 / v1.Length;
 				var b2 = v2 - v2 * b1 * b1;
@@ -185,8 +205,8 @@ namespace DS
 
 			var (l1, l2) = (z1 / t, z2 / t);
 
-			l1 = Math.Abs(l1) < 0.0001 ? 0 : l1;
-			l2 = Math.Abs(l2) < 0.0001 ? 0 : l2;
+			l1 = Math.Abs(l1) < 0.001 ? 0 : l1;
+			l2 = Math.Abs(l2) < 0.001 ? 0 : l2;
 
 			return (o, l1, l2);
 		}
