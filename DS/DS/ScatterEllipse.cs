@@ -23,7 +23,7 @@ namespace DS
 			var k1 = eps * q * Math.Sqrt(2 * lambda1);
 			var k2 = eps * q * Math.Sqrt(2 * lambda2);
 
-			for (var angle = 0.0; angle < Math.PI; angle += 0.01)
+			for (var angle = 0.0; angle < 2* Math.PI; angle += 0.01)
 			{
 				var z1 = k1 * Math.Cos(angle);
 				var z2 = k2 * Math.Sin(angle);

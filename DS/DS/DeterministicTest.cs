@@ -134,7 +134,7 @@ namespace DS
 
 			var points = FirstAttractor().ToList();
 
-			PointSaver.SaveToFile("d12_x1_1.txt", points);
+			//PointSaver.SaveToFile("d12_x1_1.txt", points);
 
 			return new ChartForm(points, 0, 0.00245, 0, 45);
 		}

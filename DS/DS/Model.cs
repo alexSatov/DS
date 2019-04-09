@@ -129,7 +129,7 @@ namespace DS
 		{
 			var q = new double[2, 2];
 
-			q[0, 0] = Sigma1 * Sigma1 + Pb1 * Pb1 * attractor.X2 * attractor.X2 * Sigma3 * Sigma3;
+			q[0, 0] = Sigma1 * Sigma1 + Pb1 * Pb1 * D12 * D12 * attractor.X2 * attractor.X2 * Sigma3 * Sigma3;
 			q[0, 1] = 0;
 			q[1, 0] = 0;
 			q[1, 1] = Sigma2 * Sigma2;
