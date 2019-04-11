@@ -58,18 +58,18 @@ namespace DS
 
 		public static ChartForm Test2(DeterministicModel dModel, StochasticModel sModel)
 		{
-			dModel.D12 = 0.0015;
+			dModel.D12 = 0.0016;
 			dModel.D21 = 0.0075;
-			sModel.D12 = 0.0015;
+			sModel.D12 = 0.0016;
 			sModel.D21 = 0.0075;
-			sModel.Eps = 0.1;
+			sModel.Eps = 0.05;
 			sModel.Sigma1 = 0;
 			sModel.Sigma2 = 0;
 			sModel.Sigma3 = 1;
 
 			var attractorPoints = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 3);
 			var points = PhaseTrajectory.Get(sModel, attractorPoints[0], 0, 2000);
-			var chart = new ChartForm(points, 0, 40, 0, 80);
+			var chart = new ChartForm(points, 0, 32, 32, 80);
 
 			var sensitivityMatrices = SensitivityMatrix.Get(sModel, attractorPoints).ToList();
 
@@ -89,18 +89,103 @@ namespace DS
 			return chart;
 		}
 
-		//public static ChartForm Test3(DeterministicModel dModel, StochasticModel sModel)
-		//{
-		//	dModel.D12 = 0.0015;
-		//	dModel.D21 = 0.0075;
-		//	sModel.D12 = 0.0015;
-		//	sModel.D21 = 0.0075;
-		//	sModel.Eps = 0.1;
-		//	sModel.Sigma1 = 1;
-		//	sModel.Sigma2 = 1;
-		//	sModel.Sigma3 = 0;
+		public static ChartForm Test3(DeterministicModel dModel, StochasticModel sModel)
+		{
+			const double step = 0.0000005;
 
-		//	IEnumerable<>
-		//}
+			dModel.D21 = 0.0075;
+			sModel.D21 = 0.0075;
+			sModel.Eps = 0.1;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
+
+			IEnumerable<(double D12, double Mu1, double Mu2)> I1()
+			{
+				const double d12End = 0.001;
+				var previous = new PointX(20, 40);
+
+				for (var d12 = 0.0; d12 < d12End; d12 += step)
+				{
+					dModel.D12 = d12;
+					sModel.D12 = d12;
+					var attractorPoints = PhaseTrajectory.Get(dModel, previous, 9999, 2);
+
+					if (attractorPoints[0].IsInfinity())
+						continue;
+
+					if (!attractorPoints[0].AlmostEquals(attractorPoints[1]))
+						yield break;
+
+					previous = attractorPoints[1];
+					var sensitivityMatrix = SensitivityMatrix.Get(sModel, previous);
+					var mu = new EigenvalueDecomposition(sensitivityMatrix).RealEigenvalues;
+
+					yield return (d12, Math.Min(mu[0], mu[1]), Math.Max(mu[0], mu[1]));
+				}
+			}
+
+			IEnumerable<(double D12, double Mu1, double Mu2)> I2()
+			{
+				const double d12End = 0.0017;
+				var previous = new PointX(20, 40);
+
+				for (var d12 = 0.0025; d12 > d12End; d12 -= step)
+				{
+					dModel.D12 = d12;
+					sModel.D12 = d12;
+					var attractorPoints = PhaseTrajectory.Get(dModel, previous, 9999, 2);
+
+					if (attractorPoints[0].IsInfinity())
+						continue;
+
+					if (!attractorPoints[0].AlmostEquals(attractorPoints[1]))
+						yield break;
+
+					previous = attractorPoints[1];
+					var sensitivityMatrix = SensitivityMatrix.Get(sModel, previous);
+					var mu = new EigenvalueDecomposition(sensitivityMatrix).RealEigenvalues;
+
+					yield return (d12, Math.Min(mu[0], mu[1]), Math.Max(mu[0], mu[1]));
+				}
+			}
+
+			IEnumerable<(double D12, double Mu1, double Mu2)> I3()
+			{
+				const double d12End = 0.0023;
+				var previous = new PointX(34.5964044040563, 44.473609663403728);
+
+				for (var d12 = 0.002166; d12 < d12End; d12 += step)
+				{
+					dModel.D12 = d12;
+					sModel.D12 = d12;
+					var attractorPoints = PhaseTrajectory.Get(dModel, previous, 9999, 2);
+
+					if (attractorPoints[0].IsInfinity())
+						continue;
+
+					if (!attractorPoints[0].AlmostEquals(attractorPoints[1]))
+						yield break;
+
+					previous = attractorPoints[1];
+					var sensitivityMatrix = SensitivityMatrix.Get(sModel, previous);
+					var mu = new EigenvalueDecomposition(sensitivityMatrix).RealEigenvalues;
+
+					yield return (d12, Math.Min(mu[0], mu[1]), Math.Max(mu[0], mu[1]));
+				}
+			}
+
+			var points = I3().ToList();
+
+			//PointSaver.SaveToFile("I1_param.txt", points);
+
+			var mu1 = points.Where(p => Math.Abs(p.Mu1) < 10000).Select(p => (p.D12, p.Mu1));
+			var mu2 = points.Where(p => Math.Abs(p.Mu2) < 10000).Select(p => (p.D12, p.Mu2));
+
+			var chart = new ChartForm(mu1, 0, 0.0025, 0, 50, name: "d12 v mu1");
+			chart.AddSeries("d12 v mu2", mu2, Color.Orange);
+
+			return chart;
+		}
 	}
 }

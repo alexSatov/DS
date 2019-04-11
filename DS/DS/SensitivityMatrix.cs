@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Accord.Math;
 
 namespace DS
@@ -35,17 +35,14 @@ namespace DS
 			{
 				b = b.Dot(fn[i]);
 
-				var qi = fn[fn.Count - 1];
+				var qfi = qn[i];
 
-				for (var k = i + 2; k < attractorPoints.Count; k++)
-					qi = qi.Dot(fn[attractorPoints.Count - k]);
+				for (var k = i + 1; k < attractorPoints.Count; k++)
+				{
+					qfi = fn[k].Dot(qfi).Dot(ftn[k]);
+				}
 
-				qi.Dot(qn[i]).Dot(ftn[i + 1]);
-
-				for (var k = i + 2; k < attractorPoints.Count; k++)
-					qi = qi.Dot(ftn[k]);
-
-				q = q.Add(qi);
+				q = q.Add(qfi);
 			}
 
 			var w = Lyapunov.SolveDiscreteEquation(b, q);
@@ -54,9 +51,14 @@ namespace DS
 
 			for (var i = 1; i < attractorPoints.Count; i++)
 			{
-				w = fn[i - 1].Dot(ftn[i - 1]).Add(qn[i - 1]);
+				w = fn[i - 1].Dot(w).Dot(ftn[i - 1]).Add(qn[i - 1]);
 				yield return w;
 			}
+		}
+
+		public static double[,] Get(StochasticModel model, PointX attractor)
+		{
+			return Get(model, new List<PointX> { attractor }).First();
 		}
 	}
 }
