@@ -11,8 +11,8 @@ namespace DS
 	{
 		public static ChartForm Test1(DeterministicModel model)
 		{
-			model.D12 = 0.002;
-			model.D21 = 0.0063;
+			model.D12 = 0.0014;
+			model.D21 = 0.0075;
 
 			var points = PhaseTrajectory.Get(model, new PointX(20, 40), 2000, 1000)
 				.Select(p => (p.X1, p.X2));
@@ -315,8 +315,6 @@ namespace DS
 				PointSaver.SaveToFile($"map\\{name}.txt", points);
 			}
 		}
-
-		
 
 		private static ChartForm GetAttractorPoolChart(Dictionary<PointX, HashSet<PointX>> attractorPoints,
 			double ox1, double ox2, double oy1, double oy2)

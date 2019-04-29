@@ -63,9 +63,9 @@ namespace DS
 			sModel.D12 = 0.0016;
 			sModel.D21 = 0.0075;
 			sModel.Eps = 0.05;
-			sModel.Sigma1 = 0;
-			sModel.Sigma2 = 0;
-			sModel.Sigma3 = 1;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
 
 			var attractorPoints = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 3);
 			var points = PhaseTrajectory.Get(sModel, attractorPoints[0], 0, 2000);
@@ -96,16 +96,16 @@ namespace DS
 			dModel.D21 = 0.0075;
 			sModel.D21 = 0.0075;
 			sModel.Eps = 0.1;
-			sModel.Sigma1 = 1;
-			sModel.Sigma2 = 1;
-			sModel.Sigma3 = 0;
+			sModel.Sigma1 = 0;
+			sModel.Sigma2 = 0;
+			sModel.Sigma3 = 1;
 
 			IEnumerable<(double D12, double Mu1, double Mu2)> I1()
 			{
 				const double d12End = 0.001;
 				var previous = new PointX(20, 40);
 
-				for (var d12 = 0.0; d12 < d12End; d12 += step)
+				for (var d12 = 0.000045; d12 < d12End; d12 += step)
 				{
 					dModel.D12 = d12;
 					sModel.D12 = d12;
@@ -177,13 +177,36 @@ namespace DS
 
 			var points = I3().ToList();
 
-			//PointSaver.SaveToFile("I1_param.txt", points);
+			PointSaver.SaveToFile("I3_param.txt", points);
 
 			var mu1 = points.Where(p => Math.Abs(p.Mu1) < 10000).Select(p => (p.D12, p.Mu1));
 			var mu2 = points.Where(p => Math.Abs(p.Mu2) < 10000).Select(p => (p.D12, p.Mu2));
 
 			var chart = new ChartForm(mu1, 0, 0.0025, 0, 50, name: "d12 v mu1");
 			chart.AddSeries("d12 v mu2", mu2, Color.Orange);
+
+			return chart;
+		}
+
+		public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
+		{
+			dModel.D12 = 0.0013;
+			dModel.D21 = 0.0075;
+			sModel.D12 = 0.0013;
+			sModel.D21 = 0.0075;
+			sModel.Eps = 0.1;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
+
+			var zik = PhaseTrajectory.Get(dModel, new PointX(20, 40), 10000, 2000);
+			var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
+			var (ellipse1, ellipse2) = ScatterEllipse.GetForZik(sModel, zik);
+
+			var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
+			chart.AddSeries("zik", zik, Color.Black);
+			chart.AddSeries("ellipse1", ellipse1, Color.Red);
+			chart.AddSeries("ellipse2", ellipse2, Color.Red);
 
 			return chart;
 		}

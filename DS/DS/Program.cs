@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Windows.Forms;
 using Accord.Math;
-using Accord.Math.Decompositions;
 
 namespace DS
 {
@@ -11,12 +10,6 @@ namespace DS
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			//var a = new double[,] { { 1, 2 }, { 3, -4 } };
-			//var eigenvalueDecomposition = new EigenvalueDecomposition(a);
-			//var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
-			//var eigenvectors = eigenvalueDecomposition.Eigenvectors;
-			//var v1 = eigenvectors.GetColumn(0);
-			//var v2 = eigenvectors.GetColumn(1);
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
@@ -25,8 +18,8 @@ namespace DS
 			var watch = new Stopwatch();
 
 			watch.Start();
-			//var chart = DeterministicTest.Test2(deterministicModel);
-			var chart = StochasticTest.Test3(deterministicModel, stochasticModel);
+			//var chart = DeterministicTest.Test1(deterministicModel);
+			var chart = StochasticTest.Test4(deterministicModel, stochasticModel);
 			watch.Stop();
 
 			Console.WriteLine(watch.Elapsed);
@@ -34,6 +27,13 @@ namespace DS
 
 			if (chart != null)
 				Application.Run(chart);
+		}
+
+		private static void Test()
+		{
+			var a1 = new double[] { 1, 2 };
+			var a2 = new double[] { 3, 4 };
+			var result = a1.Outer(a2);
 		}
 	}
 }
