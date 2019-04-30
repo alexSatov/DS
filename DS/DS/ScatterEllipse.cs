@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using Accord.Math;
 using Accord.Math.Decompositions;
@@ -51,6 +52,9 @@ namespace DS
 			var x10 = boundaries.X1Min + (boundaries.X1Max - boundaries.X1Min) / 2;
 			var x20 = boundaries.X2Min + (boundaries.X2Max - boundaries.X2Min) / 2;
 			var orderedZik = GetZikOrderedByAngle(x10, x20, zik);
+
+			//CheckOrderedZik(orderedZik);
+
 			var pv = GetPVectors(orderedZik).ToList();
 			var p = pv.Select(v => v.Outer(v)).ToList();
 			var f = orderedZik.Select(model.GetMatrixF).ToList();
@@ -102,18 +106,40 @@ namespace DS
 
 			for (var i = 0; i < zik.Count; i++)
 			{
+				var angle = 0.0;
 				var x1d = zik[i].X1 - x10;
 				var x2d = zik[i].X2 - x20;
-				var angle = x1d == 0
-					? x2d >= 0 ? Math.PI / 2 : -Math.PI / 2
-					: Math.Atan(x2d / x1d);
+
+				if (x1d == 0)
+					angle = x2d > 0 ? Math.PI / 2 : -Math.PI / 2;
+				else if (x1d > 0 && x2d >= 0)
+					angle = Math.Atan(x2d / x1d);
+				else if (x1d > 0 && x2d < 0)
+					angle = 2 * Math.PI + Math.Atan(x2d / x1d);
+				else if (x1d < 0)
+					angle = Math.PI + Math.Atan(x2d / x1d);
+
 				zikAdvanced.Add((i, angle));
 			}
+
+			var result = zikAdvanced.OrderBy(v => v.Angle).ToList();
 
 			return zikAdvanced
 				.OrderBy(v => v.Angle)
 				.Select(v => zik[v.Index])
 				.ToList();
+		}
+
+		private static void CheckOrderedZik(List<PointX> zik)
+		{
+			for (var i = 0; i < zik.Count; i++)
+			{
+				var p1 = zik[i];
+				var p2 = i == zik.Count - 1 ? zik[0] : zik[i + 1];
+
+				if (Math.Sqrt(Math.Pow(p1.X1 - p2.X1, 2) + Math.Pow(p1.X2 - p2.X2, 2)) > 0.00001)
+					throw new ArgumentException("Зик не удовлетворяет условию плотности");
+			}
 		}
 
 		private static IEnumerable<double[]> GetPVectors(List<PointX> orderedZik)
@@ -128,10 +154,10 @@ namespace DS
 
 		private static double[,] GetPhiMatrix(List<double[,]> f, List<double[,]> p)
 		{
-			var phi = p[1];
+			var phi = f[f.Count - 1];
 
-			for (var i = 0; i < f.Count - 1; i++)
-				phi = phi.Dot(f[i + 1].Dot(p[i]).Dot(f[i]));
+			for (var i = f.Count - 1; i > 0; i--)
+				phi = phi.Dot(p[i]).Dot(f[i - 1]);
 
 			return phi;
 		}

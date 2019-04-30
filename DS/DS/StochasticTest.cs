@@ -205,8 +205,13 @@ namespace DS
 
 			var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
 			chart.AddSeries("zik", zik, Color.Black);
-			chart.AddSeries("ellipse1", ellipse1, Color.Red);
-			chart.AddSeries("ellipse2", ellipse2, Color.Red);
+			chart.AddSeries("ellipse1", ellipse1.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
+			chart.AddSeries("ellipse2", ellipse2.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
+			//chart.AddSeries("test", new[]
+			//{
+			//	new PointX(14.3370638794964, 70.5644679338578),
+			//	new PointX(14.3427227911889, 53.1962823735385)
+			//}, Color.DeepPink);
 
 			return chart;
 		}
