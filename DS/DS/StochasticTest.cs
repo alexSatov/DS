@@ -190,9 +190,9 @@ namespace DS
 
 		public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
 		{
-			dModel.D12 = 0.0013;
+			dModel.D12 = 0.001;
 			dModel.D21 = 0.0075;
-			sModel.D12 = 0.0013;
+			sModel.D12 = 0.001;
 			sModel.D21 = 0.0075;
 			sModel.Eps = 0.1;
 			sModel.Sigma1 = 1;
@@ -209,8 +209,9 @@ namespace DS
 			chart.AddSeries("ellipse2", ellipse2.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
 			//chart.AddSeries("test", new[]
 			//{
-			//	new PointX(14.3370638794964, 70.5644679338578),
-			//	new PointX(14.3427227911889, 53.1962823735385)
+			//	new PointX(14.5433643962272, 60.587772308652),
+			//	new PointX(15.321157404287202, 64.95972934061189),
+			//	new PointX(9.62065982040971, 61.463546057530976)
 			//}, Color.DeepPink);
 
 			return chart;

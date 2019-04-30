@@ -10,6 +10,10 @@ namespace DS
 		[STAThread]
 		public static void Main(string[] args)
 		{
+			var a1 = Math.Atan2(1, 1);
+			var a2 = Math.Atan2(1, -1);
+			var a3 = Math.Atan2(-1, -1) + 2 * Math.PI;
+			var a4 = Math.Atan2(-1, 1) + 2 * Math.PI;
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 

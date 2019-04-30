@@ -106,23 +106,15 @@ namespace DS
 
 			for (var i = 0; i < zik.Count; i++)
 			{
-				var angle = 0.0;
 				var x1d = zik[i].X1 - x10;
 				var x2d = zik[i].X2 - x20;
+				var angle = Math.Atan2(x2d, x1d);
 
-				if (x1d == 0)
-					angle = x2d > 0 ? Math.PI / 2 : -Math.PI / 2;
-				else if (x1d > 0 && x2d >= 0)
-					angle = Math.Atan(x2d / x1d);
-				else if (x1d > 0 && x2d < 0)
-					angle = 2 * Math.PI + Math.Atan(x2d / x1d);
-				else if (x1d < 0)
-					angle = Math.PI + Math.Atan(x2d / x1d);
+				if (angle < 0)
+					angle += 2 * Math.PI;
 
 				zikAdvanced.Add((i, angle));
 			}
-
-			var result = zikAdvanced.OrderBy(v => v.Angle).ToList();
 
 			return zikAdvanced
 				.OrderBy(v => v.Angle)
@@ -147,8 +139,8 @@ namespace DS
 			for (var i = 0; i < orderedZik.Count; i++)
 			{
 				var (x1, y1) = orderedZik[i];
-				var (x2, y2) = i == orderedZik.Count - 1 ? orderedZik[i] : orderedZik[i + 1];
-				yield return new[] { x1 - x2, y2 - y1 }.Normalize();
+				var (x2, y2) = i == orderedZik.Count - 1 ? orderedZik[0] : orderedZik[i + 1];
+				yield return new[] { y1 - y2, x2 - x1 }.Normalize();
 			}
 		}
 
@@ -168,7 +160,12 @@ namespace DS
 			var q = Matrix.Zeros(2, 2);
 
 			for (var i = 0; i < k; i++)
+			{
 				q = p[i + 1].Dot(f[i].Dot(q).Dot(f[i].Transpose()).Add(s[i])).Dot(p[i + 1]);
+
+				//if (double.IsNaN(q[0, 0]) || i == 4343)
+				//	continue;
+			}
 
 			return f[k].Dot(q).Dot(f[k].Transpose()).Add(s[k]);
 		}
