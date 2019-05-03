@@ -210,5 +210,42 @@ namespace DS
 
 			return chart;
 		}
+
+		public static ChartForm Test5(DeterministicModel dModel, StochasticModel sModel)
+		{
+			const double step = 0.000005;
+			var d12 = 0.000943;
+
+			dModel.D12 = d12;
+			dModel.D21 = 0.0075;
+			sModel.D12 = d12;
+			sModel.D21 = 0.0075;
+			sModel.Eps = 0.1;
+			sModel.Sigma1 = 0;
+			sModel.Sigma2 = 0;
+			sModel.Sigma3 = 1;
+
+			var result = new List<(double D12, double MuMax, double MuMin)>();
+			var previous = new PointX(20, 40);
+
+			for (; d12 < 0.001855; d12 += step)
+			{
+				dModel.D12 = d12;
+				sModel.D12 = d12;
+				var zik = PhaseTrajectory.Get(dModel, previous, 10000, 20000);
+				previous = zik[zik.Count - 1];
+
+				var mu = ScatterEllipse.GetMuForZik(sModel, zik);
+
+				result.Add((d12, mu.Max(), mu.Min()));
+			}
+
+			var chart = new ChartForm(result.Select(p => (p.D12, p.MuMax)), 0, 0.0019, 0, 2000);
+			chart.AddSeries("min", result.Select(p => (p.D12, p.MuMin)), Color.Orange);
+
+			PointSaver.SaveToFile("zik_d12_mu.txt", result);
+
+			return chart;
+		}
 	}
 }

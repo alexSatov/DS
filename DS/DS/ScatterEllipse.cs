@@ -78,6 +78,25 @@ namespace DS
 			return (ellipse1, ellipse2);
 		}
 
+		public static List<double> GetMuForZik(StochasticModel model, List<PointX> zik, double qu = 1.821)
+		{
+			var boundaries = FindBoundaries(zik);
+			var x10 = boundaries.X1Min + (boundaries.X1Max - boundaries.X1Min) / 2;
+			var x20 = boundaries.X2Min + (boundaries.X2Max - boundaries.X2Min) / 2;
+			var orderedZik = GetZikOrderedByAngle(x10, x20, zik);
+
+			//CheckOrderedZik(zik, orderedZik);
+
+			var pv = GetPVectors(zik, orderedZik);
+			var p = pv.Select(v => v.Outer(v)).ToList();
+			var f = zik.Select(model.GetMatrixF).ToList();
+			var phi = GetPhiMatrix(f, p);
+			var s = zik.Select(model.GetMatrixQ).ToList();
+			var q = GetQMatrix(f, p, s);
+
+			return GetMu(pv, p, f, s, q, phi).ToList();
+		}
+
 		private static (double X1Min, double X1Max, double X2Min, double X2Max) FindBoundaries(List<PointX> zik)
 		{
 			var x1Min = double.MaxValue;
