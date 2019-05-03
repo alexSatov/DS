@@ -194,25 +194,19 @@ namespace DS
 			dModel.D21 = 0.0075;
 			sModel.D12 = 0.001;
 			sModel.D21 = 0.0075;
-			sModel.Eps = 0.1;
-			sModel.Sigma1 = 1;
-			sModel.Sigma2 = 1;
-			sModel.Sigma3 = 0;
+			sModel.Eps = 0.05;
+			sModel.Sigma1 = 0;
+			sModel.Sigma2 = 0;
+			sModel.Sigma3 = 1;
 
-			var zik = PhaseTrajectory.Get(dModel, new PointX(20, 40), 10000, 2000);
+			var zik = PhaseTrajectory.Get(dModel, new PointX(20, 40), 10000, 10000);
 			var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
 			var (ellipse1, ellipse2) = ScatterEllipse.GetForZik(sModel, zik);
 
-			var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
+			var chart = new ChartForm(chaosZik, 0, 20, 48, 80);
 			chart.AddSeries("zik", zik, Color.Black);
 			chart.AddSeries("ellipse1", ellipse1.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
 			chart.AddSeries("ellipse2", ellipse2.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
-			//chart.AddSeries("test", new[]
-			//{
-			//	new PointX(14.5433643962272, 60.587772308652),
-			//	new PointX(15.321157404287202, 64.95972934061189),
-			//	new PointX(9.62065982040971, 61.463546057530976)
-			//}, Color.DeepPink);
 
 			return chart;
 		}

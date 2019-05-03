@@ -53,13 +53,13 @@ namespace DS
 			var x20 = boundaries.X2Min + (boundaries.X2Max - boundaries.X2Min) / 2;
 			var orderedZik = GetZikOrderedByAngle(x10, x20, zik);
 
-			//CheckOrderedZik(orderedZik);
+			//CheckOrderedZik(zik, orderedZik);
 
-			var pv = GetPVectors(orderedZik).ToList();
+			var pv = GetPVectors(zik, orderedZik);
 			var p = pv.Select(v => v.Outer(v)).ToList();
-			var f = orderedZik.Select(model.GetMatrixF).ToList();
+			var f = zik.Select(model.GetMatrixF).ToList();
 			var phi = GetPhiMatrix(f, p);
-			var s = orderedZik.Select(model.GetMatrixQ).ToList();
+			var s = zik.Select(model.GetMatrixQ).ToList();
 			var q = GetQMatrix(f, p, s);
 			var mu = GetMu(pv, p, f, s, q, phi).ToList();
 			var ellipse1 = new List<PointX>();
@@ -68,8 +68,8 @@ namespace DS
 			for (var i = 0; i < zik.Count; i++)
 			{
 				var pd = pv[i].Multiply(model.Eps * qu * Math.Sqrt(2 * mu[i]));
-				var e1P = new PointX(orderedZik[i].X1 + pd[0], orderedZik[i].X2 + pd[1]);
-				var e2P = new PointX(orderedZik[i].X1 - pd[0], orderedZik[i].X2 - pd[1]);
+				var e1P = new PointX(zik[i].X1 + pd[0], zik[i].X2 + pd[1]);
+				var e2P = new PointX(zik[i].X1 - pd[0], zik[i].X2 - pd[1]);
 
 				ellipse1.Add(e1P);
 				ellipse2.Add(e2P);
@@ -100,9 +100,9 @@ namespace DS
 			return (x1Min, x1Max, x2Min, x2Max);
 		}
 
-		private static List<PointX> GetZikOrderedByAngle(double x10, double x20, List<PointX> zik)
+		private static List<int> GetZikOrderedByAngle(double x10, double x20, List<PointX> zik)
 		{
-			var zikAdvanced = new List<(int Index, double Angle)>();
+			var orderedZik = new List<(int Index, double Angle)>();
 
 			for (var i = 0; i < zik.Count; i++)
 			{
@@ -113,35 +113,43 @@ namespace DS
 				if (angle < 0)
 					angle += 2 * Math.PI;
 
-				zikAdvanced.Add((i, angle));
+				orderedZik.Add((i, angle));
 			}
 
-			return zikAdvanced
+			return orderedZik
 				.OrderBy(v => v.Angle)
-				.Select(v => zik[v.Index])
+				.Select(v => v.Index)
 				.ToList();
 		}
 
-		private static void CheckOrderedZik(List<PointX> zik)
+		private static void CheckOrderedZik(List<PointX> zik, List<int> orderedZik)
 		{
 			for (var i = 0; i < zik.Count; i++)
 			{
-				var p1 = zik[i];
-				var p2 = i == zik.Count - 1 ? zik[0] : zik[i + 1];
+				var p1 = zik[orderedZik[i]];
+				var p2 = i == zik.Count - 1 ? zik[orderedZik[0]] : zik[orderedZik[i + 1]];
 
 				if (Math.Sqrt(Math.Pow(p1.X1 - p2.X1, 2) + Math.Pow(p1.X2 - p2.X2, 2)) > 0.00001)
 					throw new ArgumentException("Зик не удовлетворяет условию плотности");
 			}
 		}
 
-		private static IEnumerable<double[]> GetPVectors(List<PointX> orderedZik)
+		private static List<double[]> GetPVectors(List<PointX> zik, List<int> orderedZik)
 		{
+			var pv = new List<(int Index, double[] Vector)>();
+
 			for (var i = 0; i < orderedZik.Count; i++)
 			{
-				var (x1, y1) = orderedZik[i];
-				var (x2, y2) = i == orderedZik.Count - 1 ? orderedZik[0] : orderedZik[i + 1];
-				yield return new[] { y1 - y2, x2 - x1 }.Normalize();
+				var (x1, y1) = zik[orderedZik[i]];
+				var (x2, y2) = i == zik.Count - 1 ? zik[orderedZik[0]] : zik[orderedZik[i + 1]];
+				
+				pv.Add((orderedZik[i], new[] { y1 - y2, x2 - x1 }.Normalize()));
 			}
+
+			return pv
+				.OrderBy(v => v.Index)
+				.Select(v => v.Vector)
+				.ToList();
 		}
 
 		private static double[,] GetPhiMatrix(List<double[,]> f, List<double[,]> p)
