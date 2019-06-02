@@ -221,9 +221,9 @@ namespace DS
 			sModel.D12 = d12;
 			sModel.D21 = 0.0075;
 			sModel.Eps = 0.1;
-			sModel.Sigma1 = 0;
-			sModel.Sigma2 = 0;
-			sModel.Sigma3 = 1;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
 
 			var result = new List<(double D12, double MuMax, double MuMin)>();
 			var previous = new PointX(20, 40);
@@ -232,7 +232,7 @@ namespace DS
 			{
 				dModel.D12 = d12;
 				sModel.D12 = d12;
-				var zik = PhaseTrajectory.Get(dModel, previous, 10000, 20000);
+				var zik = PhaseTrajectory.Get(dModel, previous, 10000, 40000);
 				previous = zik[zik.Count - 1];
 
 				var mu = ScatterEllipse.GetMuForZik(sModel, zik);
@@ -243,7 +243,92 @@ namespace DS
 			var chart = new ChartForm(result.Select(p => (p.D12, p.MuMax)), 0, 0.0019, 0, 2000);
 			chart.AddSeries("min", result.Select(p => (p.D12, p.MuMin)), Color.Orange);
 
-			PointSaver.SaveToFile("zik_d12_mu.txt", result);
+			PointSaver.SaveToFile("zik_d12_mu_add.txt", result);
+
+			return chart;
+		}
+
+		// (20, 40) -> [0.00145, 0.001682]; (22.060731438419, 58.3431519485857) -> [0.001909, 0.0019746]
+		public static ChartForm Test6(DeterministicModel dModel, StochasticModel sModel)
+		{
+			const double step = 0.0000005;
+
+			dModel.D21 = 0.0075;
+			sModel.D21 = 0.0075;
+			sModel.Eps = 0.1;
+			sModel.Sigma1 = 0;
+			sModel.Sigma2 = 0;
+			sModel.Sigma3 = 1;
+
+			IEnumerable<(double D12, double Mu11, double Mu12, double Mu21, double Mu22, double Mu31, double Mu32)> I1()
+			{
+				const double d12End = 0.001682;
+				var previous = new PointX(20, 40);
+
+				for (var d12 = 0.00145; d12 < d12End; d12 += step)
+				{
+					dModel.D12 = d12;
+					sModel.D12 = d12;
+
+					var attractorPoints = PhaseTrajectory.Get(dModel, previous, 9999, 3);
+
+					previous = attractorPoints[2];
+
+					var sensitivityMatrices = SensitivityMatrix.Get(sModel, attractorPoints).ToList();
+					var mu1 = new EigenvalueDecomposition(sensitivityMatrices[0]).RealEigenvalues;
+					var mu2 = new EigenvalueDecomposition(sensitivityMatrices[1]).RealEigenvalues;
+					var mu3 = new EigenvalueDecomposition(sensitivityMatrices[2]).RealEigenvalues;
+
+					yield return (d12,
+						Math.Min(mu1[0], mu1[1]), Math.Max(mu1[0], mu1[1]),
+						Math.Min(mu2[0], mu2[1]), Math.Max(mu2[0], mu2[1]),
+						Math.Min(mu3[0], mu3[1]), Math.Max(mu3[0], mu3[1]));
+				}
+			}
+
+			IEnumerable<(double D12, double Mu11, double Mu12, double Mu21, double Mu22, double Mu31, double Mu32)> I2()
+			{
+				const double d12End = 0.0019746;
+				var previous = new PointX(22.060731438419, 58.3431519485857);
+
+				for (var d12 = 0.001909; d12 < d12End; d12 += step)
+				{
+					dModel.D12 = d12;
+					sModel.D12 = d12;
+
+					var attractorPoints = PhaseTrajectory.Get(dModel, previous, 9999, 3);
+
+					previous = attractorPoints[2];
+
+					var sensitivityMatrices = SensitivityMatrix.Get(sModel, attractorPoints).ToList();
+					var mu1 = new EigenvalueDecomposition(sensitivityMatrices[0]).RealEigenvalues;
+					var mu2 = new EigenvalueDecomposition(sensitivityMatrices[1]).RealEigenvalues;
+					var mu3 = new EigenvalueDecomposition(sensitivityMatrices[2]).RealEigenvalues;
+
+					yield return (d12,
+						Math.Min(mu1[0], mu1[1]), Math.Max(mu1[0], mu1[1]),
+						Math.Min(mu2[0], mu2[1]), Math.Max(mu2[0], mu2[1]),
+						Math.Min(mu3[0], mu3[1]), Math.Max(mu3[0], mu3[1]));
+				}
+			}
+
+			var points = I2().ToList();
+
+			PointSaver.SaveToFile("I2.txt", points);
+
+			var mu11 = points.Select(p => (p.D12, p.Mu11));
+			var mu12 = points.Select(p => (p.D12, p.Mu12));
+			var mu21 = points.Select(p => (p.D12, p.Mu21));
+			var mu22 = points.Select(p => (p.D12, p.Mu22));
+			var mu31 = points.Select(p => (p.D12, p.Mu31));
+			var mu32 = points.Select(p => (p.D12, p.Mu32));
+
+			var chart = new ChartForm(mu11, 0, 0.0025, 0, 50, name: "d12 v mu11");
+			chart.AddSeries("d12 v mu12", mu12, Color.LightBlue);
+			chart.AddSeries("d12 v mu21", mu21, Color.Red);
+			chart.AddSeries("d12 v mu22", mu22, Color.DarkRed);
+			chart.AddSeries("d12 v mu31", mu31, Color.Orange);
+			chart.AddSeries("d12 v mu32", mu32, Color.OrangeRed);
 
 			return chart;
 		}

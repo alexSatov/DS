@@ -106,6 +106,7 @@ namespace DS
 			const double step = 0.000002;
 			model.D21 = 0.0075;
 
+			// [0.000045, 0.00245]
 			IEnumerable<(double D12, double X1)> FirstAttractor()
 			{
 				model.D12 = 0.000045;
@@ -114,6 +115,7 @@ namespace DS
 					.Select(v => (v.D12, v.X1));
 			}
 
+			// [0.00145, 0.0019746]
 			IEnumerable<(double D12, double X1)> SecondAttractor()
 			{
 				model.D12 = 0.00145;
@@ -122,17 +124,17 @@ namespace DS
 					.Select(v => (v.D12, v.X1));
 			}
 
+			// [0.002166, 0.0023825]
 			IEnumerable<(double D12, double X1)> ThirdAttractor()
 			{
 				model.D12 = 0.002166;
-				
 				return BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(34.5964044040563, 44.473609663403728),
 						0.0023825, step)
 					.Distinct()
 					.Select(p => (p.D12, p.X1));
 			}
 
-			var points = FirstAttractor().ToList();
+			var points = SecondAttractor().ToList();
 
 			//PointSaver.SaveToFile("d12_x1_1.txt", points);
 

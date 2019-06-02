@@ -57,6 +57,8 @@ namespace DS
 
 			for (; condition(); model.D12 += step)
 			{
+				if (model.D12 > 0.0019)
+					Console.WriteLine("kek");
 				var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
 
 				if (points[0].IsInfinity())
