@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
-using Accord.Math;
-
 namespace DS
 {
 	public class Program
@@ -10,10 +8,6 @@ namespace DS
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			var a1 = Math.Atan2(1, 1);
-			var a2 = Math.Atan2(1, -1);
-			var a3 = Math.Atan2(-1, -1) + 2 * Math.PI;
-			var a4 = Math.Atan2(-1, 1) + 2 * Math.PI;
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
@@ -23,7 +17,7 @@ namespace DS
 
 			watch.Start();
 			//var chart = DeterministicTest.Test6(deterministicModel);
-			var chart = StochasticTest.Test6(deterministicModel, stochasticModel);
+			var chart = StochasticTest.Test4(deterministicModel, stochasticModel);
 			watch.Stop();
 
 			Console.WriteLine(watch.Elapsed);
@@ -35,9 +29,6 @@ namespace DS
 
 		private static void Test()
 		{
-			var a1 = new double[] { 1, 2 };
-			var a2 = new double[] { 3, 4 };
-			var result = a1.Outer(a2);
 		}
 	}
 }

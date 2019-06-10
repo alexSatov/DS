@@ -58,20 +58,22 @@ namespace DS
 
 		public static ChartForm Test2(DeterministicModel dModel, StochasticModel sModel)
 		{
-			dModel.D12 = 0.0016;
+			dModel.D12 = 0.00194;
+			sModel.D12 = 0.00194;
 			dModel.D21 = 0.0075;
-			sModel.D12 = 0.0016;
 			sModel.D21 = 0.0075;
-			sModel.Eps = 0.05;
+			sModel.Eps = 0.1;
 			sModel.Sigma1 = 1;
 			sModel.Sigma2 = 1;
 			sModel.Sigma3 = 0;
 
-			var attractorPoints = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 3);
-			var points = PhaseTrajectory.Get(sModel, attractorPoints[0], 0, 2000);
+			var attractorPoints = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 1);
+			var points = PhaseTrajectory.Get(sModel, attractorPoints[0], 0, 500);
 			var chart = new ChartForm(points, 0, 32, 32, 80);
 
 			var sensitivityMatrices = SensitivityMatrix.Get(sModel, attractorPoints).ToList();
+
+			PointSaver.SaveToFile("ellipse/attractor.txt", points);
 
 			for (var i = 0; i < sensitivityMatrices.Count; i++)
 			{
@@ -81,9 +83,10 @@ namespace DS
 				Console.WriteLine(string.Join("; ", eigenvalues));
 				var eigenvectors = eigenvalueDecomposition.Eigenvectors;
 				var ellipse = ScatterEllipse.Get(attractorPoints[i], eigenvalues[0], eigenvalues[1],
-					eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps);
+					eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
 
 				chart.AddSeries($"ellipse{i + 1}", ellipse, Color.Red);
+				PointSaver.SaveToFile($"ellipse/ellipse{i + 1}.txt", ellipse);
 			}
 
 			return chart;
@@ -190,23 +193,27 @@ namespace DS
 
 		public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
 		{
-			dModel.D12 = 0.001;
+			dModel.D12 = 0.00157;
+			sModel.D12 = 0.00157;
 			dModel.D21 = 0.0075;
-			sModel.D12 = 0.001;
 			sModel.D21 = 0.0075;
-			sModel.Eps = 0.05;
+			sModel.Eps = 0.1;
 			sModel.Sigma1 = 0;
 			sModel.Sigma2 = 0;
 			sModel.Sigma3 = 1;
 
-			var zik = PhaseTrajectory.Get(dModel, new PointX(20, 40), 10000, 10000);
+			var zik = PhaseTrajectory.Get(dModel, new PointX(15.3484299431058, 59.4141662230043), 10000, 10000);
 			var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
 			var (ellipse1, ellipse2) = ScatterEllipse.GetForZik(sModel, zik);
 
-			var chart = new ChartForm(chaosZik, 0, 20, 48, 80);
+			var chart = new ChartForm(chaosZik, 8, 24, 48, 80);
 			chart.AddSeries("zik", zik, Color.Black);
-			chart.AddSeries("ellipse1", ellipse1.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
-			chart.AddSeries("ellipse2", ellipse2.Where(p => Math.Abs(p.X1) < 100 && Math.Abs(p.X2) < 100), Color.Red);
+			chart.AddSeries("ellipse1", ellipse1, Color.Red);
+			chart.AddSeries("ellipse2", ellipse2, Color.Red);
+
+			PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
+			PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
+			PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
 
 			return chart;
 		}
@@ -256,9 +263,9 @@ namespace DS
 			dModel.D21 = 0.0075;
 			sModel.D21 = 0.0075;
 			sModel.Eps = 0.1;
-			sModel.Sigma1 = 0;
-			sModel.Sigma2 = 0;
-			sModel.Sigma3 = 1;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
 
 			IEnumerable<(double D12, double Mu11, double Mu12, double Mu21, double Mu22, double Mu31, double Mu32)> I1()
 			{

@@ -43,8 +43,6 @@ namespace DS
 			double d12End, double step, bool rightToLeft = false)
 		{
 			var previous = start;
-			//var min = double.MaxValue;
-			//var max = 0.0;
 			Func<bool> condition;
 
 			if (rightToLeft)
@@ -66,18 +64,14 @@ namespace DS
 
 				previous = points[points.Count - 1];
 
-				//if (points[0].X1 > 30)
-				//{
-				//	if (model.D12 < min)
-				//		min = model.D12;
-				//	if (model.D12 > max)
-				//		max = model.D12;
-				//}
+				if (model.D12 > 0.00156)
+				{
+					Console.WriteLine(previous);
+				}
 
 				foreach (var (x1, x2) in points)
 					yield return (model.D12, x1, x2);
 			}
-			//Console.WriteLine($"Min = {min}, Max = {max}");
 		}
 
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(DeterministicModel dModel,
@@ -85,8 +79,6 @@ namespace DS
 		{
 			var previous = start;
 			var d12 = dModel.D12;
-			//var min = double.MaxValue;
-			//var max = 0.0;
 			Func<bool> condition;
 
 			if (rightToLeft)
@@ -109,18 +101,9 @@ namespace DS
 
 				previous = attractor;
 
-				//if (points[0].X1 > 30)
-				//{
-				//	if (model.D12 < min)
-				//		min = model.D12;
-				//	if (model.D12 > max)
-				//		max = model.D12;
-				//}
-
 				foreach (var (x1, x2) in points)
 					yield return (d12, x1, x2);
 			}
-			//Console.WriteLine($"Min = {min}, Max = {max}");
 		}
 
 		public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start,
@@ -227,7 +210,7 @@ namespace DS
 				var d12PartEnd = model.D12 + d12Part * (i + 1);
 				copy.D12 = model.D12 + d12Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21(copy, start, d12PartEnd, d21End, step1, step2));
+				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD21(copy, start, d12PartEnd, d21End, step1, step2, rightToLeft, upToDown));
 			}
 
 			return UniteResults(tasks);
@@ -246,7 +229,7 @@ namespace DS
 				var d21PartEnd = model.D21 + d21Part * (i + 1);
 				copy.D21 = model.D21 + d21Part * i;
 
-				tasks[i] = Task.Run(() => GetD12VsD21(copy, start, d12End, d21PartEnd, step1, step2));
+				tasks[i] = Task.Run(() => GetD12VsD21ByPreviousD12(copy, start, d12End, d21PartEnd, step1, step2));
 			}
 
 			return UniteResults(tasks);

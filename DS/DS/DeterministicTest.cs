@@ -71,32 +71,7 @@ namespace DS
 			var points = BifurcationDiagram.GetD12VsD21(model, new PointX(20, 40), 0.00245, 0.008,
 				0.000004, 0.0000016);
 
-			//(0.0015899999999999996, 0.0072622000000000051)
-			//model.D12 = 0.00159;
-			//model.D21 = 0.0072622;
-			//var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.00245, 0.0076,
-			//	0.000004, 0.0000017);
-
-			//(0.00200600000000001, 0.0075274500000000024); (19,9106940008894, 62,4944666763375)
-			//model.D12 = 0.002006;
-			//model.D21 = 0.00752745;
-			//var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(19.9106940008894, 62.4944666763375),
-			//	0.0018, 0.0078, 0.000004, 0.0000017, true);
-
-			//(0.00200600000000001, 0.0075274500000000024); (19,9106940008894, 62,4944666763375)
-			//model.D12 = 0.002006;
-			//model.D21 = 0.00752745;
-			//var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(19.9106940008894, 62.4944666763375),
-			//	0.00245, 0.0078, 0.000004, 0.0000017);
-
-			//var keks = points.CyclePoints[3]
-			//	.OrderByDescending(p => p.D.D21)
-			//	.Take(5)
-			//	.Select(p => (p.D.D12, p.D.D21));
-
 			var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
-
-			//chart.AddSeries("kek", keks, Color.Black);
 
 			return chart;
 		}
@@ -134,7 +109,7 @@ namespace DS
 					.Select(p => (p.D12, p.X1));
 			}
 
-			var points = SecondAttractor().ToList();
+			var points = FirstAttractor().ToList();
 
 			//PointSaver.SaveToFile("d12_x1_1.txt", points);
 
