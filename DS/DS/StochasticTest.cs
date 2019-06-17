@@ -11,10 +11,10 @@ namespace DS
 	{
 		public static ChartForm Test1(DeterministicModel dModel, StochasticModel sModel)
 		{
-			sModel.Sigma1 = 0;
-			sModel.Sigma2 = 0;
-			sModel.Sigma3 = 1;
-			sModel.Eps = 0.1;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
+			sModel.Eps = 0.01;
 			sModel.D21 = 0.0075;
 			dModel.D21 = 0.0075;
 
@@ -49,9 +49,9 @@ namespace DS
 					.Select(p => (p.D12, p.X1));
 			}
 
-			var points = ThirdAttractor().ToList();
+			var points = FirstAttractor().ToList();
 
-			PointSaver.SaveToFile("d12_x1_3_stochastic.txt", points);
+			//PointSaver.SaveToFile("d12_x1_3_stochastic.txt", points);
 
 			return new ChartForm(points, 0, 0.00245, 0, 45);
 		}
@@ -197,7 +197,7 @@ namespace DS
 			sModel.D12 = 0.00157;
 			dModel.D21 = 0.0075;
 			sModel.D21 = 0.0075;
-			sModel.Eps = 0.1;
+			sModel.Eps = 0.05;
 			sModel.Sigma1 = 0;
 			sModel.Sigma2 = 0;
 			sModel.Sigma3 = 1;
@@ -219,6 +219,44 @@ namespace DS
 		}
 
 		public static ChartForm Test5(DeterministicModel dModel, StochasticModel sModel)
+		{
+			dModel.D12 = 0.0017;
+			sModel.D12 = 0.0017;
+			dModel.D21 = 0.0075;
+			sModel.D21 = 0.0075;
+			sModel.Eps = 0.05;
+			sModel.Sigma1 = 1;
+			sModel.Sigma2 = 1;
+			sModel.Sigma3 = 0;
+
+			var zik = PhaseTrajectory.Get(dModel, new PointX(20, 40), 10000, 30000);
+			var zik1 = zik.Where((p, i) => i % 3 == 0).ToList();
+			var zik2 = zik.Where((p, i) => (i + 1) % 3 == 0).ToList();
+			var zik3 = zik.Where((p, i) => (i + 2) % 3 == 0).ToList();
+			var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 6000);
+			var (ellipse11, ellipse12) = ScatterEllipse.GetForZik(sModel, zik1);
+			var (ellipse21, ellipse22) = ScatterEllipse.GetForZik(sModel, zik2);
+			var (ellipse31, ellipse32) = ScatterEllipse.GetForZik(sModel, zik3);
+
+			var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
+			chart.AddSeries("zik1", zik1, Color.Black);
+			chart.AddSeries("zik2", zik2, Color.Red);
+			chart.AddSeries("zik3", zik3, Color.Orange);
+			//chart.AddSeries("ellipse11", ellipse11, Color.Red);
+			//chart.AddSeries("ellipse12", ellipse12, Color.Red);
+			//chart.AddSeries("ellipse21", ellipse21, Color.Red);
+			//chart.AddSeries("ellipse22", ellipse22, Color.Red);
+			//chart.AddSeries("ellipse31", ellipse31, Color.Red);
+			//chart.AddSeries("ellipse32", ellipse32, Color.Red);
+
+			//PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
+			//PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
+			//PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
+
+			return chart;
+		}
+
+		public static ChartForm Test6(DeterministicModel dModel, StochasticModel sModel)
 		{
 			const double step = 0.000005;
 			var d12 = 0.000943;
@@ -256,7 +294,7 @@ namespace DS
 		}
 
 		// (20, 40) -> [0.00145, 0.001682]; (22.060731438419, 58.3431519485857) -> [0.001909, 0.0019746]
-		public static ChartForm Test6(DeterministicModel dModel, StochasticModel sModel)
+		public static ChartForm Test7(DeterministicModel dModel, StochasticModel sModel)
 		{
 			const double step = 0.0000005;
 

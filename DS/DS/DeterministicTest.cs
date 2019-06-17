@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -188,7 +189,7 @@ namespace DS
 			model.D12 = 0.0002;
 			model.D21 = 0.007;
 
-			var points = Lyapunov.GetIndicatorsParallelByD21(model, new PointX(20, 40), 0.0024, 0.008, 0.000003, 0.000001363)
+			var points = Lyapunov.GetIndicatorsByD21(model, new PointX(20, 40), 0.0024, 0.008, 0.000003, 0.000001363)
 				.OrderByDescending(p => p.D21)
 				.ThenBy(p => p.D12)
 				.ToList();

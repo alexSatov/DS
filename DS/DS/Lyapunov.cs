@@ -112,27 +112,6 @@ namespace DS
 			return result;
 		}
 
-		public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallel(Model model, PointX start,
-			double d12End, double d21End, double step1, double step2, double eps = 0.00001, double t = 100000)
-		{
-			var processorCount = Environment.ProcessorCount;
-			var tasks = new Task<IEnumerable<(double D12, double D21, double L1, double L2)>>[processorCount];
-			var d12Part = (d12End - model.D12) / processorCount;
-
-			for (var i = 0; i < processorCount; i++)
-			{
-				var copy = model.Copy();
-				var d12PartEnd = model.D12 + d12Part * (i + 1);
-				copy.D12 = model.D12 + d12Part * i;
-
-				tasks[i] = Task.Run(() => GetIndicatorsByD12(copy, start, d12PartEnd, d21End, step1, step2, false, eps, t));
-			}
-
-			foreach (var task in tasks)
-			foreach (var values in task.Result)
-				yield return values;
-		}
-
 		public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD12(Model model, PointX start,
 			double d12End, double d21End, double step1, double step2, double eps = 0.00001, double t = 100000)
 		{

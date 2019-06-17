@@ -16,15 +16,16 @@ namespace DS
 			var watch = new Stopwatch();
 
 			watch.Start();
-			//var chart = DeterministicTest.Test6(deterministicModel);
-			var chart = StochasticTest.Test4(deterministicModel, stochasticModel);
+			var chart = DeterministicTest.Test8(deterministicModel);
+			//var chart = StochasticTest.Test1(deterministicModel, stochasticModel);
 			watch.Stop();
 
 			Console.WriteLine(watch.Elapsed);
-			//Console.ReadKey();
 
 			if (chart != null)
 				Application.Run(chart);
+			else
+				Console.ReadKey();
 		}
 
 		private static void Test()
