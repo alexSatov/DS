@@ -56,6 +56,47 @@ namespace DS
 			//CheckOrderedZik(zik, orderedZik);
 
 			var pv = GetPVectors(zik, orderedZik);
+
+			return BuildEllipses(model, zik, pv, qu);
+		}
+
+		/// <summary>
+		/// Построение эллипса рассеивания для ЗИКа. Альтернативный алгоритм.
+		/// </summary>
+		/// <param name="dModel">Детерм. модель</param>
+		/// <param name="sModel">Стох. модель</param>
+		/// <param name="zik">Элементы ЗИКа</param>
+		/// <param name="k">Кратность зика</param>
+		/// <returns>2 набора точек - координаты внешнего и внутреннего эллипсов</returns>
+		public static (List<PointX> Outer, List<PointX> Inner) GetForZik2(DeterministicModel dModel, StochasticModel sModel,
+			List<PointX> zik, int k = 1, double qu = 1.821)
+		{
+			var pv = GetPVectors(dModel, zik, k);
+			return BuildEllipses(sModel, zik, pv, qu);
+		}
+
+		public static List<double> GetMuForZik(StochasticModel model, List<PointX> zik, double qu = 1.821)
+		{
+			var boundaries = FindBoundaries(zik);
+			var x10 = boundaries.X1Min + (boundaries.X1Max - boundaries.X1Min) / 2;
+			var x20 = boundaries.X2Min + (boundaries.X2Max - boundaries.X2Min) / 2;
+			var orderedZik = GetZikOrderedByAngle(x10, x20, zik);
+
+			//CheckOrderedZik(zik, orderedZik);
+
+			var pv = GetPVectors(zik, orderedZik);
+			var p = pv.Select(v => v.Outer(v)).ToList();
+			var f = zik.Select(model.GetMatrixF).ToList();
+			var phi = GetPhiMatrix(f, p);
+			var s = zik.Select(model.GetMatrixQ).ToList();
+			var q = GetQMatrix(f, p, s);
+
+			return GetMu(pv, p, f, s, q, phi).ToList();
+		}
+
+		private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel model, List<PointX> zik,
+			List<double[]> pv, double qu)
+		{
 			var p = pv.Select(v => v.Outer(v)).ToList();
 			var f = zik.Select(model.GetMatrixF).ToList();
 			var phi = GetPhiMatrix(f, p);
@@ -76,25 +117,6 @@ namespace DS
 			}
 
 			return (ellipse1, ellipse2);
-		}
-
-		public static List<double> GetMuForZik(StochasticModel model, List<PointX> zik, double qu = 1.821)
-		{
-			var boundaries = FindBoundaries(zik);
-			var x10 = boundaries.X1Min + (boundaries.X1Max - boundaries.X1Min) / 2;
-			var x20 = boundaries.X2Min + (boundaries.X2Max - boundaries.X2Min) / 2;
-			var orderedZik = GetZikOrderedByAngle(x10, x20, zik);
-
-			//CheckOrderedZik(zik, orderedZik);
-
-			var pv = GetPVectors(zik, orderedZik);
-			var p = pv.Select(v => v.Outer(v)).ToList();
-			var f = zik.Select(model.GetMatrixF).ToList();
-			var phi = GetPhiMatrix(f, p);
-			var s = zik.Select(model.GetMatrixQ).ToList();
-			var q = GetQMatrix(f, p, s);
-
-			return GetMu(pv, p, f, s, q, phi).ToList();
 		}
 
 		private static (double X1Min, double X1Max, double X2Min, double X2Max) FindBoundaries(List<PointX> zik)
@@ -169,6 +191,28 @@ namespace DS
 				.OrderBy(v => v.Index)
 				.Select(v => v.Vector)
 				.ToList();
+		}
+
+		private static List<double[]> GetPVectors(DeterministicModel model, List<PointX> zik, int k)
+		{
+			var pv = new List<double[]>();
+			var (p1, p2) = (zik[0], zik[zik.Count - 1]);
+
+			for (var i = 0; i < zik.Count; i++)
+			{
+				var (x1, y1) = p1;
+				var (x2, y2) = p2;
+
+				pv.Add(new[] { y1 - y2, x2 - x1 }.Normalize());
+
+				for (var j = 0; j < k; j++)
+				{
+					p1 = model.GetNextPoint(p1);
+					p2 = model.GetNextPoint(p2);
+				}
+			}
+
+			return pv;
 		}
 
 		private static double[,] GetPhiMatrix(List<double[,]> f, List<double[,]> p)

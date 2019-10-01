@@ -202,7 +202,7 @@ namespace DS
 			sModel.Sigma2 = 0;
 			sModel.Sigma3 = 1;
 
-			var zik = PhaseTrajectory.Get(dModel, new PointX(15.3484299431058, 59.4141662230043), 10000, 10000);
+			var zik = PhaseTrajectory.GetWhile(dModel, new PointX(15.3484299431058, 59.4141662230043), 10000, 0.00001);
 			var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
 			var (ellipse1, ellipse2) = ScatterEllipse.GetForZik(sModel, zik);
 
@@ -218,6 +218,9 @@ namespace DS
 			return chart;
 		}
 
+		/// <summary>
+		/// Построение многокусочного зика
+		/// </summary>
 		public static ChartForm Test5(DeterministicModel dModel, StochasticModel sModel)
 		{
 			dModel.D12 = 0.0017;
@@ -229,25 +232,25 @@ namespace DS
 			sModel.Sigma2 = 1;
 			sModel.Sigma3 = 0;
 
-			var zik = PhaseTrajectory.Get(dModel, new PointX(20, 40), 10000, 30000);
+			var zik = PhaseTrajectory.GetWhile(dModel, new PointX(20, 40), 10000, 0.0001);
 			var zik1 = zik.Where((p, i) => i % 3 == 0).ToList();
-			var zik2 = zik.Where((p, i) => (i + 1) % 3 == 0).ToList();
-			var zik3 = zik.Where((p, i) => (i + 2) % 3 == 0).ToList();
+			var zik2 = zik.Where((p, i) => i % 3 == 1).ToList();
+			var zik3 = zik.Where((p, i) => i % 3 == 2).ToList();
 			var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 6000);
-			var (ellipse11, ellipse12) = ScatterEllipse.GetForZik(sModel, zik1);
-			var (ellipse21, ellipse22) = ScatterEllipse.GetForZik(sModel, zik2);
-			var (ellipse31, ellipse32) = ScatterEllipse.GetForZik(sModel, zik3);
+			var (ellipse11, ellipse12) = ScatterEllipse.GetForZik2(dModel, sModel, zik1, 3);
+			var (ellipse21, ellipse22) = ScatterEllipse.GetForZik2(dModel, sModel, zik2, 3);
+			var (ellipse31, ellipse32) = ScatterEllipse.GetForZik2(dModel, sModel, zik3, 3);
 
 			var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
 			chart.AddSeries("zik1", zik1, Color.Black);
 			chart.AddSeries("zik2", zik2, Color.Red);
 			chart.AddSeries("zik3", zik3, Color.Orange);
-			//chart.AddSeries("ellipse11", ellipse11, Color.Red);
-			//chart.AddSeries("ellipse12", ellipse12, Color.Red);
-			//chart.AddSeries("ellipse21", ellipse21, Color.Red);
-			//chart.AddSeries("ellipse22", ellipse22, Color.Red);
-			//chart.AddSeries("ellipse31", ellipse31, Color.Red);
-			//chart.AddSeries("ellipse32", ellipse32, Color.Red);
+			chart.AddSeries("ellipse11", ellipse11, Color.Red);
+			chart.AddSeries("ellipse12", ellipse12, Color.Red);
+			chart.AddSeries("ellipse21", ellipse21, Color.Red);
+			chart.AddSeries("ellipse22", ellipse22, Color.Red);
+			chart.AddSeries("ellipse31", ellipse31, Color.Red);
+			chart.AddSeries("ellipse32", ellipse32, Color.Red);
 
 			//PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
 			//PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
