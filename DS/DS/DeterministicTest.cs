@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace DS
 {
@@ -125,7 +126,7 @@ namespace DS
             model.D12 = 0.002382;
             model.D21 = 0.0075;
 
-            var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.05, 0.09);
+            var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.5, 0.9);
 
             return GetAttractorPoolChartExact(points, -5, 45, -5, 85);
         }
@@ -237,6 +238,48 @@ namespace DS
             return chart;
         }
 
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.002382)
+        /// </summary>
+        public static ChartForm Test12(DeterministicModel model)
+        {
+            model.D12 = 0.002382;
+            model.D21 = 0.0075;
+
+            var points = PhaseTrajectory.Get(model, new PointX(34, 61), 10000, 10000);
+            var (minX1, maxX1) = ((int) Math.Floor(points.Min(p => p.X1)), (int) Math.Ceiling(points.Max(p => p.X1)));
+            var lc = Enumerable.Range(0, (maxX1 - minX1) * 2)
+                .Select(i => minX1 + (double) i / 2)
+                .Where(x1 => x1 != 20)
+                .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)))
+                .ToList();
+
+            var lc1 = Lc.GetNextLc(model, lc).ToList();
+            var lc2 = Lc.GetNextLc(model, lc1).ToList();
+            var lc3 = Lc.GetNextLc(model, lc2).ToList();
+            var lc4 = Lc.GetNextLc(model, lc3).ToList();
+            var lc5 = Lc.GetNextLc(model, lc4).ToList();
+            var lc6 = Lc.GetNextLc(model, lc5).ToList();
+            var lc7 = Lc.GetNextLc(model, lc6).ToList();
+            var lc8 = Lc.GetNextLc(model, lc7).ToList();
+            var lc9 = Lc.GetNextLc(model, lc8).ToList();
+
+            var chart = new ChartForm(points, 30, 40, 0, 80);
+
+            chart.AddSeries(nameof(lc), lc, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc1), lc1, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc2), lc2, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc3), lc3, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc4), lc4, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc5), lc5, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc6), lc6, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc7), lc7, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc8), lc8, Color.Red, 5, SeriesChartType.FastLine);
+            chart.AddSeries(nameof(lc9), lc9, Color.Red, 5, SeriesChartType.FastLine);
+
+            return chart;
+        }
+
         private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
             double ox1, double ox2, double oy1, double oy2)
         {
@@ -337,10 +380,10 @@ namespace DS
                 .Where(p => !eqAttractor.Contains(p))
                 .ToList();
 
-            var chart = new ChartForm(eq, ox1, ox2, oy1, oy2);
-            chart.AddSeries(nameof(chaos), chaos, Color.DarkOrange);
-            chart.AddSeries(nameof(chaosAttractors), chaosAttractors, Color.DeepPink);
-            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Yellow);
+            var chart = new ChartForm(eq, ox1, ox2, oy1, oy2, markerSize: 4);
+            chart.AddSeries(nameof(chaos), chaos, Color.DarkSeaGreen, 4);
+            chart.AddSeries(nameof(chaosAttractors), chaosAttractors, Color.GreenYellow, 5);
+            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, 5);
 
             PointSaver.SaveToFile($"pool_simple\\{nameof(eqAttractor)}.txt", eqAttractor);
             PointSaver.SaveToFile($"pool_simple\\{nameof(chaosAttractors)}.txt", chaosAttractors);

@@ -9,6 +9,8 @@ namespace DS
         public static void SaveToFile(string filename, IEnumerable<(double, double)> points)
         {
             var lines = points.Select(p => $"{p.Item1.Format()} {p.Item2.Format()}");
+            var directory = Path.GetDirectoryName(filename);
+            Directory.CreateDirectory(directory);
             File.WriteAllLines(filename, lines);
         }
 

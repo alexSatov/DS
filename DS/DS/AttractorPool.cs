@@ -16,7 +16,7 @@ namespace DS
                 for (var x2 = leftBottom.X2; x2 <= rightTop.X2; x2 += step2)
                 {
                     var startPoint = new PointX(x1, x2);
-                    var point = PhaseTrajectory.Get(model, startPoint, 100000, 1)[0];
+                    var point = PhaseTrajectory.Get(model, startPoint, 10000, 1)[0];
 
                     if (point.IsInfinity())
                         continue;

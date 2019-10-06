@@ -226,11 +226,11 @@ namespace DS
         /// </summary>
         public static ChartForm Test5(DeterministicModel dModel, StochasticModel sModel)
         {
-            dModel.D12 = 0.0017;
-            sModel.D12 = 0.0017;
+            dModel.D12 = 0.00186;
+            sModel.D12 = 0.00186;
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
-            sModel.Eps = 0.05;
+            sModel.Eps = 0.005;
             sModel.Sigma1 = 1;
             sModel.Sigma2 = 1;
             sModel.Sigma3 = 0;
@@ -239,19 +239,22 @@ namespace DS
             var zik1 = zik.Where((p, i) => i % 3 == 0).ToList();
             var zik2 = zik.Where((p, i) => i % 3 == 1).ToList();
             var zik3 = zik.Where((p, i) => i % 3 == 2).ToList();
-            var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 6000);
+            var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 60000);
             var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
 
-            var chart = new ChartForm(chaosZik, 0, 30, 40, 80);
+            var chart = new ChartForm(chaosZik, 7, 30, 50, 80);
             chart.AddSeries("zik1", zik1, Color.Black);
             chart.AddSeries("zik2", zik2, Color.BlueViolet);
             chart.AddSeries("zik3", zik3, Color.Orange);
             chart.AddSeries("ellipse1", ellipse1, Color.Red);
             chart.AddSeries("ellipse2", ellipse2, Color.Red);
 
-            //PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
-            //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
-            //PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
+            PointSaver.SaveToFile("ellipse/chaosZik.txt", chaosZik);
+            PointSaver.SaveToFile("ellipse/zik1.txt", zik1);
+            PointSaver.SaveToFile("ellipse/zik2.txt", zik2);
+            PointSaver.SaveToFile("ellipse/zik3.txt", zik3);
+            PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
+            PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
 
             return chart;
         }

@@ -229,9 +229,6 @@ namespace DS
             for (var i = 0; i < k; i++)
             {
                 q = p[i + 1].Dot(f[i].Dot(q).Dot(f[i].Transpose()).Add(s[i])).Dot(p[i + 1]);
-
-                //if (double.IsNaN(q[0, 0]) || i == 4343)
-                //	continue;
             }
 
             return f[k].Dot(q).Dot(f[k].Transpose()).Add(s[k]);
