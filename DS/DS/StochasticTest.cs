@@ -380,5 +380,268 @@ namespace DS
 
             return chart;
         }
+
+        /// <summary>
+        /// Крит. интенсивность. 1 зона: ЗИК - 3цикл, D12 in (0.00145, 0.001682)
+        /// </summary>
+        public static ChartForm Test8_1(DeterministicModel dModel, StochasticModel sModel)
+        {
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Sigma3 = 0;
+            dModel.D21 = 0.0075;
+            sModel.D21 = 0.0075;
+
+            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            {
+                for (var d12 = 0.00145; d12 < 0.001682; d12 += 0.000001)
+                {
+                    for (var eps = 0.1; eps < 1; eps += 0.1)
+                    {
+                        dModel.D12 = d12;
+                        sModel.D12 = d12;
+                        sModel.Eps = eps;
+
+                        var eq = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 1).First();
+                        //var points = PhaseTrajectory.Get(sModel, eq, 0, 500);
+                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
+                        var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
+                        var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
+                        var eigenvectors = eigenvalueDecomposition.Eigenvectors;
+                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
+                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+
+                        foreach (var ellipsePoint in ellipse)
+                        {
+                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
+                            if (!eq.AlmostEquals(otherEq))
+                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
+                        }
+                    }
+                }
+
+                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
+            }
+
+            var (eq1, eq2, chaos, _ellipse) = Search();
+
+            var chart = new ChartForm(chaos, 0, 40, 0, 80);
+            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
+            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
+            chart.AddSeries("ellipse", _ellipse, Color.Red);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Крит. интенсивность. 2 зона: равновесие - 3цикл, D12 in (0.001909, 0.001974)
+        /// </summary>
+        public static ChartForm Test8_2(DeterministicModel dModel, StochasticModel sModel)
+        {
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Sigma3 = 0;
+            dModel.D21 = 0.0075;
+            sModel.D21 = 0.0075;
+
+            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            {
+                for (var d12 = 0.001909; d12 < 0.001974; d12 += 0.000001)
+                {
+                    for (var eps = 0.1; eps < 1; eps += 0.1)
+                    {
+                        dModel.D12 = d12;
+                        sModel.D12 = d12;
+                        sModel.Eps = eps;
+
+                        var eq = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 1).First();
+                        //var points = PhaseTrajectory.Get(sModel, eq, 0, 500);
+                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
+                        var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
+                        var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
+                        var eigenvectors = eigenvalueDecomposition.Eigenvectors;
+                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
+                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+
+                        foreach (var ellipsePoint in ellipse)
+                        {
+                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
+                            if (!eq.AlmostEquals(otherEq))
+                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
+                        }
+                    }
+                }
+
+                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
+            }
+
+            var (eq1, eq2, chaos, _ellipse) = Search();
+
+            var chart = new ChartForm(chaos, 0, 40, 0, 80);
+            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
+            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
+            chart.AddSeries("ellipse", _ellipse, Color.Red);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Крит. интенсивность. 3 зона: равновесие - равновесие, D12 in (0.002166, 0.002294)
+        /// </summary>
+        public static ChartForm Test8_3(DeterministicModel dModel, StochasticModel sModel)
+        {
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Sigma3 = 0;
+            dModel.D21 = 0.0075;
+            sModel.D21 = 0.0075;
+
+            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            {
+                var eq = new PointX(18.3933152332743, 68.0626540593603);
+                for (var d12 = 0.002166; d12 < 0.002294; d12 += 0.000001)
+                {
+                    dModel.D12 = d12;
+                    sModel.D12 = d12;
+                    eq = PhaseTrajectory.Get(dModel, eq, 9999, 1).First();
+                    for (var eps = 0.1; eps < 1; eps += 0.1)
+                    {
+                        sModel.Eps = eps;
+                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
+                        var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
+                        var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
+                        var eigenvectors = eigenvalueDecomposition.Eigenvectors;
+                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
+                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+
+                        foreach (var ellipsePoint in ellipse)
+                        {
+                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
+
+                            if (!eq.AlmostEquals(otherEq))
+                            {
+                                Console.WriteLine($"d12 = {d12}, eps = {eps}");
+                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
+                            }
+                        }
+                    }
+                }
+
+                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
+            }
+
+            var (eq1, eq2, chaos, _ellipse) = Search();
+
+            var chart = new ChartForm(chaos, 0, 40, 0, 80);
+            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
+            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
+            chart.AddSeries("ellipse", _ellipse, Color.Red);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Крит. интенсивность. 4 зона: ЗИК - 3ЗИК, D12 in (0.001682, 0.00173)
+        /// </summary>
+        public static ChartForm Test8_4(DeterministicModel dModel, StochasticModel sModel)
+        {
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Sigma3 = 0;
+            dModel.D21 = 0.0075;
+            sModel.D21 = 0.0075;
+
+            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            {
+                for (var d12 = 0.001682; d12 < 0.00173; d12 += 0.000001)
+                {
+                    for (var eps = 0.1; eps < 1; eps += 0.1)
+                    {
+                        dModel.D12 = d12;
+                        sModel.D12 = d12;
+                        sModel.Eps = eps;
+
+                        var eq = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 1).First();
+                        //var points = PhaseTrajectory.Get(sModel, eq, 0, 500);
+                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
+                        var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
+                        var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
+                        var eigenvectors = eigenvalueDecomposition.Eigenvectors;
+                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
+                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+
+                        foreach (var ellipsePoint in ellipse)
+                        {
+                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
+                            if (!eq.AlmostEquals(otherEq))
+                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
+                        }
+                    }
+                }
+
+                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
+            }
+
+            var (eq1, eq2, chaos, _ellipse) = Search();
+
+            var chart = new ChartForm(chaos, 0, 40, 0, 80);
+            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
+            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
+            chart.AddSeries("ellipse", _ellipse, Color.Red);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Крит. интенсивность. 5 зона: равновесие - 3ЗИК, D12 in (0.001855, 0.001909)
+        /// </summary>
+        public static ChartForm Test8_5(DeterministicModel dModel, StochasticModel sModel)
+        {
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Sigma3 = 0;
+            dModel.D21 = 0.0075;
+            sModel.D21 = 0.0075;
+
+            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            {
+                for (var d12 = 0.001682; d12 < 0.00173; d12 += 0.000001)
+                {
+                    for (var eps = 0.1; eps < 1; eps += 0.1)
+                    {
+                        dModel.D12 = d12;
+                        sModel.D12 = d12;
+                        sModel.Eps = eps;
+
+                        var eq = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 1).First();
+                        //var points = PhaseTrajectory.Get(sModel, eq, 0, 500);
+                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
+                        var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
+                        var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
+                        var eigenvectors = eigenvalueDecomposition.Eigenvectors;
+                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
+                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+
+                        foreach (var ellipsePoint in ellipse)
+                        {
+                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
+                            if (!eq.AlmostEquals(otherEq))
+                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
+                        }
+                    }
+                }
+
+                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
+            }
+
+            var (eq1, eq2, chaos, _ellipse) = Search();
+
+            var chart = new ChartForm(chaos, 0, 40, 0, 80);
+            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
+            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
+            chart.AddSeries("ellipse", _ellipse, Color.Red);
+
+            return chart;
+        }
     }
 }
