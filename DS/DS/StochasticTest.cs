@@ -496,46 +496,39 @@ namespace DS
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
 
-            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            IEnumerable<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
+                double d12Start, double d12End, double step = 0.000001)
             {
-                var eq = new PointX(18.3933152332743, 68.0626540593603);
-                for (var d12 = 0.002166; d12 < 0.002294; d12 += 0.000001)
+                var eq = new PointX(18, 68);
+                for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
-                    dModel.D12 = d12;
-                    sModel.D12 = d12;
-                    eq = PhaseTrajectory.Get(dModel, eq, 9999, 1).First();
-                    for (var eps = 0.1; eps < 1; eps += 0.1)
+                    dInnerModel.D12 = d12;
+                    sInnerModel.D12 = d12;
+                    eq = PhaseTrajectory.Get(dInnerModel, eq, 9999, 1).First();
+                    for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
-                        sModel.Eps = eps;
-                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
+                        sInnerModel.Eps = eps;
+                        var sensitivityMatrix = SensitivityMatrix.Get(sInnerModel, eq);
                         var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
                         var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
                         var eigenvectors = eigenvalueDecomposition.Eigenvectors;
                         var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
-                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sInnerModel.Eps).ToList();
 
                         foreach (var ellipsePoint in ellipse)
                         {
-                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
-
+                            var otherEq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9999, 1).First();
                             if (!eq.AlmostEquals(otherEq))
-                            {
-                                Console.WriteLine($"d12 = {d12}, eps = {eps}");
-                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
-                            }
+                                yield return (d12, eps);
                         }
                     }
                 }
-
-                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
             }
 
-            var (eq1, eq2, chaos, _ellipse) = Search();
+            var points = Search(dModel, sModel, 0.002166, 0.002294).ToList();
+            var chart = new ChartForm(points, 0.002166, 0.002294, 0, 2, markerSize: 4);
 
-            var chart = new ChartForm(chaos, 0, 40, 0, 80);
-            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
-            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
-            chart.AddSeries("ellipse", _ellipse, Color.Red);
+            PointSaver.SaveToFile("crit_intens\\zone3.txt", points);
 
             return chart;
         }
