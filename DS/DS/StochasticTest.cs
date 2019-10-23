@@ -518,8 +518,11 @@ namespace DS
                         foreach (var ellipsePoint in ellipse)
                         {
                             var otherEq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9999, 1).First();
+
                             if (!eq.AlmostEquals(otherEq))
                                 yield return (d12, eps);
+
+                            break;
                         }
                     }
                 }
