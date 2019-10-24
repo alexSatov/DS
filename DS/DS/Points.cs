@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace DS
 {
@@ -35,7 +36,7 @@ namespace DS
 
         public override string ToString()
         {
-            return $"({X1}, {X2})";
+            return $"({X1.ToString(CultureInfo.InvariantCulture)}, {X2.ToString(CultureInfo.InvariantCulture)})";
         }
 
         public void Deconstruct(out double x1, out double x2)

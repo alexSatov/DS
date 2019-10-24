@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using Accord.Math;
 using Accord.Math.Decompositions;
 
@@ -496,15 +497,18 @@ namespace DS
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
 
-            IEnumerable<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
+            IList<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
                 double d12Start, double d12End, double step = 0.000001)
             {
+                var result = new List<(double D12, double Eps)>();
                 var eq = new PointX(18, 68);
+
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
                     eq = PhaseTrajectory.Get(dInnerModel, eq, 9999, 1).First();
+
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
                         sInnerModel.Eps = eps;
@@ -520,11 +524,14 @@ namespace DS
                         {
                             var otherEq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9999, 1).First();
 
-                            if (eq.AlmostEquals(otherEq))
+                            if (otherEq.X1 < 28)
                                 continue;
 
                             finded = true;
-                            yield return (d12, eps);
+
+                            Console.WriteLine($"{eq}; {otherEq}; {d12}");
+                            result.Add((d12, eps));
+
                             break;
                         }
 
@@ -532,12 +539,26 @@ namespace DS
                             break;
                     }
                 }
+
+                return result;
             }
 
-            var points = Search(dModel, sModel, 0.002166, 0.002294).ToList();
+            var n = Environment.ProcessorCount;
+            var tasks = new Task<IList<(double D12, double Eps)>>[n];
+            var d12Part = (0.002294 - 0.002166) / n;
+
+            for (var i = 0; i < n; i++)
+            {
+                var d12Start = 0.002166 + d12Part * i;
+                var d12End = 0.002166 + d12Part * (i + 1);
+                tasks[i] = Task.Run(() => Search((DeterministicModel) dModel.Copy(),
+                    (StochasticModel) sModel.Copy(), d12Start, d12End));
+            }
+
+            var points = tasks.SelectMany(t => t.Result).ToList();
             var chart = new ChartForm(points, 0.002166, 0.002294, 0, 2, markerSize: 4);
 
-            PointSaver.SaveToFile("crit_intens\\zone3.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone3_1.txt", points);
 
             return chart;
         }
