@@ -508,6 +508,7 @@ namespace DS
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
                         sInnerModel.Eps = eps;
+                        var finded = false;
                         var sensitivityMatrix = SensitivityMatrix.Get(sInnerModel, eq);
                         var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
                         var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
@@ -519,11 +520,16 @@ namespace DS
                         {
                             var otherEq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9999, 1).First();
 
-                            if (!eq.AlmostEquals(otherEq))
-                                yield return (d12, eps);
+                            if (eq.AlmostEquals(otherEq))
+                                continue;
 
+                            finded = true;
+                            yield return (d12, eps);
                             break;
                         }
+
+                        if (finded)
+                            break;
                     }
                 }
             }
