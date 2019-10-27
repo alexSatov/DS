@@ -400,7 +400,7 @@ namespace DS
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
-                    attractor = PhaseTrajectory.GetWhile(dModel, attractor[attractor.Count - 1], 5000, 0.0001);
+                    attractor = PhaseTrajectory.GetWhile(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
 
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
@@ -417,7 +417,9 @@ namespace DS
 
                             finded = true;
 
-                            Console.WriteLine($"{attractor.Take(4)}; {otherAttractor}; {d12}");
+                            Console.WriteLine($"{string.Join(", ", attractor.Take(4))}; " +
+                                $"{string.Join(", ", otherAttractor)}; {d12}");
+
                             result.Add((d12, eps));
 
                             break;

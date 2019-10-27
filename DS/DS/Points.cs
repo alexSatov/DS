@@ -62,7 +62,7 @@ namespace DS
 
         public override string ToString()
         {
-            return $"({D12}, {D21})";
+            return $"({D12.ToString(CultureInfo.InvariantCulture)}, {D21.ToString(CultureInfo.InvariantCulture)})";
         }
 
         public void Deconstruct(out double d12, out double d21)
