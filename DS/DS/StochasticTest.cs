@@ -395,7 +395,8 @@ namespace DS
             {
                 const double step = 0.000001;
                 var result = new List<(double D12, double Eps)>();
-                var attractor = new List<PointX> {new PointX(20, 20)};
+                //var attractor = new List<PointX> { new PointX(12, 60) };
+                var attractor = new List<PointX> { new PointX(20, 40) };
 
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
@@ -403,8 +404,14 @@ namespace DS
                     sInnerModel.D12 = d12;
                     attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
 
-                    if (!ValidateZik(d12, attractor))
+                    //if (!ValidateZik(d12, attractor))
+                    //    continue;
+
+                    if (!Is3Cycle(attractor))
+                    {
+                        Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
                         continue;
+                    }
 
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
@@ -416,12 +423,12 @@ namespace DS
                         {
                             var otherAttractor = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                            if (!Is3Cycle(otherAttractor))
+                            if (Is3Cycle(otherAttractor))
                                 continue;
 
                             finded = true;
 
-                            Console.WriteLine($"{string.Join(", ", attractor.Take(4))}; " +
+                            Console.WriteLine($"{string.Join(", ", attractor.Take(4))};\r\n" +
                                 $"{string.Join(", ", otherAttractor)}; {d12}");
 
                             result.Add((d12, eps));
@@ -439,7 +446,7 @@ namespace DS
 
             var (points, chart) = Test8_Parallel(dModel, sModel, 0.00145, 0.001682, Search);
 
-            PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone1_2.txt", points);
 
             return chart;
         }
