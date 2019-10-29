@@ -207,7 +207,7 @@ namespace DS
             sModel.Sigma2 = 0;
             sModel.Sigma3 = 1;
 
-            var zik = PhaseTrajectory.GetWhile(dModel, new PointX(15.3484299431058, 59.4141662230043), 10000, 0.0001);
+            var zik = PhaseTrajectory.GetWhileNotConnect(dModel, new PointX(15.3484299431058, 59.4141662230043), 10000, 0.0001);
             var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
             var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
 
@@ -237,7 +237,7 @@ namespace DS
             sModel.Sigma2 = 1;
             sModel.Sigma3 = 0;
 
-            var zik = PhaseTrajectory.GetWhile(dModel, new PointX(20, 40), 10000, 0.0001);
+            var zik = PhaseTrajectory.GetWhileNotConnect(dModel, new PointX(20, 40), 10000, 0.0001);
             var zik1 = zik.Where((p, i) => i % 3 == 0).ToList();
             var zik2 = zik.Where((p, i) => i % 3 == 1).ToList();
             var zik3 = zik.Where((p, i) => i % 3 == 2).ToList();
@@ -395,16 +395,16 @@ namespace DS
             {
                 const double step = 0.000001;
                 var result = new List<(double D12, double Eps)>();
-                var attractor = new List<PointX> {new PointX(20, 60)};
+                var attractor = new List<PointX> {new PointX(20, 20)};
 
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
-                    attractor = PhaseTrajectory.GetWhile(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
+                    attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
 
-                    if (Is3Cycle(attractor))
-                        Console.WriteLine($"Error: 3-cycle on d12 = {d12}");
+                    if (!ValidateZik(d12, attractor))
+                        continue;
 
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
@@ -687,6 +687,23 @@ namespace DS
 
             return ScatterEllipse.Get(point, eigenvalues[0], eigenvalues[1],
                 eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), model.Eps).ToList();
+        }
+
+        private static bool ValidateZik(double d12, List<PointX> attractor)
+        {
+            if (Is3Cycle(attractor))
+            {
+                Console.WriteLine($"Error: 3-cycle on d12 = {d12}");
+                return false;
+            }
+
+            if (attractor.Count == 0)
+            {
+                Console.WriteLine($"Error: zik not build on d12 = {d12}");
+                return false;
+            }
+
+            return true;
         }
 
         private static void SetModels(DeterministicModel dModel, StochasticModel sModel)

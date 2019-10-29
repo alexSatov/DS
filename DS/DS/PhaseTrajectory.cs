@@ -25,7 +25,7 @@ namespace DS
             return points;
         }
 
-        public static List<PointX> GetWhile(Model model, PointX start, int skipCount, double eps, int k = 1)
+        public static List<PointX> GetWhileNotConnect(Model model, PointX start, int skipCount, double eps, int k = 1)
         {
             var points = new List<PointX>();
             var current = start;
@@ -41,6 +41,9 @@ namespace DS
             {
                 for (var i = 0; i < k; i++)
                     current = model.GetNextPoint(current);
+
+                if (points.Count > 800000)
+                    return new List<PointX>();
 
                 if (current.TendsToInfinity(model))
                     return new List<PointX> { PointX.Infinity };
