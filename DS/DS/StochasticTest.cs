@@ -402,7 +402,8 @@ namespace DS
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
-                    attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
+                    //attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
+                    attractor = PhaseTrajectory.Get(dInnerModel, attractor[attractor.Count - 1], 5000, 4);
 
                     //if (!ValidateZik(d12, attractor))
                     //    continue;
@@ -413,11 +414,14 @@ namespace DS
                         continue;
                     }
 
+                    attractor.RemoveAt(3);
+
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
                         sInnerModel.Eps = eps;
                         var finded = false;
-                        var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, attractor);
+                        //var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, attractor);
+                        var ellipse = GetEllipses(sInnerModel, attractor).SelectMany(l => l);
 
                         foreach (var ellipsePoint in ellipse)
                         {
@@ -685,15 +689,20 @@ namespace DS
             return (points, chart);
         }
 
-        private static IList<PointX> GetEllipse(StochasticModel model, PointX point)
+        private static IList<PointX> GetEllipse(StochasticModel model, PointX point, double[,] matrix = null)
         {
-            var sensitivityMatrix = SensitivityMatrix.Get(model, point);
+            var sensitivityMatrix = matrix ?? SensitivityMatrix.Get(model, point);
             var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
             var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
             var eigenvectors = eigenvalueDecomposition.Eigenvectors;
 
             return ScatterEllipse.Get(point, eigenvalues[0], eigenvalues[1],
                 eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), model.Eps).ToList();
+        }
+
+        private static IEnumerable<IList<PointX>> GetEllipses(StochasticModel model, IList<PointX> points)
+        {
+            return SensitivityMatrix.Get(model, points).Select((m, i) => GetEllipse(model, points[i], m));
         }
 
         private static bool ValidateZik(double d12, List<PointX> attractor)

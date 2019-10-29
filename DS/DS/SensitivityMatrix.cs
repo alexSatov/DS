@@ -13,7 +13,7 @@ namespace DS
         /// <param name="model">Модель</param>
         /// <param name="attractorPoints">Элементы аттрактора (равновесия или цикла)</param>
         /// <returns>Матрицы чувствительности для каждой точки аттрактора</returns>
-        public static IEnumerable<double[,]> Get(StochasticModel model, List<PointX> attractorPoints)
+        public static IEnumerable<double[,]> Get(StochasticModel model, IList<PointX> attractorPoints)
         {
             var fn = new List<double[,]>();
             var ftn = new List<double[,]>();
