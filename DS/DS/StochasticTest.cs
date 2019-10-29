@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Accord.Math;
 using Accord.Math.Decompositions;
 
@@ -394,13 +395,16 @@ namespace DS
             {
                 const double step = 0.000001;
                 var result = new List<(double D12, double Eps)>();
-                var attractor = new List<PointX> {new PointX(10, 40)};
+                var attractor = new List<PointX> {new PointX(20, 60)};
 
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
                     attractor = PhaseTrajectory.GetWhile(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
+
+                    if (Is3Cycle(attractor))
+                        Console.WriteLine($"Error: 3-cycle on d12 = {d12}");
 
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
@@ -696,7 +700,7 @@ namespace DS
 
         private static bool Is3Cycle(IList<PointX> points)
         {
-            return points[0].AlmostEquals(points[3]);
+            return points.Count == 4 && points[0].AlmostEquals(points[3]);
         }
     }
 }
