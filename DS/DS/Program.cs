@@ -18,7 +18,7 @@ namespace DS
 
             watch.Start();
             //var chart = DeterministicTest.Test13(deterministicModel);
-            var chart = StochasticTest.Test8_5(deterministicModel, stochasticModel);
+            var chart = StochasticTest.Test8_1(deterministicModel, stochasticModel);
             watch.Stop();
 
             Console.WriteLine(watch.Elapsed);

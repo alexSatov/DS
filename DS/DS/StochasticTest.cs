@@ -421,7 +421,7 @@ namespace DS
 
                     attractor.RemoveAt(3);
 
-                    for (var eps = 0.1; eps < 1.5; eps += 0.1)
+                    for (var eps = 0.1; eps < 1.5; eps += 0.02)
                     {
                         sInnerModel.Eps = eps;
                         var found = false;
@@ -707,7 +707,7 @@ namespace DS
 
             var (points, chart) = Test8_Parallel(dModel, sModel, 0.001855, 0.001909, Search);
 
-            PointSaver.SaveToFile("crit_intens\\zone1_2.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone5_1.txt", points);
 
             return chart;
         }
