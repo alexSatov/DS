@@ -198,20 +198,20 @@ namespace DS
         /// </summary>
         public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
         {
-            dModel.D12 = 0.00157;
-            sModel.D12 = 0.00157;
+            dModel.D12 = 0.001596;
+            sModel.D12 = 0.001596;
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
-            sModel.Eps = 0.05;
-            sModel.Sigma1 = 0;
-            sModel.Sigma2 = 0;
-            sModel.Sigma3 = 1;
+            sModel.Eps = 0.3;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Sigma3 = 0;
 
-            var zik = PhaseTrajectory.GetWhileNotConnect(dModel, new PointX(15.3484299431058, 59.4141662230043), 10000, 0.0001);
+            var zik = PhaseTrajectory.GetWhileNotConnect(dModel, new PointX(12, 60), 10000, 0.0001);
             var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
             var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
 
-            var chart = new ChartForm(chaosZik, 8, 24, 48, 80);
+            var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
             chart.AddSeries("zik", zik, Color.Black);
             chart.AddSeries("ellipse1", ellipse1, Color.Red);
             chart.AddSeries("ellipse2", ellipse2, Color.Red);
