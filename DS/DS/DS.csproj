@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attractor.cs" />
     <Compile Include="AttractorPool.cs" />
     <Compile Include="BifurcationDiagram.cs" />
     <Compile Include="ChartForm.cs">

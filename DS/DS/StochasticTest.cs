@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Accord.Math;
 using Accord.Math.Decompositions;
 
@@ -211,10 +210,16 @@ namespace DS
             var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
             var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
 
-            var chart = new ChartForm(chaosZik, 0, 40, 0, 80);
+            var chart = new ChartForm(chaosZik, 0, 32, 32, 80);
             chart.AddSeries("zik", zik, Color.Black);
             chart.AddSeries("ellipse1", ellipse1, Color.Red);
             chart.AddSeries("ellipse2", ellipse2, Color.Red);
+
+            var pool = AttractorPool.GetPoolFor2AttractorsParallel(dModel, Attractor.Is3Cycle, new PointX(0, 32),
+                new PointX(32, 80), 0.25, 0.4);
+
+            chart.AddSeries("pool_first", pool.First, Color.HotPink);
+            chart.AddSeries("pool_second", pool.Second, Color.Green);
 
             //PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
             //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
@@ -408,7 +413,7 @@ namespace DS
                     //if (!ValidateZik(d12, attractor))
                     //    continue;
 
-                    if (!Is3Cycle(attractor))
+                    if (!Attractor.Is3Cycle(attractor))
                     {
                         Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
                         continue;
@@ -427,7 +432,7 @@ namespace DS
                         {
                             var otherAttractor = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                            if (Is3Cycle(otherAttractor))
+                            if (Attractor.Is3Cycle(otherAttractor))
                                 continue;
 
                             finded = true;
@@ -482,7 +487,7 @@ namespace DS
                     //    continue;
                     //}
 
-                    if (!Is3Cycle(attractor))
+                    if (!Attractor.Is3Cycle(attractor))
                     {
                         Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
                         continue;
@@ -501,7 +506,7 @@ namespace DS
                         {
                             var otherAttractor = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                            if (Is3Cycle(otherAttractor))
+                            if (Attractor.Is3Cycle(otherAttractor))
                                 continue;
 
                             finded = true;
@@ -729,7 +734,7 @@ namespace DS
 
         private static bool ValidateZik(double d12, List<PointX> attractor)
         {
-            if (Is3Cycle(attractor))
+            if (Attractor.Is3Cycle(attractor))
             {
                 Console.WriteLine($"Error: 3-cycle on d12 = {d12}");
                 return false;
@@ -751,11 +756,6 @@ namespace DS
             sModel.Sigma3 = 0;
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
-        }
-
-        private static bool Is3Cycle(IList<PointX> points)
-        {
-            return points.Count == 4 && points[0].AlmostEquals(points[3]) && !points[0].AlmostEquals(points[1]);
         }
     }
 }
