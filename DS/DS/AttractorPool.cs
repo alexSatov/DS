@@ -79,7 +79,7 @@ namespace DS
             for (var x2 = leftBottom.X2; x2 <= rightTop.X2; x2 += step2)
             {
                 var startPoint = new PointX(x1, x2);
-                var attractor = PhaseTrajectory.Get(model, startPoint, 9000, 1000);
+                var attractor = PhaseTrajectory.Get(model, startPoint, 19000, 1000);
 
                 if (isFirstAttractor(attractor))
                     first.Add(startPoint);

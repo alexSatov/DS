@@ -280,6 +280,27 @@ namespace DS
             return chart;
         }
 
+        /// <summary>
+        /// Построение бассейнов
+        /// </summary>
+        public static ChartForm Test13(DeterministicModel model)
+        {
+            model.D12 = 0.001857;
+            model.D21 = 0.0075;
+
+            var pool = AttractorPool.GetPoolFor2AttractorsParallel(model, Attractor.IsEquilibrium, new PointX(0, 0),
+                new PointX(40, 80), 0.5, 0.8);
+
+            var chart = new ChartForm(pool.First, 0, 40, 0, 80, markerSize: 4);
+            chart.AddSeries("pool_second", pool.Second, Color.Orange, markerSize: 4);
+
+            //PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
+            //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
+            //PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
+
+            return chart;
+        }
+
         private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
             double ox1, double ox2, double oy1, double oy2)
         {

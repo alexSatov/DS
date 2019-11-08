@@ -193,7 +193,7 @@ namespace DS
         }
 
         /// <summary>
-        /// Построение однокусочного зика
+        /// Построение однокусочного зика [с бассейном]
         /// </summary>
         public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
         {
@@ -408,7 +408,7 @@ namespace DS
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
                     //attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
-                    attractor = PhaseTrajectory.Get(dInnerModel, attractor[attractor.Count - 1], 5000, 4);
+                    attractor = PhaseTrajectory.Get(dInnerModel, attractor[attractor.Count - 1], 9996, 4);
 
                     //if (!ValidateZik(d12, attractor))
                     //    continue;
@@ -424,7 +424,7 @@ namespace DS
                     for (var eps = 0.1; eps < 1.5; eps += 0.1)
                     {
                         sInnerModel.Eps = eps;
-                        var finded = false;
+                        var found = false;
                         //var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, attractor);
                         var ellipse = GetEllipses(sInnerModel, attractor).SelectMany(l => l);
 
@@ -435,7 +435,7 @@ namespace DS
                             if (Attractor.Is3Cycle(otherAttractor))
                                 continue;
 
-                            finded = true;
+                            found = true;
 
                             Console.WriteLine($"{string.Join(", ", attractor.Take(4))};\r\n" +
                                 $"{string.Join(", ", otherAttractor)}; {d12}");
@@ -445,7 +445,7 @@ namespace DS
                             break;
                         }
 
-                        if (finded)
+                        if (found)
                             break;
                     }
                 }
@@ -498,7 +498,7 @@ namespace DS
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
                         sInnerModel.Eps = eps;
-                        var finded = false;
+                        var found = false;
                         //var ellipse = GetEllipse(sInnerModel, attractor[3]);
                         var ellipse = GetEllipses(sInnerModel, attractor).SelectMany(l => l);
 
@@ -509,7 +509,7 @@ namespace DS
                             if (Attractor.Is3Cycle(otherAttractor))
                                 continue;
 
-                            finded = true;
+                            found = true;
 
                             Console.WriteLine($"{string.Join(", ", attractor.Take(4))};\r\n" +
                                 $"{string.Join(", ", otherAttractor)}; {d12}");
@@ -519,7 +519,7 @@ namespace DS
                             break;
                         }
 
-                        if (finded)
+                        if (found)
                             break;
                     }
                 }
@@ -557,7 +557,7 @@ namespace DS
                     for (var eps = 0.1; eps < 2; eps += 0.1)
                     {
                         sInnerModel.Eps = eps;
-                        var finded = false;
+                        var found = false;
                         var ellipse = GetEllipse(sInnerModel, eq);
 
                         foreach (var ellipsePoint in ellipse)
@@ -567,7 +567,7 @@ namespace DS
                             if (otherEq.X1 < 28)
                                 continue;
 
-                            finded = true;
+                            found = true;
 
                             Console.WriteLine($"{eq}; {otherEq}; {d12}");
                             result.Add((d12, eps));
@@ -575,7 +575,7 @@ namespace DS
                             break;
                         }
 
-                        if (finded)
+                        if (found)
                             break;
                     }
                 }
@@ -647,49 +647,67 @@ namespace DS
         /// </summary>
         public static ChartForm Test8_5(DeterministicModel dModel, StochasticModel sModel)
         {
-            sModel.Sigma1 = 1;
-            sModel.Sigma2 = 1;
-            sModel.Sigma3 = 0;
-            dModel.D21 = 0.0075;
-            sModel.D21 = 0.0075;
+            SetModels(dModel, sModel);
 
-            (PointX Eq1, PointX Eq2, IEnumerable<PointX> Chaos, IEnumerable<PointX> Ellipse) Search()
+            IList<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
+                double d12Start, double d12End)
             {
-                for (var d12 = 0.001682; d12 < 0.00173; d12 += 0.000001)
-                {
-                    for (var eps = 0.1; eps < 1; eps += 0.1)
-                    {
-                        dModel.D12 = d12;
-                        sModel.D12 = d12;
-                        sModel.Eps = eps;
+                const double step = 0.000001;
+                var result = new List<(double D12, double Eps)>();
+                var attractor = new List<PointX> { new PointX(16, 67) };
+                //var attractor = new List<PointX> { new PointX(20, 40) };
 
-                        var eq = PhaseTrajectory.Get(dModel, new PointX(20, 40), 9999, 1).First();
-                        //var points = PhaseTrajectory.Get(sModel, eq, 0, 500);
-                        var sensitivityMatrix = SensitivityMatrix.Get(sModel, eq);
-                        var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
-                        var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
-                        var eigenvectors = eigenvalueDecomposition.Eigenvectors;
-                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
-                            eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
+                for (var d12 = d12Start; d12 < d12End; d12 += step)
+                {
+                    dInnerModel.D12 = d12;
+                    sInnerModel.D12 = d12;
+                    attractor = PhaseTrajectory.Get(dInnerModel, attractor[attractor.Count - 1], 19998, 2);
+                    //attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
+
+                    //if (!ValidateZik(d12, attractor))
+                    //    continue;
+
+                    if (!Attractor.IsEquilibrium(attractor))
+                    {
+                        Console.WriteLine($"Error: eq not build on d12 = {d12}");
+                        continue;
+                    }
+
+                    for (var eps = 0.1; eps < 1.5; eps += 0.1)
+                    {
+                        sInnerModel.Eps = eps;
+                        var found = false;
+                        //var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, attractor);
+                        var ellipse = GetEllipse(sInnerModel, attractor[1]);
 
                         foreach (var ellipsePoint in ellipse)
                         {
-                            var otherEq = PhaseTrajectory.Get(dModel, ellipsePoint, 9999, 1).First();
-                            if (!eq.AlmostEquals(otherEq))
-                                return (eq, otherEq, PhaseTrajectory.Get(sModel, eq, 0, 500), ellipse);
+                            var otherAttractor = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 19998, 2);
+
+                            if (attractor[1].AlmostEquals(otherAttractor[1]))
+                                continue;
+
+                            found = true;
+
+                            Console.WriteLine($"{string.Join(", ", attractor)};\r\n" +
+                                $"{string.Join(", ", otherAttractor)}; {d12}");
+
+                            result.Add((d12, eps));
+
+                            break;
                         }
+
+                        if (found)
+                            break;
                     }
                 }
 
-                return (new PointX(0, 0), new PointX(0, 0), new List<PointX>(), new List<PointX>());
+                return result;
             }
 
-            var (eq1, eq2, chaos, _ellipse) = Search();
+            var (points, chart) = Test8_Parallel(dModel, sModel, 0.001855, 0.001909, Search);
 
-            var chart = new ChartForm(chaos, 0, 40, 0, 80);
-            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
-            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
-            chart.AddSeries("ellipse", _ellipse, Color.Red);
+            PointSaver.SaveToFile("crit_intens\\zone1_2.txt", points);
 
             return chart;
         }
@@ -734,15 +752,21 @@ namespace DS
 
         private static bool ValidateZik(double d12, List<PointX> attractor)
         {
+            if (attractor.Count == 0)
+            {
+                Console.WriteLine($"Error: zik not build on d12 = {d12}");
+                return false;
+            }
+
             if (Attractor.Is3Cycle(attractor))
             {
                 Console.WriteLine($"Error: 3-cycle on d12 = {d12}");
                 return false;
             }
 
-            if (attractor.Count == 0)
+            if (Attractor.IsEquilibrium(attractor))
             {
-                Console.WriteLine($"Error: zik not build on d12 = {d12}");
+                Console.WriteLine($"Error: eq on d12 = {d12}");
                 return false;
             }
 
