@@ -197,8 +197,8 @@ namespace DS
         /// </summary>
         public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
         {
-            dModel.D12 = 0.001596;
-            sModel.D12 = 0.001596;
+            dModel.D12 = 0.001597;
+            sModel.D12 = 0.001597;
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
             sModel.Eps = 0.3;
@@ -472,8 +472,8 @@ namespace DS
             {
                 const double step = 0.000001;
                 var result = new List<(double D12, double Eps)>();
-                //var attractor = new List<PointX> { new PointX(18, 65) };
-                var attractor = new List<PointX> { new PointX(23, 72) };
+                var attractor = new List<PointX> { new PointX(18, 65) };
+                //var attractor = new List<PointX> { new PointX(23, 72) };
 
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
@@ -481,37 +481,37 @@ namespace DS
                     sInnerModel.D12 = d12;
                     attractor = PhaseTrajectory.Get(dInnerModel, attractor[attractor.Count - 1], 9996, 4);
 
-                    //if (attractor.Count != 4 || !attractor[2].AlmostEquals(attractor[3]))
-                    //{
-                    //    Console.WriteLine($"Error: eq not build on d12 = {d12}");
-                    //    continue;
-                    //}
-
-                    if (!Attractor.Is3Cycle(attractor))
+                    if (attractor.Count != 4 || !attractor[2].AlmostEquals(attractor[3]))
                     {
-                        Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
+                        Console.WriteLine($"Error: eq not build on d12 = {d12}");
                         continue;
                     }
 
-                    attractor.RemoveAt(3);
+                    //if (!Attractor.Is3Cycle(attractor))
+                    //{
+                    //    Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
+                    //    continue;
+                    //}
 
-                    for (var eps = 0.1; eps < 2; eps += 0.1)
+                    //attractor.RemoveAt(3);
+
+                    for (var eps = 0.1; eps < 2; eps += 0.02)
                     {
                         sInnerModel.Eps = eps;
                         var found = false;
-                        //var ellipse = GetEllipse(sInnerModel, attractor[3]);
-                        var ellipse = GetEllipses(sInnerModel, attractor).SelectMany(l => l);
+                        var ellipse = GetEllipse(sInnerModel, attractor[3]);
+                        //var ellipse = GetEllipses(sInnerModel, attractor).SelectMany(l => l);
 
                         foreach (var ellipsePoint in ellipse)
                         {
                             var otherAttractor = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                            if (Attractor.Is3Cycle(otherAttractor))
+                            if (!Attractor.Is3Cycle(otherAttractor))
                                 continue;
 
                             found = true;
 
-                            Console.WriteLine($"{string.Join(", ", attractor.Take(4))};\r\n" +
+                            Console.WriteLine($"{string.Join(", ", attractor)};\r\n" +
                                 $"{string.Join(", ", otherAttractor)}; {d12}");
 
                             result.Add((d12, eps));
@@ -529,7 +529,7 @@ namespace DS
 
             var (points, chart) = Test8_Parallel(dModel, sModel, 0.001909, 0.001974, Search);
 
-            PointSaver.SaveToFile("crit_intens\\zone2_2.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone2_1.txt", points);
 
             return chart;
         }
