@@ -546,30 +546,37 @@ namespace DS
             {
                 const double step = 0.000001;
                 var result = new List<(double D12, double Eps)>();
-                var eq = new PointX(18, 68);
+                //var eq = new List<PointX> { new PointX(18, 68) };
+                var eq = new List<PointX> { new PointX(35.1513396288763, 42.157142188389) };
 
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
-                    eq = PhaseTrajectory.Get(dInnerModel, eq, 9999, 1).First();
+                    eq = PhaseTrajectory.Get(dInnerModel, eq[eq.Count - 1], 9998, 2);
 
-                    for (var eps = 0.1; eps < 2; eps += 0.1)
+                    if (!Attractor.IsEquilibrium(eq))
+                    {
+                        Console.WriteLine($"Error: eq not build on d12 = {d12}");
+                        continue;
+                    }
+
+                    for (var eps = 0.1; eps < 2; eps += 0.02)
                     {
                         sInnerModel.Eps = eps;
                         var found = false;
-                        var ellipse = GetEllipse(sInnerModel, eq);
+                        var ellipse = GetEllipse(sInnerModel, eq[1]);
 
                         foreach (var ellipsePoint in ellipse)
                         {
                             var otherEq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9999, 1).First();
 
-                            if (otherEq.X1 < 28)
+                            if (eq[1].AlmostEquals(otherEq))
                                 continue;
 
                             found = true;
 
-                            Console.WriteLine($"{eq}; {otherEq}; {d12}");
+                            Console.WriteLine($"{eq[1]}; {otherEq}; {d12}");
                             result.Add((d12, eps));
 
                             break;
@@ -585,7 +592,7 @@ namespace DS
 
             var (points, chart) = Test8_Parallel(dModel, sModel, 0.002166, 0.002294, Search);
 
-            PointSaver.SaveToFile("crit_intens\\zone3_1.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone3_2.txt", points);
 
             return chart;
         }
