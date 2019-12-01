@@ -301,6 +301,21 @@ namespace DS
             return chart;
         }
 
+		/// <summary>
+		/// Карта режимов для правой области
+		/// </summary>
+		public static ChartForm Test14(DeterministicModel model)
+		{
+			model.D12 = 0.0022;
+			model.D21 = 0.001;
+			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.0032, 0.01,
+				0.000005, 0.00005);
+
+			var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
+
+			return chart;
+		}
+
         private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
             double ox1, double ox2, double oy1, double oy2)
         {
