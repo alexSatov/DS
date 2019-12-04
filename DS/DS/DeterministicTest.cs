@@ -243,22 +243,24 @@ namespace DS
         /// </summary>
         public static ChartForm Test12(DeterministicModel model)
         {
-            model.D12 = 0.002382;
+            model.D12 = 0.00237;
             model.D21 = 0.0075;
 
-            var points = PhaseTrajectory.Get(model, new PointX(34, 61), 10000, 10000);
-            var (minX1, maxX1) = ((int) Math.Floor(points.Min(p => p.X1)), (int) Math.Ceiling(points.Max(p => p.X1)));
-            var lc = Enumerable.Range(0, (maxX1 - minX1) * 2)
-                .Select(i => minX1 + (double) i / 2)
-                .Where(x1 => x1 != 20)
+            const int lcPointsCount = 100;
+            var points = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
+            var lcPoints = points.Where(p => (int) Math.Round(p.X2) == 40).ToList();
+            var (minX1, maxX1) = (lcPoints.Min(p => p.X1), lcPoints.Max(p => p.X1));
+            var step = (maxX1 - minX1) / lcPointsCount;
+            var lc = Enumerable.Range(0, lcPointsCount + 1)
+                .Select(i => minX1 + i * step)
                 .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)))
                 .ToList();
 
             var currentLc = lc;
-            var chart = new ChartForm(points, 30, 40, 0, 80);
+            var chart = new ChartForm(points, 32, 40, 16, 64);
             chart.AddSeries(nameof(lc), lc, Color.Red, 5, SeriesChartType.FastLine);
 
-            for (var i = 1; i < 10; i++)
+            for (var i = 1; i < 9; i++)
             {
                 currentLc = Lc.GetNextLc(model, currentLc).ToList();
                 chart.AddSeries($"{i}lc", currentLc, Color.Red, 5, SeriesChartType.FastLine);
