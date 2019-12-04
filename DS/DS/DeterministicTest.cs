@@ -254,28 +254,15 @@ namespace DS
                 .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)))
                 .ToList();
 
-            var lc1 = Lc.GetNextLc(model, lc).ToList();
-            var lc2 = Lc.GetNextLc(model, lc1).ToList();
-            var lc3 = Lc.GetNextLc(model, lc2).ToList();
-            var lc4 = Lc.GetNextLc(model, lc3).ToList();
-            var lc5 = Lc.GetNextLc(model, lc4).ToList();
-            var lc6 = Lc.GetNextLc(model, lc5).ToList();
-            var lc7 = Lc.GetNextLc(model, lc6).ToList();
-            var lc8 = Lc.GetNextLc(model, lc7).ToList();
-            var lc9 = Lc.GetNextLc(model, lc8).ToList();
-
+            var currentLc = lc;
             var chart = new ChartForm(points, 30, 40, 0, 80);
-
             chart.AddSeries(nameof(lc), lc, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc1), lc1, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc2), lc2, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc3), lc3, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc4), lc4, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc5), lc5, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc6), lc6, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc7), lc7, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc8), lc8, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc9), lc9, Color.Red, 5, SeriesChartType.FastLine);
+
+            for (var i = 1; i < 10; i++)
+            {
+                currentLc = Lc.GetNextLc(model, currentLc).ToList();
+                chart.AddSeries($"{i}lc", currentLc, Color.Red, 5, SeriesChartType.FastLine);
+            }
 
             return chart;
         }
@@ -301,20 +288,20 @@ namespace DS
             return chart;
         }
 
-		/// <summary>
-		/// Карта режимов для правой области
-		/// </summary>
-		public static ChartForm Test14(DeterministicModel model)
-		{
-			model.D12 = 0.0022;
-			model.D21 = 0.001;
-			var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.0032, 0.01,
-				0.000005, 0.00005);
+        /// <summary>
+        /// Карта режимов для правой области
+        /// </summary>
+        public static ChartForm Test14(DeterministicModel model)
+        {
+            model.D12 = 0.0022;
+            model.D21 = 0.001;
+            var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.0032, 0.01,
+                0.0000025, 0.000025);
 
-			var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
+            var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
 
-			return chart;
-		}
+            return chart;
+        }
 
         private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,
             double ox1, double ox2, double oy1, double oy2)
