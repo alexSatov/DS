@@ -134,7 +134,7 @@ namespace DS
         public static ChartForm Test8(DeterministicModel model)
         {
             var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
-                new PointD(0.00159, 0.0072622), 0.00245, 0.008, 0.001, 0.000004, 0.0000017);
+                new PointD(0.00159, 0.0072622), new Rect(0, 0.00245, 0.007, 0.008), 0.001, 0.000004, 0.0000017);
             var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 
             return chart;
@@ -293,12 +293,26 @@ namespace DS
         /// <summary>
         /// Карта режимов для правой области
         /// </summary>
-        public static ChartForm Test14(DeterministicModel model)
+        public static ChartForm Test14_1(DeterministicModel model)
         {
             model.D12 = 0.0022;
             model.D21 = 0.001;
             var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.0032, 0.01,
                 0.0000025, 0.000025);
+
+            var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Карта режимов для правой области (полярный алгоритм)
+        /// синий - 4 цикл: D12=0.0025, D21=0.004; красный - 3 цикл: D12=0.0025, D21=0.0055
+        /// </summary>
+        public static ChartForm Test14_2(DeterministicModel model)
+        {
+            var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
+                new PointD(0.0025, 0.0055), new Rect(0.0022, 0.0032, 0.001, 0.01), 0.001, 0.000001, 0.00001);
 
             var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
 
