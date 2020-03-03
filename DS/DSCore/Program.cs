@@ -9,6 +9,7 @@ namespace DS
         [STAThread]
         public static void Main(string[] args)
         {
+            //Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -17,7 +18,7 @@ namespace DS
             var watch = new Stopwatch();
 
             watch.Start();
-            //var chart = DeterministicTest.Test7(deterministicModel);
+            //var chart = DeterministicTest.Test2(deterministicModel);
             var chart = StochasticTest.Test8_2(deterministicModel, stochasticModel);
             watch.Stop();
 

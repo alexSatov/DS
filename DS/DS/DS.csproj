@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Attractor.cs" />
     <Compile Include="AttractorPool.cs" />
+    <Compile Include="AttractorPoolChart.cs" />
     <Compile Include="BifurcationDiagram.cs" />
     <Compile Include="ChartForm.cs">
       <SubType>Form</SubType>
