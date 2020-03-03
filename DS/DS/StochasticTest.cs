@@ -8,6 +8,10 @@ using Accord.Math.Decompositions;
 
 namespace DS
 {
+    /// <summary>
+    /// 1, 1, 0 - аддитивный шум
+    /// 0, 0, 1 - параметрический шум
+    /// </summary>
     public static class StochasticTest
     {
         public static ChartForm Test1(DeterministicModel dModel, StochasticModel sModel)
@@ -197,11 +201,11 @@ namespace DS
         /// </summary>
         public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
         {
-            dModel.D12 = 0.001597;
-            sModel.D12 = 0.001597;
+            dModel.D12 = 0.00157;
+            sModel.D12 = 0.00157;
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
-            sModel.Eps = 0.3;
+            sModel.Eps = 0.1;
             sModel.Sigma1 = 1;
             sModel.Sigma2 = 1;
             sModel.Sigma3 = 0;
@@ -210,13 +214,13 @@ namespace DS
             var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
             var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
 
-            var chart = new ChartForm(chaosZik, 0, 32, 32, 80);
+            var chart = new ChartForm(chaosZik, 10, 22, 52, 75);
             chart.AddSeries("zik", zik, Color.Black);
             chart.AddSeries("ellipse1", ellipse1, Color.Red);
-            chart.AddSeries("ellipse2", ellipse2, Color.Red);
+            //chart.AddSeries("ellipse2", ellipse2, Color.Red);
 
-            var pool = AttractorPool.GetPoolFor2AttractorsParallel(dModel, Attractor.Is3Cycle, new PointX(0, 32),
-                new PointX(32, 80), 0.25, 0.4);
+            var pool = AttractorPool.GetPoolFor2AttractorsParallel(dModel, Attractor.Is3Cycle, new PointX(10, 52),
+                new PointX(22, 75), 0.25, 0.4);
 
             chart.AddSeries("pool_first", pool.First, Color.HotPink);
             chart.AddSeries("pool_second", pool.Second, Color.Green);
@@ -393,52 +397,43 @@ namespace DS
         /// </summary>
         public static ChartForm Test8_1(DeterministicModel dModel, StochasticModel sModel)
         {
+            const double step = 0.0000023; // 100 итераций
+
             SetModels(dModel, sModel);
 
-            IList<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
+            IList<(double D12, double Eps)> SearchLR(DeterministicModel dInnerModel, StochasticModel sInnerModel,
                 double d12Start, double d12End)
             {
-                const double step = 0.000002;
                 var result = new List<(double D12, double Eps)>();
-                //var attractor = new List<PointX> { new PointX(12, 60) };
-                var attractor = new List<PointX> { new PointX(20, 40) };
+                var zik = new List<PointX> { new PointX(12, 60) };
 
                 for (var d12 = d12Start; d12 < d12End; d12 += step)
                 {
                     dInnerModel.D12 = d12;
                     sInnerModel.D12 = d12;
-                    //attractor = PhaseTrajectory.GetWhileNotConnect(dInnerModel, attractor[attractor.Count - 1], 5000, 0.0001);
-                    attractor = PhaseTrajectory.Get(dInnerModel, attractor[attractor.Count - 1], 9996, 4);
+                    zik = PhaseTrajectory.GetWhileNotConnect(dInnerModel, zik[zik.Count - 1], 10000, 0.0001);
 
-                    //if (!ValidateZik(d12, attractor))
-                    //    continue;
-
-                    if (!Attractor.Is3Cycle(attractor))
-                    {
-                        Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
+                    if (!ValidateZik(d12, zik))
                         continue;
-                    }
-
-                    attractor.RemoveAt(3);
 
                     for (var eps = 0.1; eps < 1.5; eps += 0.02)
                     {
                         sInnerModel.Eps = eps;
                         var found = false;
-                        //var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, attractor);
-                        var ellipse = GetEllipses(sInnerModel, attractor).SelectMany(l => l);
+                        var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, zik);
 
                         foreach (var ellipsePoint in ellipse)
                         {
-                            var otherAttractor = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
+                            var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                            if (Attractor.Is3Cycle(otherAttractor))
+                            if (!Attractor.Is3Cycle(cycle3))
                                 continue;
 
                             found = true;
 
-                            Console.WriteLine($"{string.Join(", ", attractor.Take(4))};\r\n" +
-                                $"{string.Join(", ", otherAttractor)}; {d12}");
+                            Console.WriteLine($"zik: {string.Join(", ", zik.Take(4))};\r\n" +
+                                $"3-cycle: {string.Join(", ", cycle3)};\r\n" +
+                                $"d12: {d12}, eps: {eps}\r\n");
 
                             result.Add((d12, eps));
 
@@ -453,9 +448,61 @@ namespace DS
                 return result;
             }
 
-            var (points, chart) = Test8_Parallel(dModel, sModel, 0.00145, 0.001682, Search);
+            IList<(double D12, double Eps)> SearchRL(DeterministicModel dInnerModel, StochasticModel sInnerModel,
+                double d12Start, double d12End)
+            {
+                var result = new List<(double D12, double Eps)>();
+                var cycle3 = new List<PointX> { new PointX(20, 40) };
 
-            PointSaver.SaveToFile("crit_intens\\zone1_2.txt", points);
+                for (var d12 = d12Start; d12 < d12End; d12 += step)
+                {
+                    dInnerModel.D12 = d12;
+                    sInnerModel.D12 = d12;
+                    cycle3 = PhaseTrajectory.Get(dInnerModel, cycle3[cycle3.Count - 1], 9996, 4);
+
+                    if (!Attractor.Is3Cycle(cycle3))
+                    {
+                        Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
+                        continue;
+                    }
+
+                    cycle3.RemoveAt(3);
+
+                    for (var eps = 0.1; eps < 1.5; eps += 0.02)
+                    {
+                        sInnerModel.Eps = eps;
+                        var found = false;
+                        var ellipse = GetEllipses(sInnerModel, cycle3).SelectMany(l => l);
+
+                        foreach (var ellipsePoint in ellipse)
+                        {
+                            var zik = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
+
+                            if (Attractor.Is3Cycle(zik))
+                                continue;
+
+                            found = true;
+
+                            Console.WriteLine($"3-cycle: {string.Join(", ", cycle3)};\r\n" +
+                                $"zik: {string.Join(", ", zik)};\r\n" +
+                                $"d12: {d12}, eps: {eps}\r\n");
+
+                            result.Add((d12, eps));
+
+                            break;
+                        }
+
+                        if (found)
+                            break;
+                    }
+                }
+
+                return result;
+            }
+
+            var (points, chart) = Test8_Parallel(dModel, sModel, 0.00145, 0.001682, SearchLR);
+
+            PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
 
             return chart;
         }
