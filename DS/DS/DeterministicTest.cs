@@ -134,7 +134,7 @@ namespace DS
         public static ChartForm Test8(DeterministicModel model)
         {
             var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
-                new PointD(0.00159, 0.0072622), 0.00245, 0.008, 0.001, 0.000004, 0.0000017);
+                new PointD(0.00159, 0.0072622), new Rect(0, 0.00245, 0.007, 0.008), 0.001, 0.000004, 0.0000017);
             var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 
             return chart;
@@ -243,39 +243,28 @@ namespace DS
         /// </summary>
         public static ChartForm Test12(DeterministicModel model)
         {
-            model.D12 = 0.002382;
+            model.D12 = 0.00237;
             model.D21 = 0.0075;
 
-            var points = PhaseTrajectory.Get(model, new PointX(34, 61), 10000, 10000);
-            var (minX1, maxX1) = ((int) Math.Floor(points.Min(p => p.X1)), (int) Math.Ceiling(points.Max(p => p.X1)));
-            var lc = Enumerable.Range(0, (maxX1 - minX1) * 2)
-                .Select(i => minX1 + (double) i / 2)
-                .Where(x1 => x1 != 20)
+            const int lcPointsCount = 100;
+            var points = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
+            var lcPoints = points.Where(p => (int) Math.Round(p.X2) == 40).ToList();
+            var (minX1, maxX1) = (lcPoints.Min(p => p.X1), lcPoints.Max(p => p.X1));
+            var step = (maxX1 - minX1) / lcPointsCount;
+            var lc = Enumerable.Range(0, lcPointsCount + 1)
+                .Select(i => minX1 + i * step)
                 .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)))
                 .ToList();
 
-            var lc1 = Lc.GetNextLc(model, lc).ToList();
-            var lc2 = Lc.GetNextLc(model, lc1).ToList();
-            var lc3 = Lc.GetNextLc(model, lc2).ToList();
-            var lc4 = Lc.GetNextLc(model, lc3).ToList();
-            var lc5 = Lc.GetNextLc(model, lc4).ToList();
-            var lc6 = Lc.GetNextLc(model, lc5).ToList();
-            var lc7 = Lc.GetNextLc(model, lc6).ToList();
-            var lc8 = Lc.GetNextLc(model, lc7).ToList();
-            var lc9 = Lc.GetNextLc(model, lc8).ToList();
-
-            var chart = new ChartForm(points, 30, 40, 0, 80);
-
+            var currentLc = lc;
+            var chart = new ChartForm(points, 32, 40, 16, 64);
             chart.AddSeries(nameof(lc), lc, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc1), lc1, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc2), lc2, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc3), lc3, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc4), lc4, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc5), lc5, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc6), lc6, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc7), lc7, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc8), lc8, Color.Red, 5, SeriesChartType.FastLine);
-            chart.AddSeries(nameof(lc9), lc9, Color.Red, 5, SeriesChartType.FastLine);
+
+            for (var i = 1; i < 9; i++)
+            {
+                currentLc = Lc.GetNextLc(model, currentLc).ToList();
+                chart.AddSeries($"{i}lc", currentLc, Color.Red, 5, SeriesChartType.FastLine);
+            }
 
             return chart;
         }
@@ -297,6 +286,35 @@ namespace DS
             //PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
             //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
             //PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Карта режимов для правой области
+        /// </summary>
+        public static ChartForm Test14_1(DeterministicModel model)
+        {
+            model.D12 = 0.0022;
+            model.D21 = 0.001;
+            var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.0032, 0.01,
+                0.0000025, 0.000025);
+
+            var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Карта режимов для правой области (полярный алгоритм)
+        /// синий - 4 цикл: D12=0.0025, D21=0.004; красный - 3 цикл: D12=0.0025, D21=0.0055
+        /// </summary>
+        public static ChartForm Test14_2(DeterministicModel model)
+        {
+            var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
+                new PointD(0.0025, 0.0055), new Rect(0.0022, 0.0032, 0.001, 0.01), 0.001, 0.000001, 0.00001);
+
+            var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
 
             return chart;
         }

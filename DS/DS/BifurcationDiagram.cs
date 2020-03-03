@@ -236,12 +236,11 @@ namespace DS
         }
 
         public static D12VsD21Result GetD12VsD21ByPreviousPolar(Model model, PointX startX, PointD startD,
-            double d12End, double d21End, double angleStep, double step1, double step2,
+            Rect dArea, double angleStep, double step1, double step2,
             double startAngle = 0, double endAngle = 2 * Math.PI)
         {
             var result = new D12VsD21Result();
             var startVector = new Vector2D(1, 0);
-            var area = new Rect(model.D12, d12End, model.D21, d21End);
 
             for (var angle = startAngle; angle < endAngle; angle += angleStep)
             {
@@ -252,7 +251,7 @@ namespace DS
                 model.D12 = startD.D12;
                 model.D21 = startD.D21;
 
-                while (area.Contains(model.D12, model.D21))
+                while (dArea.Contains(model.D12, model.D21))
                 {
                     model.D12 += shiftVector.X;
                     model.D21 += shiftVector.Y;
@@ -265,7 +264,7 @@ namespace DS
         }
 
         public static D12VsD21Result GetD12VsD21ByPreviousPolarParallel(Model model, PointX startX, PointD startD,
-            double d12End, double d21End, double angleStep, double step1, double step2,
+            Rect dArea, double angleStep, double step1, double step2,
             double startAngle = 0, double endAngle = 2 * Math.PI)
         {
             var processorCount = Environment.ProcessorCount;
@@ -279,7 +278,7 @@ namespace DS
                 var endAnglePart = startAngle + anglePart * (i + 1);
 
                 tasks[i] = Task.Run(() =>
-                    GetD12VsD21ByPreviousPolar(copy, startX, startD, d12End, d21End, angleStep, step1, step2,
+                    GetD12VsD21ByPreviousPolar(copy, startX, startD, dArea, angleStep, step1, step2,
                         startAnglePart, endAnglePart));
             }
 
