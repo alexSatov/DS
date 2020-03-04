@@ -461,7 +461,7 @@ namespace DS
 
                 cycle3.RemoveAt(3);
 
-                for (var eps = 0.1; eps < 2; eps += 0.02)
+                for (var eps = 0.01; eps < 2; eps += 0.01)
                 {
                     sInnerModel.Eps = eps;
                     var ellipse = GetEllipses(sInnerModel, cycle3).SelectMany(l => l);
@@ -519,14 +519,15 @@ namespace DS
                     return default;
                 }
 
-                for (var eps = 0.1; eps < 2; eps += 0.02)
+                for (var eps = 0.01; eps < 2; eps += 0.01)
                 {
                     sInnerModel.Eps = eps;
                     var ellipse = GetEllipse(sInnerModel, eq[^1]);
 
                     foreach (var ellipsePoint in ellipse)
                     {
-                        var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
+                        var skipCount = d12 == 0.001909 ? 299996 : 9996;
+                        var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, skipCount, 4);
 
                         if (!Attractor.Is3Cycle(cycle3))
                             continue;
@@ -539,7 +540,7 @@ namespace DS
                     }
                 }
 
-                Console.WriteLine($"3-cycle not found with max eps on d12: {d12}\r\n");
+                Console.WriteLine($"3-cycle not found with max eps on d12: {d12.Format()}\r\n");
 
                 return default;
             }
@@ -585,14 +586,14 @@ namespace DS
                     }
                 }
 
-                Console.WriteLine($"eq not found with max eps on d12: {d12}\r\n");
+                Console.WriteLine($"eq not found with max eps on d12: {d12.Format()}\r\n");
 
                 return default;
             }
 
-            var (points, chart) = Test8_Parallel(0.001909, 0.001974, step, SearchLR);
+            var (points, chart) = Test8_Parallel(0.001909, 0.001974, step, SearchRL);
 
-            PointSaver.SaveToFile("crit_intens\\zone2_1.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone2_2.txt", points);
 
             return chart;
         }
@@ -623,7 +624,7 @@ namespace DS
                     return default;
                 }
 
-                for (var eps = 0.1; eps < 2; eps += 0.02)
+                for (var eps = 0.1; eps < 2; eps += 0.01)
                 {
                     sInnerModel.Eps = eps;
                     var ellipse = GetEllipse(sInnerModel, eq1[^1]);
@@ -643,7 +644,7 @@ namespace DS
                     }
                 }
 
-                Console.WriteLine($"eq2 not found with max eps on d12: {d12}\r\n");
+                Console.WriteLine($"eq2 not found with max eps on d12: {d12.Format()}\r\n");
 
                 return default;
             }
@@ -665,7 +666,7 @@ namespace DS
                     return default;
                 }
 
-                for (var eps = 0.1; eps < 2; eps += 0.02)
+                for (var eps = 0.01; eps < 2; eps += 0.01)
                 {
                     sInnerModel.Eps = eps;
                     var ellipse = GetEllipse(sInnerModel, eq2[^1]);
@@ -685,14 +686,14 @@ namespace DS
                     }
                 }
 
-                Console.WriteLine($"eq1 not found with max eps on d12: {d12}\r\n");
+                Console.WriteLine($"eq1 not found with max eps on d12: {d12.Format()}\r\n");
 
                 return default;
             }
 
-            var (points, chart) = Test8_Parallel(0.002166, 0.002294, step, SearchLR);
+            var (points, chart) = Test8_Parallel(0.002166, 0.002294, step, SearchRL);
 
-            PointSaver.SaveToFile("crit_intens\\zone3_1.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone3_2.txt", points);
 
             return chart;
         }
