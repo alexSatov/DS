@@ -43,6 +43,16 @@ namespace DS.MathStructures
             x1 = X1;
             x2 = X2;
         }
+
+        public static PointX operator +(PointX left, Vector2D right)
+        {
+            return new PointX(left.X + right.X, left.Y + right.Y);
+        }
+
+        public static PointX operator +(Vector2D left, PointX right)
+        {
+            return new PointX(left.X + right.X, left.Y + right.Y);
+        }
     }
 
     public struct PointD : IPoint

@@ -12,6 +12,7 @@
         <PackageReference Include="Accord" Version="3.8.0" />
         <PackageReference Include="Accord.Math" Version="3.8.0" />
         <PackageReference Include="Accord.Statistics" Version="3.8.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
         <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
         <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
     </ItemGroup>

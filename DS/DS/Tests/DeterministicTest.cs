@@ -242,6 +242,7 @@ namespace DS
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.002382)
+        /// Для дебага: Y: [32.65, 35], X: [33.36, 33.92]
         /// </summary>
         public static ChartForm Test12(DeterministicModel model)
         {
@@ -250,10 +251,10 @@ namespace DS
 
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
             var lcList = LcList.FromAttractor(model, attractor, 40, 9);
-            var chart = new ChartForm(attractor, 32, 40, 16, 64);
+            var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
 
             for (var i = 0; i < lcList.Count; i++)
-                chart.AddSeries($"lc{i}", lcList[i].Points, Color.Red, 5, SeriesChartType.FastLine);
+                chart.AddSeries($"lc{i}", lcList[i].Points, Color.Red, 5, SeriesChartType.Line);
 
             return chart;
         }
@@ -268,7 +269,7 @@ namespace DS
 
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
             var lcList = LcList.FromAttractor(model, attractor, 40, 9);
-            var chart = new ChartForm(attractor, 32, 40, 16, 64);
+            var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
             var i = 0;
 
             foreach (var borderSegment in lcList.GetBorderSegments())

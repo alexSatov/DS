@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using DS.Helpers;
 using DS.MathStructures;
 
 namespace DS
@@ -11,7 +13,7 @@ namespace DS
         {
         }
 
-        public IEnumerable<Segment> GetBorderSegments()
+        public List<Segment> GetBorderSegments()
         {
             var allPoints = this.SelectMany(lc => lc.Points).ToList();
             var allSegments = this.SelectMany(lc => lc.Segments).ToList();
@@ -19,37 +21,84 @@ namespace DS
             var minX = allPoints.Min(p => p.X) - 10;
             var maxY = allPoints.Max(p => p.Y) + 10;
             var minY = allPoints.Min(p => p.Y) - 10;
-
-            return allSegments
+            var halfBorderSegmentResults = new ConcurrentQueue<IntersectSearchResult>();
+            var borderSegments = allSegments
                 .AsParallel()
                 .Where(s =>
                 {
                     var leftStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(minX, s.Start.Y));
                     var leftEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(minX, s.End.Y));
+                    var leftIntersect = IntersectSearch(s, leftStartSegment, leftEndSegment);
 
-                    if (allSegments.TrueForAll(os => !leftStartSegment.Intersect(os) && !leftEndSegment.Intersect(os)))
+                    if (CheckEmptyIntersect(leftIntersect))
                         return true;
 
                     var upStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(s.Start.X, maxY));
                     var upEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(s.End.X, maxY));
+                    var upIntersect = IntersectSearch(s, upStartSegment, upEndSegment);
 
-                    if (allSegments.TrueForAll(os => !upStartSegment.Intersect(os) && !upEndSegment.Intersect(os)))
+                    if (CheckEmptyIntersect(upIntersect))
                         return true;
 
                     var rightStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(maxX, s.Start.Y));
                     var rightEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(maxX, s.End.Y));
+                    var rightIntersect = IntersectSearch(s, rightStartSegment, rightEndSegment);
 
-                    if (allSegments.TrueForAll(os => !rightStartSegment.Intersect(os) && !rightEndSegment.Intersect(os)))
+                    if (CheckEmptyIntersect(rightIntersect))
                         return true;
 
                     var downStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(s.Start.X, minY));
                     var downEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(s.End.X, minY));
+                    var downIntersect = IntersectSearch(s, downStartSegment, downEndSegment);
 
-                    if (allSegments.TrueForAll(os => !downStartSegment.Intersect(os) && !downEndSegment.Intersect(os)))
-                        return true;
+                    return CheckEmptyIntersect(downIntersect);
+                })
+                .ToList();
 
-                    return false;
-                });
+            bool CheckEmptyIntersect(IntersectSearchResult intersectSearchResult)
+            {
+                if (intersectSearchResult.NotFound)
+                    return true;
+
+                if (intersectSearchResult.HalfIntersect)
+                    halfBorderSegmentResults.Enqueue(intersectSearchResult);
+
+                return false;
+            }
+
+            IntersectSearchResult IntersectSearch(Segment segment, Segment startSegment, Segment endSegment)
+            {
+                var foundOnStart = allSegments.Any(s => s.GetIntersection(startSegment).IsIntersect);
+                var foundOnEnd = allSegments.Any(s => s.GetIntersection(endSegment).IsIntersect);
+
+                if (foundOnStart || foundOnEnd)
+                    return new IntersectSearchResult(foundOnStart, foundOnEnd, segment);
+
+                return new IntersectSearchResult(false, false, segment);
+            }
+
+            var halfBorderSegment = new HashSet<IntersectSearchResult>(halfBorderSegmentResults);
+
+            foreach (var halfBorderSegmentResult in halfBorderSegment)
+            {
+                var borderIntersection = borderSegments
+                    .Select(bs => bs.GetIntersection(halfBorderSegmentResult.Segment))
+                    .FirstOrDefault(ip => ip.IsIntersect);
+
+                if (!borderIntersection.Point.HasValue)
+                {
+                    Console.WriteLine($"Border intersection hasn't point: \r\n{halfBorderSegmentResult.ToJson()}");
+                    continue;
+                }
+
+                var start = halfBorderSegmentResult.FoundOnStart
+                    ? halfBorderSegmentResult.Segment.End
+                    : halfBorderSegmentResult.Segment.Start;
+
+                borderSegments.Add(new Segment(start, borderIntersection.Point.Value));
+            }
+
+            return borderSegments;
         }
 
         public static LcList FromAttractor(DeterministicModel model, IEnumerable<PointX> attractor, int x2,
@@ -80,6 +129,23 @@ namespace DS
             {
                 yield return currentLc;
                 currentLc = currentLc.GetNextLc(model);
+            }
+        }
+
+        private struct IntersectSearchResult
+        {
+            public bool FoundOnStart { get; }
+            public bool FoundOnEnd { get; }
+            public Segment Segment { get; }
+
+            public bool NotFound => !FoundOnStart && !FoundOnEnd;
+            public bool HalfIntersect => FoundOnStart != FoundOnEnd;
+
+            public IntersectSearchResult(bool foundOnStart, bool foundOnEnd, Segment segment)
+            {
+                FoundOnStart = foundOnStart;
+                FoundOnEnd = foundOnEnd;
+                Segment = segment;
             }
         }
     }
