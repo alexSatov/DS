@@ -273,7 +273,7 @@ namespace DS
 
             foreach (var borderSegment in lcList.GetBorderSegments())
                 chart.AddSeries($"lc{i++}", new[] { borderSegment.Start, borderSegment.End }, Color.Red, 5,
-                    SeriesChartType.FastLine);
+                    SeriesChartType.Line);
 
             return chart;
         }
@@ -382,27 +382,6 @@ namespace DS
                 chart.AddSeries(name, points, colors[i - 2]);
                 PointSaver.SaveToFile($"map\\{name}.txt", points);
             }
-        }
-
-        private static ChartForm GetAttractorPoolChart(Dictionary<PointX, HashSet<PointX>> attractorPoints,
-            double ox1, double ox2, double oy1, double oy2)
-        {
-            Console.WriteLine($"attractors count: {attractorPoints.Keys.Count}");
-
-            var chart = new ChartForm(new List<(double x, double y)>(), ox1, ox2, oy1, oy2);
-
-            foreach (var attractor in attractorPoints.Keys.OrderBy(p => p.X1))
-            {
-                var points = attractorPoints[attractor].Select(p => (p.X1, p.X2)).ToList();
-                var name = $"attractor {attractor}";
-
-                chart.AddSeries(name, points);
-                PointSaver.SaveToFile($"pool\\{name}.txt", points);
-            }
-
-            chart.AddSeries("attractors", attractorPoints.Keys.Select(p => (p.X1, p.X2)), Color.DeepPink);
-
-            return chart;
         }
     }
 }

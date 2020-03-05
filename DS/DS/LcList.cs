@@ -13,8 +13,43 @@ namespace DS
 
         public IEnumerable<Segment> GetBorderSegments()
         {
-            var segments = this.SelectMany(lc => lc.Segments).ToList();
-            return segments;
+            var allPoints = this.SelectMany(lc => lc.Points).ToList();
+            var allSegments = this.SelectMany(lc => lc.Segments).ToList();
+            var maxX = allPoints.Max(p => p.X) + 10;
+            var minX = allPoints.Min(p => p.X) - 10;
+            var maxY = allPoints.Max(p => p.Y) + 10;
+            var minY = allPoints.Min(p => p.Y) - 10;
+
+            return allSegments
+                .AsParallel()
+                .Where(s =>
+                {
+                    var leftStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(minX, s.Start.Y));
+                    var leftEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(minX, s.End.Y));
+
+                    if (allSegments.TrueForAll(os => !leftStartSegment.Intersect(os) && !leftEndSegment.Intersect(os)))
+                        return true;
+
+                    var upStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(s.Start.X, maxY));
+                    var upEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(s.End.X, maxY));
+
+                    if (allSegments.TrueForAll(os => !upStartSegment.Intersect(os) && !upEndSegment.Intersect(os)))
+                        return true;
+
+                    var rightStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(maxX, s.Start.Y));
+                    var rightEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(maxX, s.End.Y));
+
+                    if (allSegments.TrueForAll(os => !rightStartSegment.Intersect(os) && !rightEndSegment.Intersect(os)))
+                        return true;
+
+                    var downStartSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(s.Start.X, minY));
+                    var downEndSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(s.End.X, minY));
+
+                    if (allSegments.TrueForAll(os => !downStartSegment.Intersect(os) && !downEndSegment.Intersect(os)))
+                        return true;
+
+                    return false;
+                });
         }
 
         public static LcList FromAttractor(DeterministicModel model, IEnumerable<PointX> attractor, int x2,

@@ -9,7 +9,7 @@ namespace DS
         [STAThread]
         public static void Main(string[] args)
         {
-            //Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
