@@ -66,16 +66,11 @@ namespace DS
             Chart.Series.Add(series);
         }
 
-        public void AddSeries(string name, IEnumerable<PointX> points, Color? color = null, int markerSize = 2,
+        public void AddSeries<T>(string name, IEnumerable<T> points, Color? color = null, int markerSize = 2,
             SeriesChartType seriesChartType = SeriesChartType.FastPoint)
+            where T : IPoint
         {
-            AddSeries(name, points.Select(p => (p.X1, p.X2)), color, markerSize, seriesChartType);
-        }
-
-        public void AddSeries(string name, IEnumerable<PointD> points, Color? color = null, int markerSize = 2,
-            SeriesChartType seriesChartType = SeriesChartType.FastPoint)
-        {
-            AddSeries(name, points.Select(p => (p.D12, p.D21)), color, markerSize, seriesChartType);
+            AddSeries(name, points.Select(p => (p.X, p.Y)), color, markerSize, seriesChartType);
         }
     }
 }

@@ -248,25 +248,32 @@ namespace DS
             model.D12 = 0.00237;
             model.D21 = 0.0075;
 
-            const int lcPointsCount = 100;
-            var points = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcPoints = points.Where(p => (int) Math.Round(p.X2) == 40).ToList();
-            var (minX1, maxX1) = (lcPoints.Min(p => p.X1), lcPoints.Max(p => p.X1));
-            var step = (maxX1 - minX1) / lcPointsCount;
-            var lc = Enumerable.Range(0, lcPointsCount + 1)
-                .Select(i => minX1 + i * step)
-                .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)))
-                .ToList();
+            var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
+            var lcList = LcList.FromAttractor(model, attractor, 40, 9);
+            var chart = new ChartForm(attractor, 32, 40, 16, 64);
 
-            var currentLc = lc;
-            var chart = new ChartForm(points, 32, 40, 16, 64);
-            chart.AddSeries(nameof(lc), lc, Color.Red, 5, SeriesChartType.FastLine);
+            for (var i = 0; i < lcList.Count; i++)
+                chart.AddSeries($"lc{i}", lcList[i].Points, Color.Red, 5, SeriesChartType.FastLine);
 
-            for (var i = 1; i < 9; i++)
-            {
-                currentLc = Lc.GetNextLc(model, currentLc).ToList();
-                chart.AddSeries($"{i}lc", currentLc, Color.Red, 5, SeriesChartType.FastLine);
-            }
+            return chart;
+        }
+
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.002382). Выделяем рамку.
+        /// </summary>
+        public static ChartForm Test13(DeterministicModel model)
+        {
+            model.D12 = 0.00237;
+            model.D21 = 0.0075;
+
+            var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
+            var lcList = LcList.FromAttractor(model, attractor, 40, 9);
+            var chart = new ChartForm(attractor, 32, 40, 16, 64);
+            var i = 0;
+
+            foreach (var borderSegment in lcList.GetBorderSegments())
+                chart.AddSeries($"lc{i++}", new[] { borderSegment.Start, borderSegment.End }, Color.Red, 5,
+                    SeriesChartType.FastLine);
 
             return chart;
         }
@@ -274,7 +281,7 @@ namespace DS
         /// <summary>
         /// Построение бассейнов
         /// </summary>
-        public static ChartForm Test13(DeterministicModel model)
+        public static ChartForm Test14(DeterministicModel model)
         {
             model.D12 = 0.001857;
             model.D21 = 0.0075;
@@ -295,7 +302,7 @@ namespace DS
         /// <summary>
         /// Карта режимов для правой области
         /// </summary>
-        public static ChartForm Test14_1(DeterministicModel model)
+        public static ChartForm Test15_1(DeterministicModel model)
         {
             model.D12 = 0.0022;
             model.D21 = 0.001;
@@ -311,7 +318,7 @@ namespace DS
         /// Карта режимов для правой области (полярный алгоритм)
         /// синий - 4 цикл: D12=0.0025, D21=0.004; красный - 3 цикл: D12=0.0025, D21=0.0055
         /// </summary>
-        public static ChartForm Test14_2(DeterministicModel model)
+        public static ChartForm Test15_2(DeterministicModel model)
         {
             var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
                 new PointD(0.0025, 0.0055), new Rect(0.0022, 0.0032, 0.001, 0.01), 0.001, 0.000001, 0.00001);
