@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Accord.Math;
 using Accord.Math.Decompositions;
+using DS.MathStructures;
 
 namespace DS
 {

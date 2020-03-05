@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace DS
+namespace DS.MathStructures
 {
     public struct Vector2D
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public double X { get; }
+        public double Y { get; }
 
         public double Length => Math.Sqrt(X * X + Y * Y);
 
@@ -24,6 +24,24 @@ namespace DS
         public Vector2D Rotate(double angle)
         {
             return new Vector2D(X * Math.Cos(angle) - Y * Math.Sin(angle), X * Math.Sin(angle) + Y * Math.Cos(angle));
+        }
+
+        /// <summary>
+        /// Vector scalar product.
+        /// </summary>
+        public double Dot(Vector2D other)
+        {
+            return X * other.X + Y * other.Y;
+        }
+
+        /// <summary>
+        /// Vector cross product. Gives z-component of the result vector (x, y, z),
+        /// because in 3D-case it will be (0, 0, z) vector.
+        /// </summary>
+        /// <seealso cref="https://en.wikipedia.org/wiki/Cross_product#Matrix_notation"/>
+        public double Cross(Vector2D other)
+        {
+            return X * other.Y - Y * other.X;
         }
 
         public static Vector2D operator +(Vector2D left, Vector2D right)

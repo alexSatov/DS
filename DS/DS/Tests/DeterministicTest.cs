@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
+using DS.Helpers;
+using DS.MathStructures;
 
 namespace DS
 {

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
-namespace DS
+namespace DS.MathStructures
 {
     public struct PointX : IPoint
     {
-        public double X1 { get; set; }
-        public double X2 { get; set; }
+        public double X1 { get; }
+        public double X2 { get; }
 
         public double X => X1;
         public double Y => X2;
@@ -21,7 +20,7 @@ namespace DS
 
         public bool AlmostEquals(PointX other, double eps = 0.00001)
         {
-            return Math.Abs(X1 - other.X1) <= eps && Math.Abs(X2 - other.X2) <= eps;
+            return System.Math.Abs(X1 - other.X1) <= eps && System.Math.Abs(X2 - other.X2) <= eps;
         }
 
         public bool IsInfinity()
@@ -31,7 +30,7 @@ namespace DS
 
         public bool TendsToInfinity(Model model)
         {
-            return Math.Abs(X1) > model.MaxX || Math.Abs(X2) > model.MaxX;
+            return System.Math.Abs(X1) > model.MaxX || System.Math.Abs(X2) > model.MaxX;
         }
 
         public override string ToString()

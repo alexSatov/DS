@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace DS
+namespace DS.Helpers
 {
     public static class DoubleExtensions
     {

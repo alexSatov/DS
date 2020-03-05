@@ -1,4 +1,5 @@
 ﻿using Accord.Statistics.Distributions.Univariate;
+using DS.MathStructures;
 
 namespace DS
 {

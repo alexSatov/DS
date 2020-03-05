@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Accord.Math;
+using DS.MathStructures;
 using Matrix = Accord.Math.Matrix;
 
 namespace DS

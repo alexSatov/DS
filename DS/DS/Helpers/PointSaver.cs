@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DS.MathStructures;
 
-namespace DS
+namespace DS.Helpers
 {
     public static class PointSaver
     {

@@ -1,4 +1,4 @@
-﻿namespace DS
+﻿namespace DS.MathStructures
 {
     public struct Rect
     {

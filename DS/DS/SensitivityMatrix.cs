@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Accord.Math;
+using DS.MathStructures;
 
 namespace DS
 {

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Accord.Math;
 using Accord.Math.Decompositions;
+using DS.Helpers;
+using DS.MathStructures;
 
 namespace DS
 {
@@ -401,108 +403,94 @@ namespace DS
 
             SetModels(dModel, sModel);
 
-            IList<(double D12, double Eps)> SearchLR(DeterministicModel dInnerModel, StochasticModel sInnerModel,
-                double d12Start, double d12End)
+            (double D12, double Eps) SearchLR(double d12)
             {
-                var result = new List<(double D12, double Eps)>();
                 var zik = new List<PointX> { new PointX(12, 60) };
+                var dInnerModel = (DeterministicModel) dModel.Copy();
+                var sInnerModel = (StochasticModel) sModel.Copy();
+                dInnerModel.D12 = d12;
+                sInnerModel.D12 = d12;
 
-                for (var d12 = d12Start; d12 < d12End; d12 += step)
+                zik = PhaseTrajectory.GetWhileNotConnect(dInnerModel, zik[^1], 10000, 0.0001);
+
+                if (!ValidateZik(d12, zik))
                 {
-                    dInnerModel.D12 = d12;
-                    sInnerModel.D12 = d12;
-                    zik = PhaseTrajectory.GetWhileNotConnect(dInnerModel, zik[zik.Count - 1], 10000, 0.0001);
+                    Console.WriteLine($"zik not build on d12: {d12}\r\n");
+                    return default;
+                }
 
-                    if (!ValidateZik(d12, zik))
-                        continue;
+                for (var eps = 0.28; eps < 2; eps += 0.04)
+                {
+                    sInnerModel.Eps = eps;
+                    var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, zik);
 
-                    for (var eps = 0.1; eps < 1.5; eps += 0.02)
+                    foreach (var ellipsePoint in ellipse)
                     {
-                        sInnerModel.Eps = eps;
-                        var found = false;
-                        var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, zik);
+                        var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                        foreach (var ellipsePoint in ellipse)
-                        {
-                            var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
+                        if (!Attractor.Is3Cycle(cycle3))
+                            continue;
 
-                            if (!Attractor.Is3Cycle(cycle3))
-                                continue;
+                        Console.WriteLine($"zik: {zik.Take(4).Format()};\r\n" +
+                            $"3-cycle: {cycle3.Format()};\r\n" +
+                            $"d12: {d12.Format()}, eps: {eps.Format()}\r\n");
 
-                            found = true;
-
-                            Console.WriteLine($"zik: {zik.Take(4).Format()};\r\n" +
-                                $"3-cycle: {cycle3.Format()};\r\n" +
-                                $"d12: {d12}, eps: {eps}\r\n");
-
-                            result.Add((d12, eps));
-
-                            break;
-                        }
-
-                        if (found)
-                            break;
+                        return (d12, eps);
                     }
                 }
 
-                return result;
+                Console.WriteLine($"3-cycle not found with max eps on d12: {d12}\r\n");
+
+                return default;
             }
 
-            IList<(double D12, double Eps)> SearchRL(DeterministicModel dInnerModel, StochasticModel sInnerModel,
-                double d12Start, double d12End)
+            (double D12, double Eps) SearchRL(double d12)
             {
-                var result = new List<(double D12, double Eps)>();
                 var cycle3 = new List<PointX> { new PointX(20, 40) };
+                var dInnerModel = (DeterministicModel) dModel.Copy();
+                var sInnerModel = (StochasticModel) sModel.Copy();
+                dInnerModel.D12 = d12;
+                sInnerModel.D12 = d12;
 
-                for (var d12 = d12Start; d12 < d12End; d12 += step)
+                cycle3 = PhaseTrajectory.Get(dInnerModel, cycle3[^1], 9996, 4);
+
+                if (!Attractor.Is3Cycle(cycle3))
                 {
-                    dInnerModel.D12 = d12;
-                    sInnerModel.D12 = d12;
-                    cycle3 = PhaseTrajectory.Get(dInnerModel, cycle3[cycle3.Count - 1], 9996, 4);
+                    Console.WriteLine($"Error: 3-cycle not build on d12: {d12}\r\n" +
+                        $"result: {cycle3.Format()};\r\n");
+                    return default;
+                }
 
-                    if (!Attractor.Is3Cycle(cycle3))
+                cycle3.RemoveAt(3);
+
+                for (var eps = 0.01; eps < 2; eps += 0.01)
+                {
+                    sInnerModel.Eps = eps;
+                    var ellipse = GetEllipses(sInnerModel, cycle3).SelectMany(l => l);
+
+                    foreach (var ellipsePoint in ellipse)
                     {
-                        Console.WriteLine($"Error: 3-cycle not build on d12 = {d12}");
-                        continue;
-                    }
+                        var zik = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                    cycle3.RemoveAt(3);
+                        if (Attractor.Is3Cycle(zik))
+                            continue;
 
-                    for (var eps = 0.1; eps < 1.5; eps += 0.02)
-                    {
-                        sInnerModel.Eps = eps;
-                        var found = false;
-                        var ellipse = GetEllipses(sInnerModel, cycle3).SelectMany(l => l);
+                        Console.WriteLine($"3-cycle: {cycle3.Format()};\r\n" +
+                            $"zik: {zik.Format()};\r\n" +
+                            $"d12: {d12.Format()}, eps: {eps.Format()}\r\n");
 
-                        foreach (var ellipsePoint in ellipse)
-                        {
-                            var zik = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
-
-                            if (Attractor.Is3Cycle(zik))
-                                continue;
-
-                            found = true;
-
-                            Console.WriteLine($"3-cycle: {cycle3.Format()};\r\n" +
-                                $"zik: {zik.Format()};\r\n" +
-                                $"d12: {d12}, eps: {eps}\r\n");
-
-                            result.Add((d12, eps));
-
-                            break;
-                        }
-
-                        if (found)
-                            break;
+                        return (d12, eps);
                     }
                 }
 
-                return result;
+                Console.WriteLine($"zik not found with max eps on d12: {d12}\r\n");
+
+                return default;
             }
 
-            var (points, chart) = Test8_Parallel_Old(dModel, sModel, 0.00145, 0.001682, SearchLR);
+            var (points, chart) = Test8_Parallel(0.00145, 0.001682, step, SearchRL);
 
-            PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone1_2.txt", points);
 
             return chart;
         }
@@ -512,59 +500,51 @@ namespace DS
         /// </summary>
         public static ChartForm Test8_2(DeterministicModel dModel, StochasticModel sModel)
         {
-            const double step = 0.000001;
+            const double step = 0.000001; // 65 итераций
 
             SetModels(dModel, sModel);
 
-            IList<(double D12, double Eps)> SearchLR(DeterministicModel dInnerModel, StochasticModel sInnerModel,
-                double d12Start, double d12End)
+            (double D12, double Eps) SearchLR(double d12)
             {
-                var result = new List<(double D12, double Eps)>();
                 var eq = new List<PointX> { new PointX(18, 65) };
+                var dInnerModel = dModel.Copy();
+                var sInnerModel = (StochasticModel) sModel.Copy();
+                dInnerModel.D12 = d12;
+                sInnerModel.D12 = d12;
 
-                for (var d12 = d12Start; d12 < d12End; d12 += step)
+                eq = PhaseTrajectory.Get(dInnerModel, eq[^1], 9996, 4);
+
+                if (!Attractor.IsEquilibrium(eq))
                 {
-                    dInnerModel.D12 = d12;
-                    sInnerModel.D12 = d12;
-                    eq = PhaseTrajectory.Get(dInnerModel, eq[eq.Count - 1], 9996, 4);
+                    Console.WriteLine($"Error: eq not build on d12: {d12}\r\n" +
+                        $"result: {eq.Format()};\r\n");
+                    return default;
+                }
 
-                    if (!Attractor.IsEquilibrium(eq))
+                for (var eps = 0.01; eps < 2; eps += 0.01)
+                {
+                    sInnerModel.Eps = eps;
+                    var ellipse = GetEllipse(sInnerModel, eq[^1]);
+
+                    foreach (var ellipsePoint in ellipse)
                     {
-                        Console.WriteLine($"Error: eq not build on d12: {d12}\r\n" +
-                            $"result: {eq.Format()};\r\n");
-                        continue;
-                    }
+                        var skipCount = d12 == 0.001909 ? 299996 : 9996;
+                        var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, skipCount, 4);
 
-                    for (var eps = 0.1; eps < 2; eps += 0.02)
-                    {
-                        sInnerModel.Eps = eps;
-                        var found = false;
-                        var ellipse = GetEllipse(sInnerModel, eq[eq.Count - 1]);
+                        if (!Attractor.Is3Cycle(cycle3))
+                            continue;
 
-                        foreach (var ellipsePoint in ellipse)
-                        {
-                            var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
+                        Console.WriteLine($"eq: {eq.Format()};\r\n" +
+                            $"3-cycle: {cycle3.Format()};\r\n" +
+                            $"d12: {d12.Format()}, eps: {eps.Format()}\r\n");
 
-                            if (!Attractor.Is3Cycle(cycle3))
-                                continue;
-
-                            found = true;
-
-                            Console.WriteLine($"eq: {eq.Format()};\r\n" +
-                                $"3-cycle: {cycle3.Format()};\r\n" +
-                                $"d12: {d12}, eps: {eps}\r\n");
-
-                            result.Add((d12, eps));
-
-                            break;
-                        }
-
-                        if (found)
-                            break;
+                        return (d12, eps);
                     }
                 }
 
-                return result;
+                Console.WriteLine($"3-cycle not found with max eps on d12: {d12.Format()}\r\n");
+
+                return default;
             }
 
             (double D12, double Eps) SearchRL(double d12)
@@ -576,14 +556,14 @@ namespace DS
                 sInnerModel.D12 = d12;
 
                 cycle3 = d12 == 0.001909
-                    ? PhaseTrajectory.Get(dInnerModel, cycle3[cycle3.Count - 1], 199996, 4)
-                    : PhaseTrajectory.Get(dInnerModel, cycle3[cycle3.Count - 1], 9996, 4);
+                    ? PhaseTrajectory.Get(dInnerModel, cycle3[^1], 199996, 4)
+                    : PhaseTrajectory.Get(dInnerModel, cycle3[^1], 9996, 4);
 
                 if (!Attractor.Is3Cycle(cycle3))
                 {
                     Console.WriteLine($"Error: 3-cycle not build on d12: {d12}\r\n" +
                         $"result: {cycle3.Format()};\r\n");
-                    return default((double, double));
+                    return default;
                 }
 
                 cycle3.RemoveAt(3);
@@ -608,7 +588,9 @@ namespace DS
                     }
                 }
 
-                return default((double, double));
+                Console.WriteLine($"eq not found with max eps on d12: {d12.Format()}\r\n");
+
+                return default;
             }
 
             var (points, chart) = Test8_Parallel(0.001909, 0.001974, step, SearchRL);
@@ -623,58 +605,95 @@ namespace DS
         /// </summary>
         public static ChartForm Test8_3(DeterministicModel dModel, StochasticModel sModel)
         {
+            const double step = 0.0000012; // 106 итераций
+
             SetModels(dModel, sModel);
 
-            IList<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
-                double d12Start, double d12End)
+            (double D12, double Eps) SearchLR(double d12)
             {
-                const double step = 0.000001;
-                var result = new List<(double D12, double Eps)>();
-                //var eq = new List<PointX> { new PointX(18, 68) };
-                var eq = new List<PointX> { new PointX(35.1513396288763, 42.157142188389) };
+                var eq1 = new List<PointX> { new PointX(18, 68) };
+                var dInnerModel = dModel.Copy();
+                var sInnerModel = (StochasticModel) sModel.Copy();
+                dInnerModel.D12 = d12;
+                sInnerModel.D12 = d12;
 
-                for (var d12 = d12Start; d12 < d12End; d12 += step)
+                eq1 = PhaseTrajectory.Get(dInnerModel, eq1[0], 9998, 2);
+
+                if (!Attractor.IsEquilibrium(eq1))
                 {
-                    dInnerModel.D12 = d12;
-                    sInnerModel.D12 = d12;
-                    eq = PhaseTrajectory.Get(dInnerModel, eq[eq.Count - 1], 9998, 2);
+                    Console.WriteLine($"Error: eq1 not build on d12: {d12}\r\n" +
+                        $"result: {eq1.Format()};\r\n");
+                    return default;
+                }
 
-                    if (!Attractor.IsEquilibrium(eq))
+                for (var eps = 0.1; eps < 2; eps += 0.01)
+                {
+                    sInnerModel.Eps = eps;
+                    var ellipse = GetEllipse(sInnerModel, eq1[^1]);
+
+                    foreach (var ellipsePoint in ellipse)
                     {
-                        Console.WriteLine($"Error: eq not build on d12 = {d12}");
-                        continue;
-                    }
+                        var eq2 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9998, 2);
 
-                    for (var eps = 0.1; eps < 2; eps += 0.02)
-                    {
-                        sInnerModel.Eps = eps;
-                        var found = false;
-                        var ellipse = GetEllipse(sInnerModel, eq[1]);
+                        if (eq1[^1].AlmostEquals(eq2[^1]))
+                            continue;
 
-                        foreach (var ellipsePoint in ellipse)
-                        {
-                            var otherEq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9999, 1).First();
+                        Console.WriteLine($"eq1: {eq1.Format()};\r\n" +
+                            $"eq2: {eq2.Format()};\r\n" +
+                            $"d12: {d12.Format()}, eps: {eps.Format()}\r\n");
 
-                            if (eq[1].AlmostEquals(otherEq))
-                                continue;
-
-                            found = true;
-
-                            Console.WriteLine($"{eq[1]}; {otherEq}; {d12}");
-                            result.Add((d12, eps));
-
-                            break;
-                        }
-
-                        if (found)
-                            break;
+                        return (d12, eps);
                     }
                 }
 
-                return result;
+                Console.WriteLine($"eq2 not found with max eps on d12: {d12.Format()}\r\n");
+
+                return default;
             }
 
-            var (points, chart) = Test8_Parallel_Old(dModel, sModel, 0.002166, 0.002294, Search);
+            (double D12, double Eps) SearchRL(double d12)
+            {
+                var eq2 = new List<PointX> { new PointX(35.1513396288763, 42.157142188389) };
+                var dInnerModel = dModel.Copy();
+                var sInnerModel = (StochasticModel) sModel.Copy();
+                dInnerModel.D12 = d12;
+                sInnerModel.D12 = d12;
+
+                eq2 = PhaseTrajectory.Get(dInnerModel, eq2[0], 9998, 2);
+
+                if (!Attractor.IsEquilibrium(eq2))
+                {
+                    Console.WriteLine($"Error: eq2 not build on d12: {d12}\r\n" +
+                        $"result: {eq2.Format()};\r\n");
+                    return default;
+                }
+
+                for (var eps = 0.01; eps < 2; eps += 0.01)
+                {
+                    sInnerModel.Eps = eps;
+                    var ellipse = GetEllipse(sInnerModel, eq2[^1]);
+
+                    foreach (var ellipsePoint in ellipse)
+                    {
+                        var eq1 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9998, 2);
+
+                        if (eq2[^1].AlmostEquals(eq1[^1]))
+                            continue;
+
+                        Console.WriteLine($"eq2: {eq2.Format()};\r\n" +
+                            $"eq1: {eq1.Format()};\r\n" +
+                            $"d12: {d12.Format()}, eps: {eps.Format()}\r\n");
+
+                        return (d12, eps);
+                    }
+                }
+
+                Console.WriteLine($"eq1 not found with max eps on d12: {d12.Format()}\r\n");
+
+                return default;
+            }
+
+            var (points, chart) = Test8_Parallel(0.002166, 0.002294, step, SearchRL);
 
             PointSaver.SaveToFile("crit_intens\\zone3_2.txt", points);
 
@@ -884,9 +903,9 @@ namespace DS
 
         private static void SetModels(DeterministicModel dModel, StochasticModel sModel)
         {
-            sModel.Sigma1 = 1;
-            sModel.Sigma2 = 1;
-            sModel.Sigma3 = 0;
+            sModel.Sigma1 = 0;
+            sModel.Sigma2 = 0;
+            sModel.Sigma3 = 1;
             dModel.D21 = 0.0075;
             sModel.D21 = 0.0075;
         }
