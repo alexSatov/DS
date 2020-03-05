@@ -83,5 +83,16 @@ namespace DS.Tests
 
 			s1.Intersect(s2, includeBoundaryPoints, includeOverlap).Should().BeFalse();
 		}
+
+		[Test]
+		public void CheckIntersection_WhenTouch(
+			[Values(true, false)] bool includeBoundaryPoints,
+			[Values(true, false)] bool includeOverlap)
+		{
+			var s1 = new Segment(new PointX(3, 2), new PointX(4, 3));
+			var s2 = new Segment(new PointX(3, 4), new PointX(5, 2));
+
+			s1.Intersect(s2, includeBoundaryPoints, includeOverlap).Should().BeTrue();
+		}
 	}
 }
