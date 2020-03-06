@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DS.MathStructures
 {
@@ -77,6 +78,12 @@ namespace DS.MathStructures
                 : End.Equals(other.Start) || End.Equals(other.End)
                     ? End
                     : (PointX?) null;
+        }
+
+        public IEnumerable<PointX> GetBoundaryPoints()
+        {
+            yield return Start;
+            yield return End;
         }
     }
 }

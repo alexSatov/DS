@@ -19,5 +19,10 @@
         {
             return x >= Left && x <= Right && y >= Bottom && y <= Top;
         }
+
+        public bool Contains(IPoint point)
+        {
+            return Contains(point.X, point.Y);
+        }
     }
 }

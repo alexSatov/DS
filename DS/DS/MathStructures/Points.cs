@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace DS.MathStructures
 {
@@ -42,6 +43,14 @@ namespace DS.MathStructures
         {
             x1 = X1;
             x2 = X2;
+        }
+
+        public double GetDistanceWith(PointX other)
+        {
+            var x = other.X - X;
+            var y = other.Y - Y;
+
+            return Math.Sqrt(x * x + y * y);
         }
 
         public static PointX operator +(PointX left, Vector2D right)

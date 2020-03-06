@@ -252,9 +252,19 @@ namespace DS
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
             var lcList = LcList.FromAttractor(model, attractor, 40, 9);
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
+            //var rect = new Rect(33.36, 33.92, 32.65, 35);
 
             for (var i = 0; i < lcList.Count; i++)
                 chart.AddSeries($"lc{i}", lcList[i].Points, Color.Red, 5, SeriesChartType.Line);
+
+            //var segments = lcList
+            //    .SelectMany(lc => lc.Segments)
+            //    .Where(s => rect.Contains(s.Start) || rect.Contains(s.End))
+            //    .ToList();
+
+            //var maxX = segments.Max(s => Math.Max(s.Start.X, s.End.X));
+            //var segment = segments.First(s => s.Start.X == maxX || s.End.X == maxX);
+            //Console.WriteLine(segment.ToJson());
 
             return chart;
         }
@@ -272,9 +282,9 @@ namespace DS
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
             var i = 0;
 
-            foreach (var borderSegment in lcList.GetBorderSegments())
-                chart.AddSeries($"lc{i++}", new[] { borderSegment.Start, borderSegment.End }, Color.Red, 5,
-                    SeriesChartType.Line);
+            foreach (var borderSegment in lcList.GetBorderSegments(true))
+                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5,
+                    SeriesChartType.FastLine);
 
             return chart;
         }
