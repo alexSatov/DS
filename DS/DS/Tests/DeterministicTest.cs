@@ -279,12 +279,13 @@ namespace DS
 
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
             var lcList = LcList.FromAttractor(model, attractor, 40, 9);
+            var borderSegments = lcList.GetBorderSegments(true);
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
             var i = 0;
 
-            foreach (var borderSegment in lcList.GetBorderSegments(true))
-                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5,
-                    SeriesChartType.FastLine);
+            foreach (var borderSegment in borderSegments)
+                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    seriesChartType: SeriesChartType.FastLine);
 
             return chart;
         }
