@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms.DataVisualization.Charting;
 using Accord.Math;
 using Accord.Math.Decompositions;
 using DS.Helpers;
@@ -818,6 +819,48 @@ namespace DS
             var (points, chart) = Test8_Parallel_Old(dModel, sModel, 0.001855, 0.001909, Search);
 
             PointSaver.SaveToFile("crit_intens\\zone5_1.txt", points);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.00237) и эллипса рассеивания вокруг границы.
+        /// </summary>
+        public static ChartForm Test9(DeterministicModel dModel, StochasticModel sModel)
+        {
+            const double eps = 0.05;
+
+            dModel.D12 = 0.00237;
+            dModel.D21 = 0.0075;
+
+            sModel.D12 = 0.00237;
+            sModel.D21 = 0.0075;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Eps = eps;
+
+            var i = 0;
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(34, 61), 50000, 50000);
+            var attractor2 = PhaseTrajectory.Get(sModel, new PointX(34, 61), 50000, 50000);
+            var lcList = LcList.FromAttractor(dModel, attractor, 40, 9);
+            var borderSegments = lcList.GetBorderSegments();
+            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcList, eps);
+
+            var chart = new ChartForm(attractor2, 31, 40, 20, 55);
+
+            foreach (var borderSegment in borderSegments)
+                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    seriesChartType: SeriesChartType.FastLine);
+
+            //chart.AddSeries($"{nameof(ellipse)}1", ellipse[1], Color.Black, 5, SeriesChartType.Line);
+            //chart.AddSeries($"{nameof(ellipse)}2", ellipse[2], Color.DarkBlue, 5, SeriesChartType.Line);
+            //chart.AddSeries($"{nameof(ellipse)}3", ellipse[3], Color.Blue, 5, SeriesChartType.Line);
+            //chart.AddSeries($"{nameof(ellipse)}4", ellipse[4], Color.Green, 5, SeriesChartType.Line);
+            //chart.AddSeries($"{nameof(ellipse)}5", ellipse[5], Color.Gold, 5, SeriesChartType.Line);
+            //chart.AddSeries($"{nameof(ellipse)}6", ellipse[6], Color.Orange, 5, SeriesChartType.Line);
+            //chart.AddSeries($"{nameof(ellipse)}7", ellipse[7], Color.Violet, 5, SeriesChartType.Line);
+
+            chart.AddSeries("ellipse", ellipse.SelectMany(p => p.Value), Color.Green, 5, SeriesChartType.Point);
 
             return chart;
         }

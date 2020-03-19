@@ -98,7 +98,7 @@ namespace DS
         /// Построение эллипса рассеивания для хаоса, описанного критическими линиями.
         /// </summary>
         public static Dictionary<int, List<PointX>> GetForChaosLc(DeterministicModel model, LcList lcList,
-            double eps = 0.01, double kq = 0.01)
+            double eps = 0.01, double kq = 0.001)
         {
             var borderSegments = lcList.GetBorderSegments(false);
             var lcEllipsePoints = GetLcEllipseMap(model, lcList, eps, kq);
@@ -110,8 +110,8 @@ namespace DS
                 .OrderBy(r => r.LcIndex)
                 .ThenBy(r => r.Index)
                 .Select(r => (r.LcIndex, lcEllipsePoints[r.LcIndex, r.Index]))
-				.GroupBy(t => t.LcIndex)
-				.ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToList());
+                .GroupBy(t => t.LcIndex)
+                .ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToList());
         }
 
         private static PointX[,] GetLcEllipseMap(DeterministicModel model, LcList lcList, double eps, double kq)

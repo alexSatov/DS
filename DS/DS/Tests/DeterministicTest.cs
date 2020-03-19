@@ -257,7 +257,7 @@ namespace DS
             chart.AddSeries("lc2", lcList[2], Color.DarkBlue, 5, SeriesChartType.Line);
             chart.AddSeries("lc3", lcList[3], Color.Blue, 5, SeriesChartType.Line);
             chart.AddSeries("lc4", lcList[4], Color.Green, 5, SeriesChartType.Line);
-            chart.AddSeries("lc5", lcList[5], Color.Yellow, 5, SeriesChartType.Line);
+            chart.AddSeries("lc5", lcList[5], Color.Gold, 5, SeriesChartType.Line);
             chart.AddSeries("lc6", lcList[6], Color.Orange, 5, SeriesChartType.Line);
             chart.AddSeries("lc7", lcList[7], Color.Violet, 5, SeriesChartType.Line);
             chart.AddSeries("lc8", lcList[8], Color.DarkViolet, 5, SeriesChartType.Line);
@@ -298,38 +298,6 @@ namespace DS
                 .Select(p => lcList[p.LcIndex][p.Index]);
 
             chart.AddSeries(nameof(orderedBorderPoints), series, Color.Black, 5);
-
-            return chart;
-        }
-
-        /// <summary>
-        /// Построение критических линий (для хаоса d12 = 0.00237) и эллипса рассеивания вокруг границы.
-        /// </summary>
-        public static ChartForm Test14(DeterministicModel model)
-        {
-            model.D12 = 0.00237;
-            model.D21 = 0.0075;
-
-            var i = 0;
-            var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcList.FromAttractor(model, attractor, 40, 9);
-            var borderSegments = lcList.GetBorderSegments();
-            var ellipse = ScatterEllipse.GetForChaosLc(model, lcList);
-
-            var chart = new ChartForm(attractor, 32, 40, 23, 52);
-
-            chart.AddSeries($"{nameof(ellipse)}1", ellipse[1], Color.Black, 5, SeriesChartType.Line);
-            chart.AddSeries($"{nameof(ellipse)}2", ellipse[2], Color.DarkBlue, 5, SeriesChartType.Line);
-            chart.AddSeries($"{nameof(ellipse)}3", ellipse[3], Color.Blue, 5, SeriesChartType.Line);
-            chart.AddSeries($"{nameof(ellipse)}4", ellipse[4], Color.Green, 5, SeriesChartType.Line);
-            chart.AddSeries($"{nameof(ellipse)}5", ellipse[5], Color.Yellow, 5, SeriesChartType.Line);
-            chart.AddSeries($"{nameof(ellipse)}6", ellipse[6], Color.Orange, 5, SeriesChartType.Line);
-            chart.AddSeries($"{nameof(ellipse)}7", ellipse[7], Color.Violet, 5, SeriesChartType.Line);
-            //chart.AddSeries($"{nameof(ellipse)}8", ellipse[8], Color.DarkViolet, 5, SeriesChartType.Line);
-
-            foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-                    seriesChartType: SeriesChartType.FastLine);
 
             return chart;
         }
