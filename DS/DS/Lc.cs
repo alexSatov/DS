@@ -4,22 +4,19 @@ using DS.MathStructures;
 
 namespace DS
 {
-    public class Lc
+    public class Lc : List<PointX>
     {
-        public IList<PointX> Points { get; }
-
         public IEnumerable<Segment> Segments =>
-            Enumerable.Range(0, Points.Count - 1)
-                .Select(i => new Segment(Points[i], Points[i + 1]));
+            Enumerable.Range(0, Count - 1)
+                .Select(i => new Segment(this[i], this[i + 1]));
 
-        public Lc(IList<PointX> points)
+        public Lc(IEnumerable<PointX> points) : base(points)
         {
-            Points = points;
         }
 
         public Lc GetNextLc(DeterministicModel model)
         {
-            return new Lc(Points.Select(model.GetNextPoint).ToList());
+            return new Lc(this.Select(model.GetNextPoint));
         }
 
         public static double GetX2(DeterministicModel model, double x1)

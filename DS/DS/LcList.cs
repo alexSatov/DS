@@ -12,37 +12,26 @@ namespace DS
         {
         }
 
-        public List<Segment> GetBorderSegments(bool handleHalfBorders = false)
+        public (bool Found, int LcIndex, int Index) Find(PointX point)
         {
-            const double max = double.MaxValue / 2;
-            const double min = double.MinValue / 2;
+            for (var lcIndex = 0; lcIndex < Count; lcIndex++)
+            {
+                var index = this[lcIndex].IndexOf(point);
+                if (index > 0)
+                    return (true, lcIndex, index);
+            }
 
+            return (false, -1, -1);
+        }
+
+        public List<Segment> GetBorderSegments(bool handleHalfBorders = true)
+        {
             var allSegments = this.SelectMany(lc => lc.Segments).ToList();
             var halfBorderSegmentResults = new ConcurrentQueue<IntersectSearchResult>();
-            var directions = Enum.GetValues(typeof(Direction)).Cast<Direction>().ToList();
             var borderSegments = allSegments
                 .AsParallel()
-                .Where(s => (from direction in directions
-                        let startX = direction == Direction.Left ? min : direction == Direction.Right ? max : s.Start.X
-                        let endX = direction == Direction.Left ? min : direction == Direction.Right ? max : s.End.X
-                        let startY = direction == Direction.Down ? min : direction == Direction.Up ? max : s.Start.Y
-                        let endY = direction == Direction.Down ? min : direction == Direction.Up ? max : s.End.Y
-                        let startSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(startX, startY))
-                        let endSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(endX, endY))
-                        select IntersectSearch(s, startSegment, endSegment))
-                    .Any(CheckEmptyIntersect))
+                .Where(s => IsBorderSegment(s, allSegments, CheckEmptyIntersect))
                 .ToList();
-
-            IntersectSearchResult IntersectSearch(Segment segment, Segment startSegment, Segment endSegment)
-            {
-                var foundOnStart = allSegments.Any(s => s.GetIntersection(startSegment).IsIntersect);
-                var foundOnEnd = allSegments.Any(s => s.GetIntersection(endSegment).IsIntersect);
-
-                if (foundOnStart || foundOnEnd)
-                    return new IntersectSearchResult(foundOnStart, foundOnEnd, segment);
-
-                return new IntersectSearchResult(false, false, segment);
-            }
 
             bool CheckEmptyIntersect(IntersectSearchResult intersectSearchResult)
             {
@@ -61,6 +50,26 @@ namespace DS
             return borderSegments;
         }
 
+        public bool IsBorderSegment(Segment s, IList<Segment> allSegments,
+            Func<IntersectSearchResult, bool> checkEmptyIntersect = null)
+        {
+            const double max = double.MaxValue / 2;
+            const double min = double.MinValue / 2;
+
+            if (checkEmptyIntersect == null)
+                checkEmptyIntersect = r => r.NotFound;
+
+            return (from direction in Directions.All
+                    let startX = Directions.ChooseHorizontally(direction, min, max, s.Start.X)
+                    let endX = Directions.ChooseHorizontally(direction, min, max, s.End.X)
+                    let startY = Directions.ChooseVertically(direction, min, max, s.Start.Y)
+                    let endY = Directions.ChooseVertically(direction, min, max, s.End.Y)
+                    let startSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(startX, startY))
+                    let endSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(endX, endY))
+                    select IntersectSearch(s, startSegment, endSegment, allSegments))
+                .Any(checkEmptyIntersect);
+        }
+
         public static LcList FromAttractor(DeterministicModel model, IEnumerable<PointX> attractor, int x2,
             int count, int lcPointsCount = 100, double eps = 0.1)
         {
@@ -69,8 +78,7 @@ namespace DS
             var step = (maxX1 - minX1) / lcPointsCount;
             var lc0Points = Enumerable.Range(0, lcPointsCount + 1)
                 .Select(i => minX1 + i * step)
-                .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)))
-                .ToList();
+                .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)));
 
             var lc0 = new Lc(lc0Points);
 
@@ -90,6 +98,18 @@ namespace DS
                 yield return currentLc;
                 currentLc = currentLc.GetNextLc(model);
             }
+        }
+
+        private IntersectSearchResult IntersectSearch(Segment segment, Segment startSegment, Segment endSegment,
+            IList<Segment> allSegments)
+        {
+            var foundOnStart = allSegments.Any(s => s.GetIntersection(startSegment).IsIntersect);
+            var foundOnEnd = allSegments.Any(s => s.GetIntersection(endSegment).IsIntersect);
+
+            if (foundOnStart || foundOnEnd)
+                return new IntersectSearchResult(foundOnStart, foundOnEnd, segment);
+
+            return new IntersectSearchResult(false, false, segment);
         }
 
         private static void AddHalfBorderSegments(ICollection<Segment> borderSegments,
@@ -170,7 +190,7 @@ namespace DS
             }
         }
 
-        private struct IntersectSearchResult
+        public struct IntersectSearchResult
         {
             public bool FoundOnStart { get; }
             public bool FoundOnEnd { get; }

@@ -94,6 +94,102 @@ namespace DS
             return GetMu(pv, p, f, s, q, phi).ToList();
         }
 
+        /// <summary>
+        /// Построение эллипса рассеивания для хаоса, описанного критическими линиями.
+        /// </summary>
+        public static Dictionary<int, List<PointX>> GetForChaosLc(DeterministicModel model, LcList lcList,
+            double eps = 0.01, double kq = 0.01)
+        {
+            var borderSegments = lcList.GetBorderSegments(false);
+            var lcEllipsePoints = GetLcEllipseMap(model, lcList, eps, kq);
+            var borderPoints = new HashSet<PointX>(borderSegments.SelectMany(s => s.GetBoundaryPoints()));
+
+            return borderPoints
+                .Select(lcList.Find)
+                .Where(r => r.Found)
+                .OrderBy(r => r.LcIndex)
+                .ThenBy(r => r.Index)
+                .Select(r => (r.LcIndex, lcEllipsePoints[r.LcIndex, r.Index]))
+				.GroupBy(t => t.LcIndex)
+				.ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToList());
+        }
+
+        private static PointX[,] GetLcEllipseMap(DeterministicModel model, LcList lcList, double eps, double kq)
+        {
+            var keps = 3 * eps;
+            var kf11 = 20 * model.A1;
+            var kf12 = 20 * model.D12;
+            var kf21 = 40 * model.D21;
+            var kf22 = 40 * model.A2;
+            var allSegments = lcList.SelectMany(lc => lc.Segments).ToList();
+
+            double[,] F(PointX point)
+            {
+                return new[,]
+                {
+                    { kf11 * (20 - point.X1), kf12 * (40 - point.X2) },
+                    { kf21 * (20 - point.X1), kf22 * (40 - point.X2) }
+                };
+            }
+
+            PointX X(PointX point, double mu, double[] nu)
+            {
+                var v = nu.Multiply(keps * Math.Sqrt(mu));
+                return new PointX(point.X1 + v[0], point.X2 + v[1]);
+            }
+
+            double[] Nu(PointX point, double[] q)
+            {
+                var n1 = new[] { q[1], -q[0] };
+                var n2 = new[] { -q[1], q[0] };
+                var d1 = n1.Multiply(kq);
+                var d2 = n2.Multiply(kq);
+                var s1 = new Segment(point, new PointX(point.X1 + d1[0], point.X2 + d1[1]));
+
+                return lcList.IsBorderSegment(s1, allSegments) ? n1.Normalize() : n2.Normalize();
+            }
+
+            var s = Matrix.Identity(2);
+            var (n, m) = (lcList.Count, lcList[0].Count);
+            var map = new PointX[n, m];
+            var mu = new double[n, m];
+            var nu = new Dictionary<(int, int), double[]>();
+            var q = new Dictionary<(int, int), double[]>();
+            var f = new Dictionary<(int, int), double[,]>();
+            var w = new Dictionary<(int, int), double[,]>();
+
+            for (var j = 0; j < m; j++)
+            {
+                var point = lcList[0][j];
+                q[(0, j)] = new double[] { 1, 0 };
+                f[(0, j)] = F(point);
+            }
+
+            for (var j = 0; j < m; j++)
+            {
+                q[(1, j)] = f[(0, j)].Dot(q[(0, j)]);
+                f[(1, j)] = F(lcList[1][j]);
+                nu[(1, j)] = Nu(lcList[1][j], q[(1, j)]);
+                mu[1, j] = nu[(1, j)].Dot(s).Dot(nu[(1, j)]);
+                w[(1, j)] = nu[(1, j)].Multiply(mu[1, j]).Outer(nu[(1, j)]);
+                map[1, j] = X(lcList[1][j], mu[1, j], nu[(1, j)]);
+            }
+
+            for (var i = 2; i < n; i++)
+            for (var j = 0; j < m; j++)
+            {
+                q[(i, j)] = f[(i - 1, j)].Dot(q[(i - 1, j)]);
+                f[(i, j)] = F(lcList[i][j]);
+                nu[(i, j)] = Nu(lcList[i][j], q[(i, j)]);
+                var st = f[(i - 1, j)].Dot(w[(i - 1, j)]).Dot(f[(i - 1, j)].Transpose()).Add(s);
+                mu[i, j] = nu[(i, j)].Dot(st).Dot(nu[(i, j)]);
+                w[(i, j)] = nu[(i, j)].Multiply(mu[i, j]).Outer(nu[(i, j)]);
+                map[i, j] = X(lcList[i][j], mu[i, j], nu[(i, j)]);
+            }
+
+            return map;
+        }
+
         private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel model, List<PointX> zik,
             List<double[]> pv, double qu)
         {
