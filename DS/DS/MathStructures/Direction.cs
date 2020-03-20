@@ -1,36 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace DS.MathStructures
 {
-    public enum Direction
+    public static class Direction
     {
-        Up, Right, Down, Left
+        public static readonly Vector2D Up = new Vector2D(0, 1);
+        public static readonly Vector2D UpRight = new Vector2D(1, 1);
+        public static readonly Vector2D Right = new Vector2D(1, 0);
+        public static readonly Vector2D DownRight = new Vector2D(1, -1);
+        public static readonly Vector2D Down = new Vector2D(0, -1);
+        public static readonly Vector2D DownLeft = new Vector2D(-1, -1);
+        public static readonly Vector2D Left = new Vector2D(-1, 0);
+        public static readonly Vector2D UpLeft = new Vector2D(-1, 1);
     }
 
     public static class Directions
     {
-        public static IEnumerable<Direction> All => Enum.GetValues(typeof(Direction)).Cast<Direction>();
-
-        public static T ChooseHorizontally<T>(Direction direction, T left, T right, T defaultValue)
-        {
-            return direction switch
+        public static List<Vector2D> All =>
+            new List<Vector2D>
             {
-                Direction.Left => left,
-                Direction.Right => right,
-                _ => defaultValue
+                Direction.Up,
+                Direction.Right,
+                Direction.Down,
+                Direction.Left,
+                Direction.UpRight,
+                Direction.DownRight,
+                Direction.DownLeft,
+                Direction.UpLeft
             };
-        }
-
-        public static T ChooseVertically<T>(Direction direction, T down, T up, T defaultValue)
-        {
-            return direction switch
-            {
-                Direction.Down => down,
-                Direction.Up => up,
-                _ => defaultValue
-            };
-        }
     }
 }

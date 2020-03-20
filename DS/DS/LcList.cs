@@ -17,81 +17,98 @@ namespace DS
             for (var lcIndex = 0; lcIndex < Count; lcIndex++)
             {
                 var index = this[lcIndex].IndexOf(point);
-                if (index > 0)
+                if (index > -1)
                     return (true, lcIndex, index);
             }
 
             return (false, -1, -1);
         }
 
-        public List<Segment> GetBorderSegments(bool handleHalfBorders = true)
+        public List<Segment> GetBorderSegments(bool handleHalfBorders = true, bool closeBorder = true)
         {
             var allSegments = this.SelectMany(lc => lc.Segments).ToList();
             var halfBorderSegmentResults = new ConcurrentQueue<IntersectSearchResult>();
             var borderSegments = allSegments
                 .AsParallel()
-                .Where(s => IsBorderSegment(s, allSegments, CheckEmptyIntersect))
+                .Where(s =>
+				{
+					var notFoundOnStart = IsBorderPoint(s.Start, allSegments);
+					var notFoundOnEnd = IsBorderPoint(s.End, allSegments);
+                    var result = new IntersectSearchResult(!notFoundOnStart, !notFoundOnEnd, s);
+
+                    if (result.HalfIntersect)
+                        halfBorderSegmentResults.Enqueue(result);
+
+					return result.NotFound;
+				})
                 .ToList();
 
-            bool CheckEmptyIntersect(IntersectSearchResult intersectSearchResult)
-            {
-                if (intersectSearchResult.NotFound)
-                    return true;
+			if (handleHalfBorders)
+                AddHalfBorderSegments(borderSegments, allSegments, halfBorderSegmentResults);
 
-                if (intersectSearchResult.HalfIntersect)
-                    halfBorderSegmentResults.Enqueue(intersectSearchResult);
-
-                return false;
-            }
-
-            if (handleHalfBorders)
-                AddHalfBorderSegments(borderSegments, halfBorderSegmentResults);
+            if (closeBorder)
+                CloseBorder(borderSegments);
 
             return borderSegments;
         }
 
-        public bool IsBorderSegment(Segment s, IList<Segment> allSegments,
-            Func<IntersectSearchResult, bool> checkEmptyIntersect = null)
+        public static bool IsBorderPoint(PointX point, IList<Segment> allSegments)
         {
-            const double max = double.MaxValue / 2;
-            const double min = double.MinValue / 2;
+            const double inf = 1000;
 
-            if (checkEmptyIntersect == null)
-                checkEmptyIntersect = r => r.NotFound;
+			foreach (var direction in Directions.All)
+			{
+				var segment = new Segment(point, point + direction * inf);
 
-            return (from direction in Directions.All
-                    let startX = Directions.ChooseHorizontally(direction, min, max, s.Start.X)
-                    let endX = Directions.ChooseHorizontally(direction, min, max, s.End.X)
-                    let startY = Directions.ChooseVertically(direction, min, max, s.Start.Y)
-                    let endY = Directions.ChooseVertically(direction, min, max, s.End.Y)
-                    let startSegment = new Segment(new PointX(s.Start.X, s.Start.Y), new PointX(startX, startY))
-                    let endSegment = new Segment(new PointX(s.End.X, s.End.Y), new PointX(endX, endY))
-                    select IntersectSearch(s, startSegment, endSegment, allSegments))
-                .Any(checkEmptyIntersect);
+				if (!allSegments.Any(s => s.GetIntersection(segment, includeOverlap: true).IsIntersect))
+					return true;
+			}
+
+			return false;
+		}
+
+        public static LcList FromAttractor(DeterministicModel model, IList<PointX> attractor, int count,
+            int x1 = 20, int x2 = 40, int lcPointsCount = 100, double eps = 0.1)
+        {
+            Lc lc0X1 = null, lc0X2 = null;
+
+            var lc0X1RawPoints = attractor.Where(p => Math.Abs(p.X2 - x2) < eps).ToList();
+            if (lc0X1RawPoints.Count != 0)
+            {
+                var (minX1, maxX1) = (lc0X1RawPoints.Min(p => p.X1), lc0X1RawPoints.Max(p => p.X1));
+                var stepX1 = (maxX1 - minX1) / lcPointsCount;
+                var lc0X1Points = Enumerable.Range(0, lcPointsCount + 1)
+                    .Select(i => minX1 + i * stepX1)
+                    .Select(x1 => new PointX(x1, x2));
+
+                lc0X1 = new Lc(lc0X1Points);
+            }
+
+            var lc0X2RawPoints = attractor.Where(p => Math.Abs(p.X1 - x1) < eps).ToList();
+            if (lc0X2RawPoints.Count != 0)
+            {
+                var (minX2, maxX2) = (lc0X2RawPoints.Min(p => p.X2), lc0X2RawPoints.Max(p => p.X2));
+                var stepX2 = (maxX2 - minX2) / lcPointsCount;
+                var lc0X2Points = Enumerable.Range(0, lcPointsCount + 1)
+                    .Select(i => minX2 + i * stepX2)
+                    .Select(x2 => new PointX(x1, x2));
+
+                lc0X2 = new Lc(lc0X2Points, false);
+            }
+
+            return FromZeroLc(model, lc0X1, lc0X2, count);
         }
 
-        public static LcList FromAttractor(DeterministicModel model, IEnumerable<PointX> attractor, int x2,
-            int count, int lcPointsCount = 100, double eps = 0.1)
+        public static LcList FromZeroLc(DeterministicModel model, Lc lc0X1, Lc lc0X2, int count)
         {
-            var lc0RawPoints = attractor.Where(p => Math.Abs(p.X2 - x2) < eps).ToList();
-            var (minX1, maxX1) = (lc0RawPoints.Min(p => p.X1), lc0RawPoints.Max(p => p.X1));
-            var step = (maxX1 - minX1) / lcPointsCount;
-            var lc0Points = Enumerable.Range(0, lcPointsCount + 1)
-                .Select(i => minX1 + i * step)
-                .Select(x1 => new PointX(x1, Lc.GetX2(model, x1)));
-
-            var lc0 = new Lc(lc0Points);
-
-            return FromZeroLc(model, lc0, count);
-        }
-
-        public static LcList FromZeroLc(DeterministicModel model, Lc lc0, int count)
-        {
-            return new LcList(IterateLcs(model, lc0, count));
+            return new LcList(IterateLcs(model, lc0X1, count).Concat(IterateLcs(model, lc0X2, count)));
         }
 
         public static IEnumerable<Lc> IterateLcs(DeterministicModel model, Lc lc0, int count)
         {
+            if (lc0 == null)
+                yield break;
+
             var currentLc = lc0;
             for (var i = 0; i < count; i++)
             {
@@ -100,19 +117,7 @@ namespace DS
             }
         }
 
-        private IntersectSearchResult IntersectSearch(Segment segment, Segment startSegment, Segment endSegment,
-            IList<Segment> allSegments)
-        {
-            var foundOnStart = allSegments.Any(s => s.GetIntersection(startSegment).IsIntersect);
-            var foundOnEnd = allSegments.Any(s => s.GetIntersection(endSegment).IsIntersect);
-
-            if (foundOnStart || foundOnEnd)
-                return new IntersectSearchResult(foundOnStart, foundOnEnd, segment);
-
-            return new IntersectSearchResult(false, false, segment);
-        }
-
-        private static void AddHalfBorderSegments(ICollection<Segment> borderSegments,
+		private static void AddHalfBorderSegments(ICollection<Segment> borderSegments, IList<Segment> allSegments,
             IEnumerable<IntersectSearchResult> halfBorderSegmentResults)
         {
             var halfBorderSegmentResultSet = new HashSet<IntersectSearchResult>(halfBorderSegmentResults);
@@ -123,31 +128,29 @@ namespace DS
 
                 halfBorderSegmentResultSet.Remove(halfBorderSegmentResult);
 
-                var halfBorderSegmentIntersection = halfBorderSegmentResultSet
-                    .Where(hbs => !hbs.Equals(halfBorderSegmentResult))
+                var halfBorderSegmentIntersections = halfBorderSegmentResultSet
                     .Select(hbs => (HalfBorderSegmentResult: hbs,
                         IntersectionPoint: hbs.Segment.GetIntersection(halfBorderSegmentResult.Segment)))
-                    .FirstOrDefault(t => t.IntersectionPoint.IsIntersect);
+                    .Where(t => t.IntersectionPoint.IsIntersect
+						&& t.IntersectionPoint.Point.HasValue
+						&& IsBorderPoint(t.IntersectionPoint.Point.Value, allSegments))
+					.ToList();
 
                 var start = halfBorderSegmentResult.FoundOnStart
                     ? halfBorderSegmentResult.Segment.End
                     : halfBorderSegmentResult.Segment.Start;
 
-                if (!halfBorderSegmentIntersection.IntersectionPoint.Point.HasValue)
-                    continue;
+				foreach (var halfBorderSegmentIntersection in halfBorderSegmentIntersections)
+				{
+					var end = halfBorderSegmentIntersection.HalfBorderSegmentResult.FoundOnEnd
+						? halfBorderSegmentIntersection.HalfBorderSegmentResult.Segment.Start
+						: halfBorderSegmentIntersection.HalfBorderSegmentResult.Segment.End;
 
-                var end = halfBorderSegmentIntersection.HalfBorderSegmentResult.FoundOnEnd
-                    ? halfBorderSegmentIntersection.HalfBorderSegmentResult.Segment.Start
-                    : halfBorderSegmentIntersection.HalfBorderSegmentResult.Segment.End;
-
-                borderSegments.Add(new Segment(start, halfBorderSegmentIntersection.IntersectionPoint.Point.Value));
-                borderSegments.Add(new Segment(halfBorderSegmentIntersection.IntersectionPoint.Point.Value, end));
-
-                halfBorderSegmentResultSet.Remove(halfBorderSegmentIntersection.HalfBorderSegmentResult);
+					borderSegments.Add(new Segment(start, halfBorderSegmentIntersection.IntersectionPoint.Point.Value));
+					borderSegments.Add(new Segment(halfBorderSegmentIntersection.IntersectionPoint.Point.Value, end));
+				}
             }
-
-            CloseBorder(borderSegments);
-        }
+		}
 
         private static void CloseBorder(ICollection<Segment> borderSegments)
         {
@@ -166,7 +169,7 @@ namespace DS
                 .Where(p => borderPointsUsingCount[p] == 1)
                 .ToHashSet();
 
-            while (aloneBorderPoints.Count != 0)
+            while (aloneBorderPoints.Count > 1)
             {
                 var aloneBorderPoint = aloneBorderPoints.First();
                 aloneBorderPoints.Remove(aloneBorderPoint);
@@ -174,7 +177,7 @@ namespace DS
                 var minLength = double.MaxValue;
                 var minLengthPoint = default(PointX);
 
-                foreach (var other in aloneBorderPoints.Where(p => !p.Equals(aloneBorderPoint)))
+                foreach (var other in aloneBorderPoints)
                 {
                     var length = aloneBorderPoint.GetDistanceWith(other);
                     if (length < minLength)

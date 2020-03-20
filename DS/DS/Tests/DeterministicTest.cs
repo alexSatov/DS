@@ -249,7 +249,7 @@ namespace DS
             model.D21 = 0.0075;
 
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcList.FromAttractor(model, attractor, 40, 9);
+            var lcList = LcList.FromAttractor(model, attractor, 9);
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
 
             chart.AddSeries("lc0", lcList[0], Color.Red, 5, SeriesChartType.Line);
@@ -275,7 +275,7 @@ namespace DS
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcList.FromAttractor(model, attractor, 40, 9);
+            var lcList = LcList.FromAttractor(model, attractor, 9);
             var borderSegments = lcList.GetBorderSegments();
 
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
@@ -307,10 +307,10 @@ namespace DS
         /// </summary>
         public static ChartForm Test15(DeterministicModel model)
         {
-            model.D12 = 0.001857;
+            model.D12 = 0.00236;
             model.D21 = 0.0075;
 
-            var pool = AttractorPool.GetPoolFor2AttractorsParallel(model, Attractor.IsEquilibrium, new PointX(0, 0),
+            var pool = AttractorPool.GetPoolFor2AttractorsParallel(model, Attractor.Is3Cycle, new PointX(0, 0),
                 new PointX(40, 80), 0.5, 0.8);
 
             var chart = new ChartForm(pool.First, 0, 40, 0, 80, markerSize: 4);

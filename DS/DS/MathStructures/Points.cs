@@ -31,7 +31,7 @@ namespace DS.MathStructures
 
         public bool TendsToInfinity(Model model)
         {
-            return System.Math.Abs(X1) > model.MaxX || System.Math.Abs(X2) > model.MaxX;
+            return Math.Abs(X1) > model.MaxX || Math.Abs(X2) > model.MaxX;
         }
 
         public override string ToString()

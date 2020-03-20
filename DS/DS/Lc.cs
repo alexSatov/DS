@@ -6,17 +6,20 @@ namespace DS
 {
     public class Lc : List<PointX>
     {
+        public bool IsX1 { get; }
+
         public IEnumerable<Segment> Segments =>
             Enumerable.Range(0, Count - 1)
                 .Select(i => new Segment(this[i], this[i + 1]));
 
-        public Lc(IEnumerable<PointX> points) : base(points)
+        public Lc(IEnumerable<PointX> points, bool isX1 = true) : base(points)
         {
+            IsX1 = isX1;
         }
 
         public Lc GetNextLc(DeterministicModel model)
         {
-            return new Lc(this.Select(model.GetNextPoint));
+            return new Lc(this.Select(model.GetNextPoint), IsX1);
         }
 
         public static double GetX2(DeterministicModel model, double x1)

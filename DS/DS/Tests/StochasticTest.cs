@@ -828,21 +828,21 @@ namespace DS
         /// </summary>
         public static ChartForm Test9(DeterministicModel dModel, StochasticModel sModel)
         {
-            const double eps = 0.05;
+            const double eps = 0.05, d12 = 0.00236, d21 = 0.0075;
 
-            dModel.D12 = 0.00237;
-            dModel.D21 = 0.0075;
+            dModel.D12 = d12;
+            dModel.D21 = d21;
 
-            sModel.D12 = 0.00237;
-            sModel.D21 = 0.0075;
+            sModel.D12 = d12;
+            sModel.D21 = d21;
             sModel.Sigma1 = 1;
             sModel.Sigma2 = 1;
             sModel.Eps = eps;
 
             var i = 0;
-            var attractor = PhaseTrajectory.Get(dModel, new PointX(34, 61), 50000, 50000);
-            var attractor2 = PhaseTrajectory.Get(sModel, new PointX(34, 61), 50000, 50000);
-            var lcList = LcList.FromAttractor(dModel, attractor, 40, 9);
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
+            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcList = LcList.FromAttractor(dModel, attractor, 9);
             var borderSegments = lcList.GetBorderSegments();
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcList, eps);
 
@@ -861,6 +861,70 @@ namespace DS
             //chart.AddSeries($"{nameof(ellipse)}7", ellipse[7], Color.Violet, 5, SeriesChartType.Line);
 
             chart.AddSeries("ellipse", ellipse.SelectMany(p => p.Value), Color.Green, 5, SeriesChartType.Point);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.002538, d21 = 0.0055)
+        /// и эллипса рассеивания вокруг границы.
+        /// </summary>
+        public static ChartForm Test10(DeterministicModel dModel, StochasticModel sModel)
+        {
+            const double eps = 0.05, d12 = 0.002538, d21 = 0.0055;
+
+            dModel.D12 = d12;
+            dModel.D21 = d21;
+
+            sModel.D12 = d12;
+            sModel.D21 = d21;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Eps = eps;
+
+            var i = 0;
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
+            //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcList = LcList.FromAttractor(dModel, attractor, 5);
+            var borderSegments = lcList.GetBorderSegments(true,  false);
+            var rect = new Rect(11.4, 12.2, 36, 38);
+            var allSegments = lcList.SelectMany(lc => lc.Segments).ToList();
+            var segments = allSegments.Where(s => rect.Contains(s.Start) || rect.Contains(s.End)).ToList();
+            var list = segments.Select(s => LcList.IsBorderPoint(s.Start, allSegments)).ToList();
+            //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcList, eps);
+
+            var chart = new ChartForm(attractor, 10, 46, 0, 64);
+
+            foreach (var borderSegment in borderSegments)
+                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    seriesChartType: SeriesChartType.FastLine);
+
+            //foreach (var segment in segments)
+            //    chart.AddSeries($"segment{i++}", segment.GetBoundaryPoints(), Color.Red, 5, SeriesChartType.Line);
+
+            //foreach (var lc in lcList)
+            //    chart.AddSeries($"lc{i++}", lc, Color.Orange, 3, SeriesChartType.Point);
+
+            //chart.AddSeries("lc0", lcList[0], Color.Red, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc1", lcList[1], Color.Black, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc2", lcList[2], Color.Purple, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc3", lcList[3], Color.Orange, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc4", lcList[4], Color.Green, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc5", lcList[5], Color.Red, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc6", lcList[6], Color.Black, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc7", lcList[7], Color.Purple, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc8", lcList[8], Color.Orange, 5, SeriesChartType.Line);
+            //chart.AddSeries("lc9", lcList[9], Color.Green, 5, SeriesChartType.Line);
+
+            //////chart.AddSeries($"{nameof(ellipse)}1", ellipse[1], Color.Black, 5, SeriesChartType.Line);
+            //////chart.AddSeries($"{nameof(ellipse)}2", ellipse[2], Color.DarkBlue, 5, SeriesChartType.Line);
+            //////chart.AddSeries($"{nameof(ellipse)}3", ellipse[3], Color.Blue, 5, SeriesChartType.Line);
+            //////chart.AddSeries($"{nameof(ellipse)}4", ellipse[4], Color.Green, 5, SeriesChartType.Line);
+            //////chart.AddSeries($"{nameof(ellipse)}5", ellipse[5], Color.Gold, 5, SeriesChartType.Line);
+            //////chart.AddSeries($"{nameof(ellipse)}6", ellipse[6], Color.Orange, 5, SeriesChartType.Line);
+            //////chart.AddSeries($"{nameof(ellipse)}7", ellipse[7], Color.Violet, 5, SeriesChartType.Line);
+
+            //chart.AddSeries("ellipse", ellipse.SelectMany(p => p.Value), Color.Green, 5, SeriesChartType.Point);
 
             return chart;
         }
