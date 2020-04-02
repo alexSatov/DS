@@ -68,8 +68,8 @@ namespace DS
         /// <param name="zik">Элементы ЗИКа</param>
         /// <param name="k">Кратность зика</param>
         /// <returns>2 набора точек - координаты внешнего и внутреннего эллипсов</returns>
-        public static (List<PointX> Outer, List<PointX> Inner) GetForZik2(DeterministicModel dModel, StochasticModel sModel,
-            List<PointX> zik, double qu = 1.821)
+        public static (List<PointX> Outer, List<PointX> Inner) GetForZik2(DeterministicModel dModel,
+            StochasticModel sModel, List<PointX> zik, double qu = 1.821)
         {
             var pv = GetPVectors(dModel, zik);
             return BuildEllipses(sModel, zik, pv, qu);
@@ -97,32 +97,29 @@ namespace DS
         /// <summary>
         /// Построение эллипса рассеивания для хаоса, описанного критическими линиями.
         /// </summary>
-        public static Dictionary<int, List<PointX>> GetForChaosLc(DeterministicModel model, LcList lcList,
-            double eps = 0.01, double kq = 0.001)
+        public static IEnumerable<(LcType Type, int LcIndex, int Index, PointX Point)> GetForChaosLc(
+            DeterministicModel model, LcSet lcSet, double eps = 0.01, double kq = 0.001)
         {
-            var borderSegments = lcList.GetBorderSegments(false);
-            var lcEllipsePoints = GetLcEllipseMap(model, lcList, eps, kq);
-            var borderPoints = new HashSet<PointX>(borderSegments.SelectMany(s => s.GetBoundaryPoints()));
+            var lcEllipsePoints = GetLcEllipseMap(model, lcSet, eps, kq);
+            var borderPoints = lcSet.GetBorderPoints();
 
-            return borderPoints
-                .Select(lcList.Find)
-                .Where(r => r.Found)
-                .OrderBy(r => r.LcIndex)
-                .ThenBy(r => r.Index)
-                .Select(r => (r.LcIndex, lcEllipsePoints[r.LcIndex, r.Index]))
-                .GroupBy(t => t.LcIndex)
-                .ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToList());
+            foreach (var borderPoint in borderPoints)
+                if (lcEllipsePoints.ContainsKey(borderPoint.Type))
+                    yield return (borderPoint.Type, borderPoint.LcIndex, borderPoint.Index,
+                        lcEllipsePoints[borderPoint.Type][borderPoint.LcIndex, borderPoint.Index]);
         }
 
-        private static PointX[,] GetLcEllipseMap(DeterministicModel model, LcList lcList, double eps, double kq)
+        private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(DeterministicModel model, LcSet lcSet,
+            double eps, double kq)
         {
             var keps = 3 * eps;
             var kf11 = 20 * model.A1;
             var kf12 = 20 * model.D12;
             var kf21 = 40 * model.D21;
             var kf22 = 40 * model.A2;
-            var allSegments = lcList.SelectMany(lc => lc.Segments).ToList();
-            var lcX1List = new LcList(lcList.Where(lc => lc.IsX1));
+            var allSegments = lcSet.GetAllSegments().ToList();
+            var lcHList = lcSet[LcType.H];
+            var lcVList = lcSet[LcType.V];
 
             double[,] F(PointX point)
             {
@@ -144,14 +141,15 @@ namespace DS
                 var n1 = new[] { q[1], -q[0] };
                 var n2 = new[] { -q[1], q[0] };
                 var d1 = n1.Multiply(kq);
-				var s1 = new PointX(point.X1 + d1[0], point.X2 + d1[1]);
+                var s1 = new PointX(point.X1 + d1[0], point.X2 + d1[1]);
 
-                return LcList.IsBorderPoint(s1, allSegments) ? n1.Normalize() : n2.Normalize();
+                return LcSet.IsBorderPoint(s1, allSegments) ? n1.Normalize() : n2.Normalize();
             }
 
             var s = Matrix.Identity(2);
-            var (n, m) = (lcX1List.Count, lcX1List[0].Count);
-            var map = new PointX[n, m];
+            var (n, m) = (lcHList.Count, lcHList[0].Count);
+
+            var mapH = new PointX[n, m];
             var mu = new double[n, m];
             var nu = new Dictionary<(int, int), double[]>();
             var q = new Dictionary<(int, int), double[]>();
@@ -160,7 +158,7 @@ namespace DS
 
             for (var j = 0; j < m; j++)
             {
-                var point = lcList[0][j];
+                var point = lcHList[0][j];
                 q[(0, j)] = new double[] { 1, 0 };
                 f[(0, j)] = F(point);
             }
@@ -168,26 +166,26 @@ namespace DS
             for (var j = 0; j < m; j++)
             {
                 q[(1, j)] = f[(0, j)].Dot(q[(0, j)]);
-                f[(1, j)] = F(lcX1List[1][j]);
-                nu[(1, j)] = Nu(lcX1List[1][j], q[(1, j)]);
+                f[(1, j)] = F(lcHList[1][j]);
+                nu[(1, j)] = Nu(lcHList[1][j], q[(1, j)]);
                 mu[1, j] = nu[(1, j)].Dot(s).Dot(nu[(1, j)]);
                 w[(1, j)] = nu[(1, j)].Multiply(mu[1, j]).Outer(nu[(1, j)]);
-                map[1, j] = X(lcList[1][j], mu[1, j], nu[(1, j)]);
+                mapH[1, j] = X(lcHList[1][j], mu[1, j], nu[(1, j)]);
             }
 
             for (var i = 2; i < n; i++)
             for (var j = 0; j < m; j++)
             {
                 q[(i, j)] = f[(i - 1, j)].Dot(q[(i - 1, j)]);
-                f[(i, j)] = F(lcX1List[i][j]);
-                nu[(i, j)] = Nu(lcX1List[i][j], q[(i, j)]);
+                f[(i, j)] = F(lcHList[i][j]);
+                nu[(i, j)] = Nu(lcHList[i][j], q[(i, j)]);
                 var st = f[(i - 1, j)].Dot(w[(i - 1, j)]).Dot(f[(i - 1, j)].Transpose()).Add(s);
                 mu[i, j] = nu[(i, j)].Dot(st).Dot(nu[(i, j)]);
                 w[(i, j)] = nu[(i, j)].Multiply(mu[i, j]).Outer(nu[(i, j)]);
-                map[i, j] = X(lcX1List[i][j], mu[i, j], nu[(i, j)]);
+                mapH[i, j] = X(lcHList[i][j], mu[i, j], nu[(i, j)]);
             }
 
-            return map;
+            return new Dictionary<LcType, PointX[,]> { { LcType.H, mapH } };
         }
 
         private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel model, List<PointX> zik,

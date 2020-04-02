@@ -249,7 +249,7 @@ namespace DS
             model.D21 = 0.0075;
 
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcList.FromAttractor(model, attractor, 9);
+            var lcList = LcSet.FromAttractor(model, attractor, 9)[LcType.H];
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
 
             chart.AddSeries("lc0", lcList[0], Color.Red, 5, SeriesChartType.Line);
@@ -275,7 +275,7 @@ namespace DS
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcList.FromAttractor(model, attractor, 9);
+            var lcList = LcSet.FromAttractor(model, attractor, 9);
             var borderSegments = lcList.GetBorderSegments();
 
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
@@ -283,21 +283,6 @@ namespace DS
             foreach (var borderSegment in borderSegments)
                 chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
                     seriesChartType: SeriesChartType.FastLine);
-
-            // сортировка точек границы по LC
-            var borderPoints = new HashSet<PointX>(borderSegments.SelectMany(s => s.GetBoundaryPoints()));
-            var orderedBorderPoints = borderPoints
-                .Select(p => lcList.Find(p))
-                .Where(r => r.Found)
-                .OrderBy(r => r.LcIndex)
-                .ThenBy(r => r.Index)
-                .ToList();
-
-            var series = orderedBorderPoints
-                .Where(p => p.LcIndex == 1)
-                .Select(p => lcList[p.LcIndex][p.Index]);
-
-            chart.AddSeries(nameof(orderedBorderPoints), series, Color.Black, 5);
 
             return chart;
         }
