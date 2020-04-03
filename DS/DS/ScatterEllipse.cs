@@ -148,48 +148,90 @@ namespace DS
 
             var s = Matrix.Identity(2);
             var (n, m) = (lcHList.Count, lcHList[0].Count);
-
             var mapH = new PointX[n, m];
-            var mu = new double[n, m];
-            var nu = new Dictionary<(int, int), double[]>();
-            var q = new Dictionary<(int, int), double[]>();
-            var f = new Dictionary<(int, int), double[,]>();
-            var w = new Dictionary<(int, int), double[,]>();
+            var mapV = new PointX[n, m];
 
-            for (var j = 0; j < m; j++)
+            if (lcHList.Count > 0)
             {
-                var point = lcHList[0][j];
-                q[(0, j)] = new double[] { 1, 0 };
-                f[(0, j)] = F(point);
+                var muH = new double[n, m];
+                var nuH = new Dictionary<(int, int), double[]>();
+                var qH = new Dictionary<(int, int), double[]>();
+                var fH = new Dictionary<(int, int), double[,]>();
+                var wH = new Dictionary<(int, int), double[,]>();
+
+                for (var j = 0; j < m; j++)
+                {
+                    var point = lcHList[0][j];
+                    qH[(0, j)] = new double[] { 1, 0 };
+                    fH[(0, j)] = F(point);
+                }
+
+                for (var j = 0; j < m; j++)
+                {
+                    qH[(1, j)] = fH[(0, j)].Dot(qH[(0, j)]);
+                    fH[(1, j)] = F(lcHList[1][j]);
+                    nuH[(1, j)] = Nu(lcHList[1][j], qH[(1, j)]);
+                    muH[1, j] = nuH[(1, j)].Dot(s).Dot(nuH[(1, j)]);
+                    wH[(1, j)] = nuH[(1, j)].Multiply(muH[1, j]).Outer(nuH[(1, j)]);
+                    mapH[1, j] = X(lcHList[1][j], muH[1, j], nuH[(1, j)]);
+                }
+
+                for (var i = 2; i < n; i++)
+                for (var j = 0; j < m; j++)
+                {
+                    qH[(i, j)] = fH[(i - 1, j)].Dot(qH[(i - 1, j)]);
+                    fH[(i, j)] = F(lcHList[i][j]);
+                    nuH[(i, j)] = Nu(lcHList[i][j], qH[(i, j)]);
+                    var st = fH[(i - 1, j)].Dot(wH[(i - 1, j)]).Dot(fH[(i - 1, j)].Transpose()).Add(s);
+                    muH[i, j] = nuH[(i, j)].Dot(st).Dot(nuH[(i, j)]);
+                    wH[(i, j)] = nuH[(i, j)].Multiply(muH[i, j]).Outer(nuH[(i, j)]);
+                    mapH[i, j] = X(lcHList[i][j], muH[i, j], nuH[(i, j)]);
+                }
             }
 
-            for (var j = 0; j < m; j++)
+            if (lcVList.Count > 0)
             {
-                q[(1, j)] = f[(0, j)].Dot(q[(0, j)]);
-                f[(1, j)] = F(lcHList[1][j]);
-                nu[(1, j)] = Nu(lcHList[1][j], q[(1, j)]);
-                mu[1, j] = nu[(1, j)].Dot(s).Dot(nu[(1, j)]);
-                w[(1, j)] = nu[(1, j)].Multiply(mu[1, j]).Outer(nu[(1, j)]);
-                mapH[1, j] = X(lcHList[1][j], mu[1, j], nu[(1, j)]);
+                var muV = new double[n, m];
+                var nuV = new Dictionary<(int, int), double[]>();
+                var qV = new Dictionary<(int, int), double[]>();
+                var fV = new Dictionary<(int, int), double[,]>();
+                var wV = new Dictionary<(int, int), double[,]>();
+
+                for (var j = 0; j < m; j++)
+                {
+                    var point = lcVList[0][j];
+                    qV[(0, j)] = new double[] { 0, 1 };
+                    fV[(0, j)] = F(point);
+                }
+
+                for (var j = 0; j < m; j++)
+                {
+                    qV[(1, j)] = fV[(0, j)].Dot(qV[(0, j)]);
+                    fV[(1, j)] = F(lcVList[1][j]);
+                    nuV[(1, j)] = Nu(lcVList[1][j], qV[(1, j)]);
+                    muV[1, j] = nuV[(1, j)].Dot(s).Dot(nuV[(1, j)]);
+                    wV[(1, j)] = nuV[(1, j)].Multiply(muV[1, j]).Outer(nuV[(1, j)]);
+                    mapV[1, j] = X(lcVList[1][j], muV[1, j], nuV[(1, j)]);
+                }
+
+                for (var i = 2; i < n; i++)
+                for (var j = 0; j < m; j++)
+                {
+                    qV[(i, j)] = fV[(i - 1, j)].Dot(qV[(i - 1, j)]);
+                    fV[(i, j)] = F(lcVList[i][j]);
+                    nuV[(i, j)] = Nu(lcVList[i][j], qV[(i, j)]);
+                    var st = fV[(i - 1, j)].Dot(wV[(i - 1, j)]).Dot(fV[(i - 1, j)].Transpose()).Add(s);
+                    muV[i, j] = nuV[(i, j)].Dot(st).Dot(nuV[(i, j)]);
+                    wV[(i, j)] = nuV[(i, j)].Multiply(muV[i, j]).Outer(nuV[(i, j)]);
+                    mapV[i, j] = X(lcVList[i][j], muV[i, j], nuV[(i, j)]);
+                }
             }
 
-            for (var i = 2; i < n; i++)
-            for (var j = 0; j < m; j++)
-            {
-                q[(i, j)] = f[(i - 1, j)].Dot(q[(i - 1, j)]);
-                f[(i, j)] = F(lcHList[i][j]);
-                nu[(i, j)] = Nu(lcHList[i][j], q[(i, j)]);
-                var st = f[(i - 1, j)].Dot(w[(i - 1, j)]).Dot(f[(i - 1, j)].Transpose()).Add(s);
-                mu[i, j] = nu[(i, j)].Dot(st).Dot(nu[(i, j)]);
-                w[(i, j)] = nu[(i, j)].Multiply(mu[i, j]).Outer(nu[(i, j)]);
-                mapH[i, j] = X(lcHList[i][j], mu[i, j], nu[(i, j)]);
-            }
-
-            return new Dictionary<LcType, PointX[,]> { { LcType.H, mapH } };
+            return new Dictionary<LcType, PointX[,]> { { LcType.H, mapH }, { LcType.V, mapV } };
         }
 
-        private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel model, List<PointX> zik,
-            List<double[]> pv, double qu)
+        private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel model,
+            List<PointX> zik, List<double[]> pv, double qu)
         {
             var p = pv.Select(v => v.Outer(v)).ToList();
             var f = zik.Select(model.GetMatrixF).ToList();

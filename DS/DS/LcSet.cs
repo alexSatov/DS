@@ -74,8 +74,12 @@ namespace DS
             {
                 var segment = new Segment(point, point + direction * inf);
 
-                if (!allSegments.Any(s => s.GetIntersection(segment, includeOverlap: true).IsIntersect))
+                if (!allSegments
+                    .Where(s => !s.Contains(point))
+                    .Any(s => s.GetIntersection(segment).IsIntersect))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -131,7 +135,7 @@ namespace DS
             }
         }
 
-        private static void AddHalfBorderSegments(ICollection<Segment> borderSegments, IList<Segment> allSegments,
+        private static void AddHalfBorderSegments(IList<Segment> borderSegments, IList<Segment> allSegments,
             IEnumerable<IntersectSearchResult> halfBorderSegmentResults)
         {
             var halfBorderSegmentResultSet = new HashSet<IntersectSearchResult>(halfBorderSegmentResults);

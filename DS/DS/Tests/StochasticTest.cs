@@ -847,11 +847,10 @@ namespace DS
             //var borderPoints = lcSet.GetBorderPoints();
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
 
-            var chart = new ChartForm(attractor2, 31, 40, 20, 55);
+            var chart = new ChartForm(attractor, 31, 40, 20, 55);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-                    seriesChartType: SeriesChartType.FastLine);
+                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5, SeriesChartType.FastLine);
 
             chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
@@ -892,6 +891,44 @@ namespace DS
 
             chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.0024, d21 = 0.0055)
+        /// и эллипса рассеивания вокруг границы.
+        /// </summary>
+        public static ChartForm Test11(DeterministicModel dModel, StochasticModel sModel)
+        {
+            const double eps = 0.05, d12 = 0.0024, d21 = 0.0055;
+
+            dModel.D12 = d12;
+            dModel.D21 = d21;
+
+            sModel.D12 = d12;
+            sModel.D21 = d21;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Eps = eps;
+
+            var i = 0;
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
+            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcSet = LcSet.FromAttractor(dModel, attractor, 8);
+            var borderSegments = lcSet.GetBorderSegments();
+            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
+
+            var chart = new ChartForm(attractor, 27, 40, 14, 54);
+
+            //foreach (var lc in lcSet[LcType.H])
+            //    chart.AddSeries($"lc_{i++}", lc, Color.Red, 5, SeriesChartType.Line);
+
+            foreach (var borderSegment in borderSegments)
+                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5,
+                    SeriesChartType.FastLine);
+
+            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
 
             return chart;
         }

@@ -18,6 +18,11 @@ namespace DS.MathStructures
             Vector = new Vector2D(start, end);
         }
 
+        public bool Contains(PointX point, double eps = 0.00001)
+        {
+            return Math.Abs((point.X - Start.X) / (End.X - Start.X) - (point.Y - Start.Y) / (End.Y - Start.Y)) < eps;
+        }
+
         /// <summary>
         /// Gets the intersection of two segments if it exists
         /// </summary>
@@ -25,8 +30,8 @@ namespace DS.MathStructures
         /// <param name="other"></param>
         /// <param name="includeBoundaryPoints">Determines whether to include boundary points case (if same, return start point)</param>
         /// <param name="includeOverlap">Determines whether to include overlap case (point will be null)</param>
-        public IntersectPoint GetIntersection(Segment other,
-            bool includeBoundaryPoints = false, bool includeOverlap = false)
+        public IntersectPoint GetIntersection(Segment other, bool includeBoundaryPoints = false,
+            bool includeOverlap = false)
         {
             var commonBoundaryPoint = GetCommonBoundaryPoint(other);
             if (commonBoundaryPoint.HasValue)
