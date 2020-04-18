@@ -841,7 +841,7 @@ namespace DS
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
-            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 9);
             var borderSegments = lcSet.GetBorderSegments();
             //var borderPoints = lcSet.GetBorderPoints();
@@ -877,19 +877,19 @@ namespace DS
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
-            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 5);
-            var borderSegments = lcSet.GetBorderSegments();
+            var borderSegments = lcSet.GetBorderSegments2();
             //var borderPoints = lcSet.GetBorderPoints();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
+            //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
 
-            var chart = new ChartForm(attractor2, 10, 46, 0, 64);
+            var chart = new ChartForm(attractor, 10, 46, 0, 64);
 
             foreach (var borderSegment in borderSegments)
                 chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
                     seriesChartType: SeriesChartType.FastLine);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
+            //chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
 
             return chart;
@@ -914,7 +914,7 @@ namespace DS
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
-            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 8);
             var borderSegments = lcSet.GetBorderSegments();
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);

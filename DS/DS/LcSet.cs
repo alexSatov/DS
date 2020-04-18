@@ -31,7 +31,7 @@ namespace DS
                     for (var index = 0; index < this[lcType][lcIndex].Count; index++)
                     {
                         var point = this[lcType][lcIndex][index];
-                        if (IsBorderPoint(point, allSegments))
+                        if (IsOutOrBorderPoint(point, allSegments))
                             yield return (lcType, lcIndex, index, point);
                     }
                 }
@@ -46,8 +46,8 @@ namespace DS
                 .AsParallel()
                 .Where(s =>
                 {
-                    var notFoundOnStart = IsBorderPoint(s.Start, allSegments);
-                    var notFoundOnEnd = IsBorderPoint(s.End, allSegments);
+                    var notFoundOnStart = IsOutOrBorderPoint(s.Start, allSegments);
+                    var notFoundOnEnd = IsOutOrBorderPoint(s.End, allSegments);
                     var result = new IntersectSearchResult(!notFoundOnStart, !notFoundOnEnd, s);
 
                     if (result.HalfIntersect)
@@ -66,13 +66,51 @@ namespace DS
             return borderSegments;
         }
 
-        public static bool IsBorderPoint(PointX point, IList<Segment> allSegments)
+        public IEnumerable<Segment> GetBorderSegments2(bool closeOnFail = false)
         {
-            const double inf = 1000;
+            var allSegments = GetAllSegments().ToList();
+            var borderSegments = GetBorderSegments(true, false);
+            var borderPoints = borderSegments.SelectMany(bs => bs.GetBoundaryPoints()).ToHashSet();
+            var currentPoint = borderPoints.First();
+            var startPoint = currentPoint;
+            borderPoints.Remove(currentPoint);
 
+            while (borderPoints.Count > 0)
+            {
+                var nextPoint = borderPoints
+                    .Select(p => (Point: p, Distance: currentPoint.GetDistanceWith(p)))
+                    .OrderBy(t => t.Distance)
+                    .Select(t => t.Point)
+                    .FirstOrDefault(p =>
+                    {
+                        var center = currentPoint.GetCenterPointWith(p);
+                        return IsOutOrBorderPoint(center, allSegments);
+                    });
+
+                if (nextPoint.Equals(default(PointX)))
+                {
+                    Console.WriteLine($"Error: point {currentPoint} haven't neighbor!");
+
+                    if (closeOnFail)
+                        yield return new Segment(startPoint, currentPoint);
+
+                    yield break;
+                }
+
+                yield return new Segment(currentPoint, nextPoint);
+
+                currentPoint = nextPoint;
+                borderPoints.Remove(currentPoint);
+            }
+
+            yield return new Segment(startPoint, currentPoint);
+        }
+
+        public static bool IsOutOrBorderPoint(PointX point, IList<Segment> allSegments, double e = 1000)
+        {
             foreach (var direction in Directions.All)
             {
-                var segment = new Segment(point, point + direction * inf);
+                var segment = new Segment(point, point + direction * e);
 
                 if (!allSegments
                     .Where(s => !s.Contains(point))
@@ -83,6 +121,13 @@ namespace DS
             }
 
             return false;
+        }
+
+        public static bool IsOutPoint(PointX point, IList<Segment> allSegments, double e = 0.09)
+        {
+            return Directions.All
+                .Select(direction => point + direction * e)
+                .All(deltaPoint => IsOutOrBorderPoint(deltaPoint, allSegments));
         }
 
         public static LcSet FromAttractor(DeterministicModel model, IList<PointX> attractor, int count,
@@ -151,7 +196,7 @@ namespace DS
                         IntersectionPoint: hbs.Segment.GetIntersection(halfBorderSegmentResult.Segment)))
                     .Where(t => t.IntersectionPoint.IsIntersect
                         && t.IntersectionPoint.Point.HasValue
-                        && IsBorderPoint(t.IntersectionPoint.Point.Value, allSegments))
+                        && IsOutOrBorderPoint(t.IntersectionPoint.Point.Value, allSegments))
                     .ToList();
 
                 var start = halfBorderSegmentResult.FoundOnStart
@@ -239,7 +284,7 @@ namespace DS
             }
         }
 
-        //public List<Segment> GetBorderSegments2(bool closeBorder = true)
+        //public List<Segment> GetBorderSegments3(bool closeBorder = true)
         //{
         //    var borderSegments = new List<Segment>();
         //    var borderPoints = GetBorderPoints()

@@ -21,7 +21,7 @@ namespace DS.MathStructures
 
         public bool AlmostEquals(PointX other, double eps = 0.00001)
         {
-            return System.Math.Abs(X1 - other.X1) <= eps && System.Math.Abs(X2 - other.X2) <= eps;
+            return Math.Abs(X1 - other.X1) <= eps && Math.Abs(X2 - other.X2) <= eps;
         }
 
         public bool IsInfinity()
@@ -51,6 +51,12 @@ namespace DS.MathStructures
             var y = other.Y - Y;
 
             return Math.Sqrt(x * x + y * y);
+        }
+
+        public PointX GetCenterPointWith(PointX other)
+        {
+            var vector = new Vector2D(this, other) / 2;
+            return this + vector;
         }
 
         public static PointX operator +(PointX left, Vector2D right)

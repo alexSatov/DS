@@ -143,7 +143,7 @@ namespace DS
                 var d1 = n1.Multiply(kq);
                 var s1 = new PointX(point.X1 + d1[0], point.X2 + d1[1]);
 
-                return LcSet.IsBorderPoint(s1, allSegments) ? n1.Normalize() : n2.Normalize();
+                return LcSet.IsOutOrBorderPoint(s1, allSegments) ? n1.Normalize() : n2.Normalize();
             }
 
             var s = Matrix.Identity(2);
