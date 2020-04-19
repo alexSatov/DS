@@ -828,7 +828,7 @@ namespace DS
         /// </summary>
         public static ChartForm Test9(DeterministicModel dModel, StochasticModel sModel)
         {
-            const double eps = 0.05, d12 = 0.00236, d21 = 0.0075;
+            const double eps = 0.05, d12 = 0.00237, d21 = 0.0075;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
@@ -843,17 +843,17 @@ namespace DS
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
             //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 9);
-            var borderSegments = lcSet.GetBorderSegments();
+            var borderSegments = lcSet.GetBorderSegments2(true, false);
             //var borderPoints = lcSet.GetBorderPoints();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
+            //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
 
             var chart = new ChartForm(attractor, 31, 40, 20, 55);
 
             foreach (var borderSegment in borderSegments)
                 chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5, SeriesChartType.FastLine);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
-            //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
+            //chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
+            //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Red, 5, SeriesChartType.Point);
 
             return chart;
         }

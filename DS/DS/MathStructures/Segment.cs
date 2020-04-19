@@ -10,6 +10,7 @@ namespace DS.MathStructures
         public Vector2D Vector { get; }
 
         public double Length => Vector.Length;
+        public PointX Center => Start.GetCenterPointWith(End);
 
         public Segment(PointX start, PointX end)
         {

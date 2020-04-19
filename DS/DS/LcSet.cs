@@ -66,44 +66,50 @@ namespace DS
             return borderSegments;
         }
 
-        public IEnumerable<Segment> GetBorderSegments2(bool closeOnFail = false)
+        public List<Segment> GetBorderSegments2(bool useFirstMethod = true, bool closeBorder = true)
         {
+            var result = new List<Segment>();
             var allSegments = GetAllSegments().ToList();
-            var borderSegments = GetBorderSegments(true, false);
-            var borderPoints = borderSegments.SelectMany(bs => bs.GetBoundaryPoints()).ToHashSet();
+            var borderPoints = useFirstMethod
+                ? GetBorderSegments(true, false)
+                    .SelectMany(bs => bs.GetBoundaryPoints()).ToHashSet()
+                : GetBorderPoints().Select(t => t.Point).ToHashSet();
+
             var currentPoint = borderPoints.First();
-            var startPoint = currentPoint;
             borderPoints.Remove(currentPoint);
 
             while (borderPoints.Count > 0)
             {
-                var nextPoint = borderPoints
+                var segment = borderPoints
                     .Select(p => (Point: p, Distance: currentPoint.GetDistanceWith(p)))
                     .OrderBy(t => t.Distance)
-                    .Select(t => t.Point)
-                    .FirstOrDefault(p =>
+                    .Select(t => new Segment(currentPoint, t.Point))
+                    .FirstOrDefault(s =>
                     {
-                        var center = currentPoint.GetCenterPointWith(p);
-                        return IsOutOrBorderPoint(center, allSegments);
+                        return IsOutOrBorderPoint(s.Center, allSegments)
+                            && allSegments.All(other => !other.GetIntersection(s).IsIntersect);
                     });
 
-                if (nextPoint.Equals(default(PointX)))
+                if (segment.Equals(default(Segment)))
                 {
                     Console.WriteLine($"Error: point {currentPoint} haven't neighbor!");
 
-                    if (closeOnFail)
-                        yield return new Segment(startPoint, currentPoint);
+                    currentPoint = borderPoints.First();
+                    borderPoints.Remove(currentPoint);
 
-                    yield break;
+                    continue;
                 }
 
-                yield return new Segment(currentPoint, nextPoint);
+                result.Add(segment);
 
-                currentPoint = nextPoint;
+                currentPoint = segment.End;
                 borderPoints.Remove(currentPoint);
             }
 
-            yield return new Segment(startPoint, currentPoint);
+            if (closeBorder)
+                CloseBorder(result, allSegments);
+
+            return result;
         }
 
         public static bool IsOutOrBorderPoint(PointX point, IList<Segment> allSegments, double e = 1000)
@@ -123,7 +129,7 @@ namespace DS
             return false;
         }
 
-        public static bool IsOutPoint(PointX point, IList<Segment> allSegments, double e = 0.09)
+        public static bool IsOutPoint(PointX point, IList<Segment> allSegments, double e = 0.001)
         {
             return Directions.All
                 .Select(direction => point + direction * e)
@@ -260,7 +266,7 @@ namespace DS
 
                 var segment = new Segment(aloneBorderPoint, minLengthPoint);
 
-                if (!allSegments.Any(s => s.GetIntersection(segment).IsIntersect))
+                if (allSegments.All(s => !s.GetIntersection(segment).IsIntersect))
                     borderSegments.Add(segment);
 
                 aloneBorderPoints.Remove(minLengthPoint);
