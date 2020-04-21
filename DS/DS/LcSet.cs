@@ -38,7 +38,7 @@ namespace DS
             }
         }
 
-        public List<Segment> GetBorderSegments(bool handleHalfBorders = true, bool closeBorder = true)
+        public List<Segment> GetBorderSegments(bool handleHalfBorders = true, bool closeBorder = false)
         {
             var allSegments = GetAllSegments().ToList();
             var halfBorderSegmentResults = new ConcurrentQueue<IntersectSearchResult>();
@@ -71,40 +71,11 @@ namespace DS
             var result = new List<Segment>();
             var allSegments = GetAllSegments().ToList();
             var borderPoints = useFirstMethod
-                ? GetBorderSegments(true, false)
-                    .SelectMany(bs => bs.GetBoundaryPoints()).ToHashSet()
-                : GetBorderPoints().Select(t => t.Point).ToHashSet();
+                ? GetBorderSegments().SelectMany(bs => bs.GetBoundaryPoints())
+                : GetBorderPoints().Select(t => t.Point);
 
-            var currentPoint = borderPoints.First();
-            borderPoints.Remove(currentPoint);
-
-            while (borderPoints.Count > 0)
-            {
-                var segment = borderPoints
-                    .Select(p => (Point: p, Distance: currentPoint.GetDistanceWith(p)))
-                    .OrderBy(t => t.Distance)
-                    .Select(t => new Segment(currentPoint, t.Point))
-                    .FirstOrDefault(s =>
-                    {
-                        return IsOutOrBorderPoint(s.Center, allSegments)
-                            && allSegments.All(other => !other.GetIntersection(s).IsIntersect);
-                    });
-
-                if (segment.Equals(default(Segment)))
-                {
-                    Console.WriteLine($"Error: point {currentPoint} haven't neighbor!");
-
-                    currentPoint = borderPoints.First();
-                    borderPoints.Remove(currentPoint);
-
-                    continue;
-                }
-
-                result.Add(segment);
-
-                currentPoint = segment.End;
-                borderPoints.Remove(currentPoint);
-            }
+            var segments = TryConnectPoints(borderPoints, allSegments);
+            result.AddRange(segments);
 
             if (closeBorder)
                 CloseBorder(result, allSegments);
@@ -221,7 +192,7 @@ namespace DS
             }
         }
 
-        private static void CloseBorder(ICollection<Segment> borderSegments, ICollection<Segment> allSegments)
+        private static void CloseBorder(List<Segment> borderSegments, IList<Segment> allSegments)
         {
             var borderPointsUsingCount = new Dictionary<PointX, (int Count, PointX Neighbor)>();
 
@@ -243,33 +214,40 @@ namespace DS
             }
 
             var aloneBorderPoints = borderPointsUsingCount.Keys
-                .Where(p => borderPointsUsingCount[p].Count == 1)
-                .ToHashSet();
+                .Where(p => borderPointsUsingCount[p].Count == 1);
 
-            while (aloneBorderPoints.Count > 1)
+            var segments = TryConnectPoints(aloneBorderPoints, allSegments);
+            borderSegments.AddRange(segments);
+        }
+
+        private static IEnumerable<Segment> TryConnectPoints(IEnumerable<PointX> points, IList<Segment> allSegments)
+        {
+            var pointSet = points.ToHashSet();
+            var currentPoint = pointSet.First();
+            pointSet.Remove(currentPoint);
+
+            while (pointSet.Count > 0)
             {
-                var aloneBorderPoint = aloneBorderPoints.First();
-                aloneBorderPoints.Remove(aloneBorderPoint);
+                var segment = pointSet
+                    .Select(p => (Point: p, Distance: currentPoint.GetDistanceWith(p)))
+                    .OrderBy(t => t.Distance)
+                    .Select(t => new Segment(currentPoint, t.Point))
+                    .FirstOrDefault(s => IsOutOrBorderPoint(s.Center, allSegments));
 
-                var minLength = double.MaxValue;
-                var minLengthPoint = default(PointX);
-
-                foreach (var other in aloneBorderPoints.Except(new []{ borderPointsUsingCount[aloneBorderPoint].Neighbor }))
+                if (segment.Equals(default(Segment)))
                 {
-                    var length = aloneBorderPoint.GetDistanceWith(other);
-                    if (length < minLength)
-                    {
-                        minLength = length;
-                        minLengthPoint = other;
-                    }
+                    Console.WriteLine($"Error: point {currentPoint} haven't neighbor!");
+
+                    currentPoint = pointSet.First();
+                    pointSet.Remove(currentPoint);
+
+                    continue;
                 }
 
-                var segment = new Segment(aloneBorderPoint, minLengthPoint);
+                yield return segment;
 
-                if (allSegments.All(s => !s.GetIntersection(segment).IsIntersect))
-                    borderSegments.Add(segment);
-
-                aloneBorderPoints.Remove(minLengthPoint);
+                currentPoint = segment.End;
+                pointSet.Remove(currentPoint);
             }
         }
 
@@ -293,7 +271,7 @@ namespace DS
         //public List<Segment> GetBorderSegments3(bool closeBorder = true)
         //{
         //    var borderSegments = new List<Segment>();
-        //    var borderPoints = GetBorderPoints()
+        //    var pointSet = GetBorderPoints()
         //        .GroupBy(t => t.Type)
         //        .ToDictionary(g => g.Key, g => g
         //            .GroupBy(t => t.LcIndex)
@@ -301,15 +279,15 @@ namespace DS
 
         //    foreach (var lcType in Enum.GetValues(typeof(LcType)).Cast<LcType>())
         //    {
-        //        if (!borderPoints.ContainsKey(lcType))
+        //        if (!pointSet.ContainsKey(lcType))
         //            continue;
 
-        //        for (var lcIndex = 0; lcIndex < borderPoints[lcType].Count; lcIndex++)
+        //        for (var lcIndex = 0; lcIndex < pointSet[lcType].Count; lcIndex++)
         //        {
-        //            for (var i = 0; i < borderPoints[lcType][lcIndex].Count - 1; i++)
+        //            for (var i = 0; i < pointSet[lcType][lcIndex].Count - 1; i++)
         //            {
-        //                var start = borderPoints[lcType][lcIndex][i];
-        //                var end = borderPoints[lcType][lcIndex][i + 1];
+        //                var start = pointSet[lcType][lcIndex][i];
+        //                var end = pointSet[lcType][lcIndex][i + 1];
 
         //                if (end.Index - start.Index == 1)
         //                    borderSegments.Add(new Segment(start.Point, end.Point));

@@ -843,7 +843,7 @@ namespace DS
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
             //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 9);
-            var borderSegments = lcSet.GetBorderSegments2(true, false);
+            var borderSegments = lcSet.GetBorderSegments2();
             //var borderPoints = lcSet.GetBorderPoints();
             //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
 
@@ -879,7 +879,9 @@ namespace DS
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
             //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 5);
-            var borderSegments = lcSet.GetBorderSegments2();
+            var borderSegments = lcSet.GetBorderSegments()
+                .Where(s => s.Start.X1 > 24 || s.End.X1 > 24)
+                .Concat(lcSet.GetBorderSegments2().Where(s => s.Start.X1 <= 24 && s.End.X1 <= 24));
             //var borderPoints = lcSet.GetBorderPoints();
             //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
 
