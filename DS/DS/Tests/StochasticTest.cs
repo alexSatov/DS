@@ -843,17 +843,21 @@ namespace DS
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
             //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 9);
-            var borderSegments = lcSet.GetBorderSegments2();
+            var borderSegments = lcSet.GetBorderSegments();
             //var borderPoints = lcSet.GetBorderPoints();
-            //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
+            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             var chart = new ChartForm(attractor, 31, 40, 20, 55);
 
             foreach (var borderSegment in borderSegments)
                 chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5, SeriesChartType.FastLine);
 
-            //chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
+            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Red, 5, SeriesChartType.Point);
+
+            PointSaver.SaveToFile("chaos_ellipse/chaos.txt", attractor);
+            PointSaver.SaveToFile("chaos_ellipse/border.txt", borderSegments.SelectMany(s => s.GetBoundaryPoints()));
+            PointSaver.SaveToFile("chaos_ellipse/ellipse.txt", ellipse.Select(e => (e.LcIndex, e.Index, e.Point.X1, e.Point.X2)));
 
             return chart;
         }
