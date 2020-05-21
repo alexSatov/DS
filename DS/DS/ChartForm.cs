@@ -25,7 +25,7 @@ namespace DS
             };
 
             Chart.ChartAreas.Add(ChartArea);
-            AddSeries(name ?? "main", points, color ?? Color.DodgerBlue, markerSize);
+            AddSeries(name ?? "main", points, color ?? Color.DodgerBlue, markerSize: markerSize);
         }
 
         public ChartForm(IEnumerable<PointX> points, double ox1, double ox2, double oy1, double oy2,
@@ -41,7 +41,7 @@ namespace DS
         }
 
         public void AddSeries(string name, IEnumerable<(double x, double y)> points, Color? color = null,
-            int markerSize = 2, SeriesChartType seriesChartType = SeriesChartType.FastPoint)
+            SeriesChartType seriesChartType = SeriesChartType.FastPoint, int markerSize = 2, int borderWidth = 2)
         {
             var seriesPointCount = 0;
             var series = new Series
@@ -50,7 +50,8 @@ namespace DS
                 ChartType = seriesChartType,
                 ChartArea = ChartArea.Name,
                 MarkerStyle = MarkerStyle.Circle,
-                MarkerSize = markerSize
+                MarkerSize = markerSize,
+                BorderWidth = borderWidth
             };
 
             if (color.HasValue)
@@ -66,11 +67,11 @@ namespace DS
             Chart.Series.Add(series);
         }
 
-        public void AddSeries<T>(string name, IEnumerable<T> points, Color? color = null, int markerSize = 2,
-            SeriesChartType seriesChartType = SeriesChartType.FastPoint)
+        public void AddSeries<T>(string name, IEnumerable<T> points, Color? color = null,
+            SeriesChartType seriesChartType = SeriesChartType.FastPoint, int markerSize = 2, int borderWidth = 2)
             where T : IPoint
         {
-            AddSeries(name, points.Select(p => (p.X, p.Y)), color, markerSize, seriesChartType);
+            AddSeries(name, points.Select(p => (p.X, p.Y)), color, seriesChartType, markerSize, borderWidth);
         }
     }
 }

@@ -252,15 +252,15 @@ namespace DS
             var lcList = LcSet.FromAttractor(model, attractor, 9)[LcType.H];
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
 
-            chart.AddSeries("lc0", lcList[0], Color.Red, 5, SeriesChartType.Line);
-            chart.AddSeries("lc1", lcList[1], Color.Black, 5, SeriesChartType.Line);
-            chart.AddSeries("lc2", lcList[2], Color.DarkBlue, 5, SeriesChartType.Line);
-            chart.AddSeries("lc3", lcList[3], Color.Blue, 5, SeriesChartType.Line);
-            chart.AddSeries("lc4", lcList[4], Color.Green, 5, SeriesChartType.Line);
-            chart.AddSeries("lc5", lcList[5], Color.Gold, 5, SeriesChartType.Line);
-            chart.AddSeries("lc6", lcList[6], Color.Orange, 5, SeriesChartType.Line);
-            chart.AddSeries("lc7", lcList[7], Color.Violet, 5, SeriesChartType.Line);
-            chart.AddSeries("lc8", lcList[8], Color.DarkViolet, 5, SeriesChartType.Line);
+            chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, 5);
+            chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, 5);
+            chart.AddSeries("lc2", lcList[2], Color.DarkBlue, SeriesChartType.Line, 5);
+            chart.AddSeries("lc3", lcList[3], Color.Blue, SeriesChartType.Line, 5);
+            chart.AddSeries("lc4", lcList[4], Color.Green, SeriesChartType.Line, 5);
+            chart.AddSeries("lc5", lcList[5], Color.Gold, SeriesChartType.Line, 5);
+            chart.AddSeries("lc6", lcList[6], Color.Orange, SeriesChartType.Line, 5);
+            chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 5);
+            chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 5);
 
             return chart;
         }
@@ -299,7 +299,7 @@ namespace DS
                 new PointX(40, 80), 0.5, 0.8);
 
             var chart = new ChartForm(pool.First, 0, 40, 0, 80, markerSize: 4);
-            chart.AddSeries("pool_second", pool.Second, Color.Orange, 4);
+            chart.AddSeries("pool_second", pool.Second, Color.Orange, markerSize: 4);
 
             //PointSaver.SaveToFile("ellipse/attractor.txt", chaosZik);
             //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);

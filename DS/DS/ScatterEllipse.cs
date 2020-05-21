@@ -252,7 +252,14 @@ namespace DS
                 ellipse2.Add(e2P);
             }
 
-            return (ellipse1, ellipse2);
+            var ellipse1MinX = ellipse1.Min(point => point.X);
+            var ellipse1MaxX = ellipse1.Max(point => point.X);
+            var ellipse2MinX = ellipse2.Min(point => point.X);
+            var ellipse2MaxX = ellipse2.Max(point => point.X);
+            var d1 = ellipse1MaxX - ellipse1MinX;
+            var d2 = ellipse2MaxX - ellipse2MinX;
+
+            return d1 >= d2 ? (ellipse1, ellipse2) : (ellipse2, ellipse1);
         }
 
         private static (double X1Min, double X1Max, double X2Min, double X2Max) FindBoundaries(List<PointX> zik)

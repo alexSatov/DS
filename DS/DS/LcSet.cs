@@ -150,10 +150,13 @@ namespace DS
                 yield break;
 
             var currentLc = lc0;
+
+            yield return currentLc;
+
             for (var i = 0; i < count; i++)
             {
-                yield return currentLc;
                 currentLc = currentLc.GetNextLc(model);
+                yield return currentLc;
             }
         }
 

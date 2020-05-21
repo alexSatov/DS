@@ -5,18 +5,18 @@ namespace DS
 {
     public abstract class Model
     {
-        public double A1 { get; }
-        public double A2 { get; }
-        public double B1 { get; }
-        public double B2 { get; }
-        public double Px { get; }
-        public double Py { get; }
+        public double A1 { get; set; }
+        public double A2 { get; set; }
+        public double B1 { get; set; }
+        public double B2 { get; set; }
+        public double Px { get; set; }
+        public double Py { get; set; }
         public double D12 { get; set; }
         public double D21 { get; set; }
-        public double MaxX { get; }
+        public double MaxX { get; set; }
 
-        public double Pb1 { get; }
-        public double Pb2 { get; }
+        public double Pb1 { get; set; }
+        public double Pb2 { get; set; }
 
         protected Model(double a1, double a2, double b1, double b2, double px, double py,
             double d12 = 0, double d21 = 0, double maxX = 100)

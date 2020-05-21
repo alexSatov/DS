@@ -420,7 +420,7 @@ namespace DS
                     return default;
                 }
 
-                for (var eps = 0.28; eps < 2; eps += 0.04)
+                for (var eps = 0.01; eps < 2; eps += 0.01)
                 {
                     sInnerModel.Eps = eps;
                     var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, zik);
@@ -489,9 +489,9 @@ namespace DS
                 return default;
             }
 
-            var (points, chart) = Test8_Parallel(0.00145, 0.001682, step, SearchRL);
+            var (points, chart) = Test8_Parallel(0.00145, 0.001682, step, SearchLR);
 
-            PointSaver.SaveToFile("crit_intens\\zone1_2.txt", points);
+            PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
 
             return chart;
         }
@@ -746,8 +746,8 @@ namespace DS
             var (eq1, eq2, chaos, _ellipse) = Search();
 
             var chart = new ChartForm(chaos, 0, 40, 0, 80);
-            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, 8);
-            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, 8);
+            chart.AddSeries("attractor1", new List<PointX> { eq1 }, Color.Black, markerSize: 8);
+            chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, markerSize: 8);
             chart.AddSeries("ellipse", _ellipse, Color.Red);
 
             return chart;
@@ -850,9 +850,9 @@ namespace DS
             var chart = new ChartForm(attractor, 31, 40, 20, 55);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5, SeriesChartType.FastLine);
+                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine, 5);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
+            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 5);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Red, 5, SeriesChartType.Point);
 
             PointSaver.SaveToFile("chaos_ellipse/chaos.txt", attractor);
@@ -892,10 +892,9 @@ namespace DS
             var chart = new ChartForm(attractor2, 10, 46, 0, 64);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-                    seriesChartType: SeriesChartType.FastLine);
+                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
+            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 5);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
 
             return chart;
@@ -931,10 +930,56 @@ namespace DS
             //    chart.AddSeries($"lc_{i++}", lc, Color.Red, 5, SeriesChartType.Line);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, 5,
-                    SeriesChartType.FastLine);
+                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, 5, SeriesChartType.Point);
+            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point);
+
+            return chart;
+        }
+
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = d21 = 0)
+        /// и эллипса рассеивания вокруг границы.
+        /// </summary>
+        public static ChartForm Test12(DeterministicModel dModel, StochasticModel sModel)
+        {
+            const double eps = 0.1, d12 = 0, d21 = 0;
+
+            dModel.D12 = d12;
+            dModel.D21 = d21;
+            dModel.A1 = 0.00925;
+            dModel.A2 = 0.002324;
+
+            sModel.D12 = d12;
+            sModel.D21 = d21;
+            sModel.A1 = 0.00925;
+            sModel.A2 = 0.002324;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Eps = eps;
+
+            var i = 0;
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
+            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcSet = LcSet.FromAttractor(dModel, attractor, 3);
+            var borderSegments = lcSet.GetBorderSegments();
+            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps, kq:1);
+
+            var chart = new ChartForm(attractor2, 0, 40, 0, 80);
+            //chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
+            //chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
+            //chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
+            //chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
+            //chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
+            //chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
+            ////chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
+            ////chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
+
+            foreach (var borderSegment in borderSegments)
+                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    SeriesChartType.Line, 4);
+
+            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 4);
 
             return chart;
         }

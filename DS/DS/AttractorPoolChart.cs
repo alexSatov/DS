@@ -32,9 +32,9 @@ namespace DS
                 .ToList();
 
             var chart = new ChartForm(eq, ox1, ox2, oy1, oy2, markerSize: 4);
-            chart.AddSeries(nameof(chaos), chaos, Color.DarkSeaGreen, 4);
-            chart.AddSeries(nameof(chaosAttractors), chaosAttractors, Color.GreenYellow, 5);
-            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, 5);
+            chart.AddSeries(nameof(chaos), chaos, Color.DarkSeaGreen, markerSize: 4);
+            chart.AddSeries(nameof(chaosAttractors), chaosAttractors, Color.GreenYellow, markerSize: 5);
+            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, markerSize: 5);
 
             PointSaver.SaveToFile($"pool_simple\\{nameof(eqAttractor)}.txt", eqAttractor);
             PointSaver.SaveToFile($"pool_simple\\{nameof(chaosAttractors)}.txt", chaosAttractors);
@@ -64,10 +64,10 @@ namespace DS
                 .ToList();
 
             var chart = new ChartForm(eq, ox1, ox2, oy1, oy2, markerSize: 4);
-            chart.AddSeries(nameof(cycle3), cycle3, Color.OrangeRed, 4);
-            chart.AddSeries(nameof(eq), eq, Color.DodgerBlue, 4);
-            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, 8);
-            chart.AddSeries(nameof(cycle3Attractor), cycle3Attractor, Color.Red, 8);
+            chart.AddSeries(nameof(cycle3), cycle3, Color.OrangeRed, markerSize: 4);
+            chart.AddSeries(nameof(eq), eq, Color.DodgerBlue, markerSize: 4);
+            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, markerSize: 8);
+            chart.AddSeries(nameof(cycle3Attractor), cycle3Attractor, Color.Red, markerSize: 8);
 
             return chart;
         }
@@ -92,10 +92,10 @@ namespace DS
                 .ToList();
 
             var chart = new ChartForm(eq, ox1, ox2, oy1, oy2, markerSize: 4);
-            chart.AddSeries(nameof(cycle3), cycle3, Color.OrangeRed, 4);
-            chart.AddSeries(nameof(eq), eq, Color.DodgerBlue, 4);
-            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, 8);
-            chart.AddSeries(nameof(cycle3Attractor), cycle3Attractor, Color.Red, 8);
+            chart.AddSeries(nameof(cycle3), cycle3, Color.OrangeRed, markerSize: 4);
+            chart.AddSeries(nameof(eq), eq, Color.DodgerBlue, markerSize: 4);
+            chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, markerSize: 8);
+            chart.AddSeries(nameof(cycle3Attractor), cycle3Attractor, Color.Red, markerSize: 8);
 
             return chart;
         }
