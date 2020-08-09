@@ -984,6 +984,57 @@ namespace DS
             return chart;
         }
 
+        /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.001814, d21 = 0.00785312)
+        /// и эллипса рассеивания вокруг границы.
+        /// </summary>
+        public static ChartForm Test13(DeterministicModel dModel, StochasticModel sModel)
+        {
+            const double eps = 0.1, d12 = 0.001814, d21 = 0.00785312;
+
+            dModel.D12 = d12;
+            dModel.D21 = d21;
+
+            sModel.D12 = d12;
+            sModel.D21 = d21;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Eps = eps;
+
+            var i = 0;
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(20, 40), 50000, 100000);
+            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcSet = LcSet.FromAttractor(dModel, attractor, 7);
+            //var borderSegments = lcSet.GetBorderSegments();
+            //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps, kq: 1);
+
+            var chart = new ChartForm(attractor, 1, 31, 20, 80);
+            chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
+            chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
+            chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
+            chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
+            chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
+            chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
+            chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
+            chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
+            chart.AddSeries("4H", lcSet[LcType.H][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            chart.AddSeries("4V", lcSet[LcType.V][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            chart.AddSeries("5H", lcSet[LcType.H][5], Color.DarkOrange, SeriesChartType.Line, 4);
+            chart.AddSeries("5V", lcSet[LcType.V][5], Color.DarkOrange, SeriesChartType.Line, 4);
+            chart.AddSeries("6H", lcSet[LcType.H][6], Color.Olive, SeriesChartType.Line, 4);
+            chart.AddSeries("6V", lcSet[LcType.V][6], Color.Olive, SeriesChartType.Line, 4);
+            chart.AddSeries("7H", lcSet[LcType.H][7], Color.Gold, SeriesChartType.Line, 4);
+            chart.AddSeries("7V", lcSet[LcType.V][7], Color.Gold, SeriesChartType.Line, 4);
+
+            //foreach (var borderSegment in borderSegments)
+            //    chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+            //        SeriesChartType.Line, 4);
+
+            //chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 4);
+
+            return chart;
+        }
+
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,
             double d12End, double d12Step, Func<double, (double D12, double Eps)> searcher)
         {

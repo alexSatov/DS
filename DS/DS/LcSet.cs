@@ -38,6 +38,9 @@ namespace DS
             }
         }
 
+        /// <summary>
+        /// Accurate border segments algorithm
+        /// </summary>
         public List<Segment> GetBorderSegments(bool handleHalfBorders = true, bool closeBorder = false)
         {
             var allSegments = GetAllSegments().ToList();
@@ -66,11 +69,14 @@ namespace DS
             return borderSegments;
         }
 
-        public List<Segment> GetBorderSegments2(bool useFirstMethod = true, bool closeBorder = true)
+        /// <summary>
+        /// Greedy border segments algorithm (can use accurate on input)
+        /// </summary>
+        public List<Segment> GetBorderSegments2(bool useAccurateAlgorithm = true, bool closeBorder = false)
         {
             var result = new List<Segment>();
             var allSegments = GetAllSegments().ToList();
-            var borderPoints = useFirstMethod
+            var borderPoints = useAccurateAlgorithm
                 ? GetBorderSegments().SelectMany(bs => bs.GetBoundaryPoints())
                 : GetBorderPoints().Select(t => t.Point);
 
