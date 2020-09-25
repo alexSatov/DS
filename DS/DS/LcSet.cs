@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
 
 namespace DS
 {
@@ -91,7 +93,7 @@ namespace DS
 
         public static bool IsOutOrBorderPoint(PointX point, IList<Segment> allSegments, double e = 1000)
         {
-            foreach (var direction in Directions.All)
+            foreach (var direction in Direction.GetAll())
             {
                 var segment = new Segment(point, point + direction * e);
 
@@ -108,12 +110,12 @@ namespace DS
 
         public static bool IsOutPoint(PointX point, IList<Segment> allSegments, double e = 0.001)
         {
-            return Directions.All
+            return Direction.GetAll()
                 .Select(direction => point + direction * e)
                 .All(deltaPoint => IsOutOrBorderPoint(deltaPoint, allSegments));
         }
 
-        public static LcSet FromAttractor(DeterministicModel model, IList<PointX> attractor, int count,
+        public static LcSet FromAttractor(DeterministicModel1 model, IList<PointX> attractor, int count,
             int x1 = 20, int x2 = 40, int lcPointsCount = 100, double eps = 0.1)
         {
             Lc lc0H = null, lc0V = null;
@@ -145,12 +147,12 @@ namespace DS
             return FromZeroLc(model, lc0H, lc0V, count);
         }
 
-        public static LcSet FromZeroLc(DeterministicModel model, Lc lc0H, Lc lc0V, int count)
+        public static LcSet FromZeroLc(DeterministicModel1 model, Lc lc0H, Lc lc0V, int count)
         {
             return new LcSet(IterateLcs(model, lc0H, count), IterateLcs(model, lc0V, count));
         }
 
-        public static IEnumerable<Lc> IterateLcs(DeterministicModel model, Lc lc0, int count)
+        public static IEnumerable<Lc> IterateLcs(DeterministicModel1 model, Lc lc0, int count)
         {
             if (lc0 == null)
                 yield break;
@@ -210,14 +212,14 @@ namespace DS
                 if (!borderPointsUsingCount.ContainsKey(borderSegment.Start))
                     borderPointsUsingCount[borderSegment.Start] = (1, borderSegment.End);
                 else
-                    borderPointsUsingCount[borderSegment.Start] = 
+                    borderPointsUsingCount[borderSegment.Start] =
                         (borderPointsUsingCount[borderSegment.Start].Count + 1,
                             borderPointsUsingCount[borderSegment.Start].Neighbor);
 
                 if (!borderPointsUsingCount.ContainsKey(borderSegment.End))
                     borderPointsUsingCount[borderSegment.End] = (1, borderSegment.Start);
                 else
-                    borderPointsUsingCount[borderSegment.End] = 
+                    borderPointsUsingCount[borderSegment.End] =
                         (borderPointsUsingCount[borderSegment.End].Count + 1,
                             borderPointsUsingCount[borderSegment.End].Neighbor);
             }

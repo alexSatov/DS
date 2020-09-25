@@ -2,9 +2,9 @@
 using System.Drawing;
 using System.Linq;
 using DS.Helpers;
-using DS.MathStructures;
+using DS.MathStructures.Points;
 
-namespace DS
+namespace DS.Tests.Charts
 {
     public static class AttractorPoolChart
     {

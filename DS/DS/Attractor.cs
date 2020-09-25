@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using DS.MathStructures;
+using DS.MathStructures.Points;
 
 namespace DS
 {

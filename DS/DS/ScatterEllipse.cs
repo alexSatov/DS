@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Accord.Math;
 using Accord.Math.Decompositions;
-using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
 
 namespace DS
 {
@@ -42,11 +43,11 @@ namespace DS
         /// <summary>
         /// Построение эллипса рассеивания для ЗИКа
         /// </summary>
-        /// <param name="sModel">Модель</param>
+        /// <param name="sModel1">Модель</param>
         /// <param name="zik">Элементы ЗИКа</param>
         /// <returns>2 набора точек - координаты внешнего и внутреннего эллипсов</returns>
-        public static (List<PointX> Outer, List<PointX> Inner) GetForZik(DeterministicModel dModel,
-            StochasticModel sModel, List<PointX> zik, double qu = 1.821)
+        public static (List<PointX> Outer, List<PointX> Inner) GetForZik(DeterministicModel1 dModel1,
+            StochasticModel1 sModel1, List<PointX> zik, double qu = 1.821)
         {
             var boundaries = FindBoundaries(zik);
             var x10 = boundaries.X1Min + (boundaries.X1Max - boundaries.X1Min) / 2;
@@ -57,25 +58,25 @@ namespace DS
 
             var pv = GetPVectors(zik, orderedZik);
 
-            return BuildEllipses(sModel, zik, pv, qu);
+            return BuildEllipses(sModel1, zik, pv, qu);
         }
 
         /// <summary>
         /// Построение эллипса рассеивания для ЗИКа. Альтернативный алгоритм.
         /// </summary>
-        /// <param name="dModel">Детерм. модель</param>
-        /// <param name="sModel">Стох. модель</param>
+        /// <param name="dModel1">Детерм. модель</param>
+        /// <param name="sModel1">Стох. модель</param>
         /// <param name="zik">Элементы ЗИКа</param>
         /// <param name="k">Кратность зика</param>
         /// <returns>2 набора точек - координаты внешнего и внутреннего эллипсов</returns>
-        public static (List<PointX> Outer, List<PointX> Inner) GetForZik2(DeterministicModel dModel,
-            StochasticModel sModel, List<PointX> zik, double qu = 1.821)
+        public static (List<PointX> Outer, List<PointX> Inner) GetForZik2(DeterministicModel1 dModel1,
+            StochasticModel1 sModel1, List<PointX> zik, double qu = 1.821)
         {
-            var pv = GetPVectors(dModel, zik);
-            return BuildEllipses(sModel, zik, pv, qu);
+            var pv = GetPVectors(dModel1, zik);
+            return BuildEllipses(sModel1, zik, pv, qu);
         }
 
-        public static List<double> GetMuForZik(StochasticModel model, List<PointX> zik, double qu = 1.821)
+        public static List<double> GetMuForZik(StochasticModel1 model, List<PointX> zik)
         {
             var boundaries = FindBoundaries(zik);
             var x10 = boundaries.X1Min + (boundaries.X1Max - boundaries.X1Min) / 2;
@@ -98,7 +99,7 @@ namespace DS
         /// Построение эллипса рассеивания для хаоса, описанного критическими линиями.
         /// </summary>
         public static IEnumerable<(LcType Type, int LcIndex, int Index, PointX Point)> GetForChaosLc(
-            DeterministicModel model, LcSet lcSet, double eps = 0.01, double kq = 0.001)
+            Model1 model, LcSet lcSet, double eps = 0.01, double kq = 0.001)
         {
             var lcEllipsePoints = GetLcEllipseMap(model, lcSet, eps, kq);
             var borderPoints = lcSet.GetBorderPoints();
@@ -109,7 +110,7 @@ namespace DS
                         lcEllipsePoints[borderPoint.Type][borderPoint.LcIndex, borderPoint.Index]);
         }
 
-        private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(DeterministicModel model, LcSet lcSet,
+        private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(Model1 model, LcSet lcSet,
             double eps, double kq)
         {
             var keps = 3 * eps;
@@ -230,7 +231,7 @@ namespace DS
             return new Dictionary<LcType, PointX[,]> { { LcType.H, mapH }, { LcType.V, mapV } };
         }
 
-        private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel model,
+        private static (List<PointX> Outer, List<PointX> Inner) BuildEllipses(StochasticModel1 model,
             List<PointX> zik, List<double[]> pv, double qu)
         {
             var p = pv.Select(v => v.Outer(v)).ToList();
@@ -336,10 +337,10 @@ namespace DS
                 .ToList();
         }
 
-        private static List<double[]> GetPVectors(DeterministicModel model, List<PointX> zik)
+        private static List<double[]> GetPVectors(IModel model, List<PointX> zik)
         {
             var pv = new List<double[]>();
-            var (p1, p2) = (zik[0], zik[zik.Count - 1]);
+            var (p1, p2) = (zik[0], zik[^1]);
 
             for (var i = 0; i < zik.Count; i++)
             {

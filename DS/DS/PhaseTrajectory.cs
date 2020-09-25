@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
 
 namespace DS
 {
     public static class PhaseTrajectory
     {
-        public static List<PointX> Get(Model model, PointX start, int skipCount, int getCount)
+        public static List<PointX> Get(IModel model, PointX start, int skipCount, int getCount)
         {
             var current = start;
             var points = new List<PointX>();
@@ -14,7 +15,7 @@ namespace DS
             {
                 var next = model.GetNextPoint(current);
 
-                if (next.TendsToInfinity(model))
+                if (next.TendsToInfinity(model.AbsInf))
                     return new List<PointX> { PointX.Infinity };
 
                 if (i >= skipCount)
@@ -26,7 +27,7 @@ namespace DS
             return points;
         }
 
-        public static List<PointX> GetWhileNotConnect(Model model, PointX start, int skipCount, double eps, int k = 1)
+        public static List<PointX> GetWhileNotConnect(IModel model, PointX start, int skipCount, double eps, int k = 1)
         {
             var points = new List<PointX>();
             var current = start;
@@ -46,7 +47,7 @@ namespace DS
                 if (points.Count > 800000)
                     return new List<PointX>();
 
-                if (current.TendsToInfinity(model))
+                if (current.TendsToInfinity(model.AbsInf))
                     return new List<PointX> { PointX.Infinity };
 
                 points.Add(current);

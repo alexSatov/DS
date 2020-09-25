@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
 
 namespace DS
 {
     public static class AttractorPool
     {
-        public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2(Model model, PointX leftBottom, PointX rightTop,
+        public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2(IModel model, PointX leftBottom, PointX rightTop,
             double step1, double step2)
         {
             var result = new Dictionary<PointX, HashSet<PointX>>();
@@ -49,7 +50,7 @@ namespace DS
             return result;
         }
 
-        public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2Parallel(Model model, PointX leftBottom,
+        public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2Parallel(Model1 model, PointX leftBottom,
             PointX rightTop, double step1, double step2)
         {
             var processorCount = Environment.ProcessorCount;
@@ -70,7 +71,7 @@ namespace DS
                 .ToDictionary(g => g.Key, g => g.SelectMany(v => v).ToHashSet());
         }
 
-        public static (IList<PointX> First, IList<PointX> Second) GetPoolFor2Attractors(Model model,
+        public static (IList<PointX> First, IList<PointX> Second) GetPoolFor2Attractors(Model1 model,
             Func<IList<PointX>, bool> isFirstAttractor, PointX leftBottom, PointX rightTop, double step1, double step2)
         {
             var first = new List<PointX>();
@@ -91,7 +92,7 @@ namespace DS
             return (first, second);
         }
 
-        public static (IList<PointX> First, IList<PointX> Second) GetPoolFor2AttractorsParallel(Model model,
+        public static (IList<PointX> First, IList<PointX> Second) GetPoolFor2AttractorsParallel(Model1 model,
             Func<IList<PointX>, bool> isFirstAttractor, PointX leftBottom, PointX rightTop, double step1, double step2)
         {
             var processorCount = Environment.ProcessorCount;

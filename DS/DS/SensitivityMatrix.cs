@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Accord.Math;
-using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
 
 namespace DS
 {
@@ -14,7 +15,7 @@ namespace DS
         /// <param name="model">Модель</param>
         /// <param name="attractorPoints">Элементы аттрактора (равновесия или цикла)</param>
         /// <returns>Матрицы чувствительности для каждой точки аттрактора</returns>
-        public static IEnumerable<double[,]> Get(StochasticModel model, IList<PointX> attractorPoints)
+        public static IEnumerable<double[,]> Get(StochasticModel1 model, IList<PointX> attractorPoints)
         {
             var fn = new List<double[,]>();
             var ftn = new List<double[,]>();
@@ -29,8 +30,8 @@ namespace DS
                 qn.Add(model.GetMatrixQ(point));
             }
 
-            var b = fn[fn.Count - 1];
-            var q = qn[qn.Count - 1];
+            var b = fn[^1];
+            var q = qn[^1];
 
             for (var i = attractorPoints.Count - 2; i >= 0; i--)
             {
@@ -57,7 +58,7 @@ namespace DS
             }
         }
 
-        public static double[,] Get(StochasticModel model, PointX attractor)
+        public static double[,] Get(StochasticModel1 model, PointX attractor)
         {
             return Get(model, new List<PointX> { attractor }).First();
         }

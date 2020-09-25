@@ -4,9 +4,9 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using DS.MathStructures;
+using DS.MathStructures.Points;
 
-namespace DS
+namespace DS.Tests.Charts
 {
     public class ChartForm : Form
     {

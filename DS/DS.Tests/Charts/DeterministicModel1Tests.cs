@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -7,12 +6,23 @@ using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
 using DS.Helpers;
 using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
+using NUnit.Framework;
 
-namespace DS
+namespace DS.Tests.Charts
 {
-    public static class DeterministicTest
+    public class DeterministicModel1Tests : ChartTests
     {
-        public static ChartForm Test1(DeterministicModel model)
+        private DeterministicModel1 model;
+
+        protected override void OnSetUp()
+        {
+            model = new DeterministicModel1(0.0002, 0.00052, 10, 20, 0.25, 1);
+        }
+
+        [Test]
+        public void Test1()
         {
             model.D12 = 0.0014;
             model.D21 = 0.0075;
@@ -20,10 +30,11 @@ namespace DS
             var points = PhaseTrajectory.Get(model, new PointX(20, 40), 2000, 1000)
                 .Select(p => (p.X1, p.X2));
 
-            return new ChartForm(points, 0, 40, 0, 80);
+            Chart = new ChartForm(points, 0, 40, 0, 80);
         }
 
-        public static ChartForm Test2(DeterministicModel model)
+        [Test]
+        public void Test2()
         {
             model.D21 = 0.0063;
 
@@ -31,10 +42,11 @@ namespace DS
                 .Distinct()
                 .Select(v => (v.D12, v.X1));
 
-            return new ChartForm(points, 0.0017, 0.0025, 10, 45);
+            Chart = new ChartForm(points, 0.0017, 0.0025, 10, 45);
         }
 
-        public static ChartForm Test3(DeterministicModel model)
+        [Test]
+        public void Test3()
         {
             model.D12 = 0.0017;
             model.D21 = 0.005;
@@ -56,18 +68,20 @@ namespace DS
 
             AddCycles(chart, points.CyclePoints);
 
-            return chart;
+            Chart = chart;
         }
 
-        public static ChartForm Test4(DeterministicModel model)
+        [Test]
+        public void Test4()
         {
             var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.004, 0.016,
                 0.00002, 0.00008);
 
-            return GetCyclesChart(points, 0, 0.004, 0, 0.016);
+            Chart = GetCyclesChart(points, 0, 0.004, 0, 0.016);
         }
 
-        public static ChartForm Test5(DeterministicModel model)
+        [Test]
+        public void Test5()
         {
             model.D12 = 0.00005;
             model.D21 = 0.007;
@@ -76,10 +90,11 @@ namespace DS
 
             var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 
-            return chart;
+            Chart = chart;
         }
 
-        public static ChartForm Test6(DeterministicModel model)
+        [Test]
+        public void Test6()
         {
             const double step = 0.000002;
             model.D21 = 0.0075;
@@ -116,33 +131,36 @@ namespace DS
 
             //PointSaver.SaveToFile("d12_x1_1.txt", points);
 
-            return new ChartForm(points, 0, 0.00245, 0, 45);
+            Chart = new ChartForm(points, 0, 0.00245, 0, 45);
         }
 
         // d12 = 0.00145 - ЗИК и 3х цикл: (6, 62); (17, 44); (24, 75)
         // d12 = 0.00197 - равновесие и 3х цикл: (12, 65); (20, 62); (23, 72)
         // d12 = 0.00217 - равновесие и равновесие: (18, 68) и (35, 44)
         // d12 = 0.002382 - хаос и равновесие: (20, 68)
-        public static ChartForm Test7(DeterministicModel model)
+        [Test]
+        public void Test7()
         {
             model.D12 = 0.001909;
             model.D21 = 0.0075;
 
             var points = AttractorPool.GetX1VsX2Parallel(model, new PointX(-5, -5), new PointX(45, 85), 0.5, 0.9);
 
-            return AttractorPoolChart.GetAttractorPoolChart1(points, -5, 45, -5, 85);
+            Chart = AttractorPoolChart.GetAttractorPoolChart1(points, -5, 45, -5, 85);
         }
 
-        public static ChartForm Test8(DeterministicModel model)
+        [Test]
+        public void Test8()
         {
             var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
                 new PointD(0.00159, 0.0072622), new Rect(0, 0.00245, 0.007, 0.008), 0.001, 0.000004, 0.0000017);
             var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 
-            return chart;
+            Chart = chart;
         }
 
-        public static ChartForm Test9(DeterministicModel model)
+        [Test]
+        public void Test9()
         {
             const double step = 0.0000002;
             model.D21 = 0.0075;
@@ -182,11 +200,12 @@ namespace DS
             PointSaver.SaveToFile("lyapunov\\l1.txt", l1Points);
             PointSaver.SaveToFile("lyapunov\\l2.txt", l2Points);
 
-            return chart;
+            Chart = chart;
         }
 
         // 0.000003, 0.000001363 (по 734)
-        public static ChartForm Test10(DeterministicModel model)
+        [Test]
+        public void Test10()
         {
             model.D12 = 0.0002;
             model.D21 = 0.007;
@@ -223,11 +242,10 @@ namespace DS
 
             File.WriteAllText("lyapunovMap\\l1.txt", l1Result.ToString());
             File.WriteAllText("lyapunovMap\\l2.txt", l2Result.ToString());
-
-            return null;
         }
 
-        public static ChartForm Test11(DeterministicModel model)
+        [Test]
+        public void Test11()
         {
             model.D12 = 0.002382;
             model.D21 = 0.0075;
@@ -237,13 +255,14 @@ namespace DS
 
             PointSaver.SaveToFile("chaosAttractor.txt", points);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.002382)
         /// </summary>
-        public static ChartForm Test12(DeterministicModel model)
+        [Test]
+        public void Test12()
         {
             model.D12 = 0.00237;
             model.D21 = 0.0075;
@@ -262,13 +281,14 @@ namespace DS
             chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 5);
             chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 5);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.00237). Выделяем границу.
         /// </summary>
-        public static ChartForm Test13(DeterministicModel model)
+        [Test]
+        public void Test13()
         {
             model.D12 = 0.00237;
             model.D21 = 0.0075;
@@ -284,13 +304,14 @@ namespace DS
                 chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
                     seriesChartType: SeriesChartType.FastLine);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение бассейнов
         /// </summary>
-        public static ChartForm Test15(DeterministicModel model)
+        [Test]
+        public void Test15()
         {
             model.D12 = 0.00236;
             model.D21 = 0.0075;
@@ -305,13 +326,14 @@ namespace DS
             //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
             //PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Карта режимов для правой области
         /// </summary>
-        public static ChartForm Test16_1(DeterministicModel model)
+        [Test]
+        public void Test16_1()
         {
             model.D12 = 0.0022;
             model.D21 = 0.001;
@@ -320,21 +342,22 @@ namespace DS
 
             var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Карта режимов для правой области (полярный алгоритм)
         /// синий - 4 цикл: D12=0.0025, D21=0.004; красный - 3 цикл: D12=0.0025, D21=0.0055
         /// </summary>
-        public static ChartForm Test16_2(DeterministicModel model)
+        [Test]
+        public void Test16_2()
         {
             var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
                 new PointD(0.0025, 0.0055), new Rect(0.0022, 0.0032, 0.001, 0.01), 0.001, 0.000001, 0.00001);
 
             var chart = GetCyclesChart(points, 0.0022, 0.0032, 0.001, 0.01);
 
-            return chart;
+            Chart = chart;
         }
 
         private static ChartForm GetCyclesChart(BifurcationDiagram.D12VsD21Result points,

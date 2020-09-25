@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Accord.Math;
-using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.MathStructures.Vectors;
+using DS.Models;
 using Matrix = Accord.Math.Matrix;
 
 namespace DS
@@ -27,7 +29,7 @@ namespace DS
             return x;
         }
 
-        public static IEnumerable<(double D12, double L1, double L2)> GetD12Indicators(Model model, PointX start,
+        public static IEnumerable<(double D12, double L1, double L2)> GetD12Indicators(IModel model, PointX start,
             double d12End, double step, bool byPrevious = false, double eps = 0.00001, double t = 100000)
         {
             var result = new List<(double D12, double L1, double L2)>();
@@ -44,7 +46,7 @@ namespace DS
             return result;
         }
 
-        public static IEnumerable<(double D12, double L1, double L2)> GetD12IndicatorsParallel(Model model, PointX start,
+        public static IEnumerable<(double D12, double L1, double L2)> GetD12IndicatorsParallel(IModel model, PointX start,
             double d12End, double step, double eps = 0.00001, double t = 100000)
         {
             var processorCount = Environment.ProcessorCount;
@@ -65,7 +67,7 @@ namespace DS
                     yield return values;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD12(Model model, PointX start,
+        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD12(IModel model, PointX start,
             double d12End, double d21End, double step1, double step2, bool byPrevious = false,
             double eps = 0.00001, double t = 100000)
         {
@@ -89,7 +91,7 @@ namespace DS
             return result;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD21(Model model, PointX start,
+        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD21(IModel model, PointX start,
             double d12End, double d21End, double step1, double step2, bool byPrevious = false,
             double eps = 0.00001, double t = 100000)
         {
@@ -113,7 +115,7 @@ namespace DS
             return result;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD12(Model model, PointX start,
+        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD12(Model1 model, PointX start,
             double d12End, double d21End, double step1, double step2, double eps = 0.00001, double t = 100000)
         {
             var processorCount = Environment.ProcessorCount;
@@ -134,7 +136,7 @@ namespace DS
                     yield return values;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD21(Model model, PointX start,
+        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD21(Model1 model, PointX start,
             double d12End, double d21End, double step1, double step2, double eps = 0.00001, double t = 100000)
         {
             var processorCount = Environment.ProcessorCount;
@@ -155,7 +157,7 @@ namespace DS
                     yield return values;
         }
 
-        private static (PointX O, double L1, double L2) FindL1L2(Model model, PointX start, PointX previous,
+        private static (PointX O, double L1, double L2) FindL1L2(IModel model, PointX start, PointX previous,
             bool byPrevious, double eps, double t)
         {
             var o = byPrevious ? previous : start;

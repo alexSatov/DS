@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
 
 namespace DS
 {
@@ -17,7 +19,7 @@ namespace DS
             Type = type;
         }
 
-        public Lc GetNextLc(DeterministicModel model)
+        public Lc GetNextLc(DeterministicModel1 model)
         {
             return new Lc(this.Select(model.GetNextPoint), Type);
         }

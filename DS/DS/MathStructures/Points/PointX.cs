@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using DS.MathStructures.Vectors;
 
-namespace DS.MathStructures
+namespace DS.MathStructures.Points
 {
-    public struct PointX : IPoint
+    public readonly struct PointX : IPoint
     {
         public double X1 { get; }
         public double X2 { get; }
@@ -29,14 +30,9 @@ namespace DS.MathStructures
             return X1 == double.MaxValue && X2 == double.MaxValue;
         }
 
-        public bool TendsToInfinity(Model model)
+        public bool TendsToInfinity(double absInf)
         {
-            return Math.Abs(X1) > model.MaxX || Math.Abs(X2) > model.MaxX;
-        }
-
-        public override string ToString()
-        {
-            return $"({X1.ToString(CultureInfo.InvariantCulture)}, {X2.ToString(CultureInfo.InvariantCulture)})";
+            return Math.Abs(X1) > absInf || Math.Abs(X2) > absInf;
         }
 
         public void Deconstruct(out double x1, out double x2)
@@ -68,37 +64,10 @@ namespace DS.MathStructures
         {
             return new PointX(left.X + right.X, left.Y + right.Y);
         }
-    }
-
-    public struct PointD : IPoint
-    {
-        public double D12 { get; set; }
-        public double D21 { get; set; }
-
-        public double X => D12;
-        public double Y => D21;
-
-        public PointD(double d12, double d21)
-        {
-            D12 = d12;
-            D21 = d21;
-        }
 
         public override string ToString()
         {
-            return $"({D12.ToString(CultureInfo.InvariantCulture)}, {D21.ToString(CultureInfo.InvariantCulture)})";
+            return $"({X1.ToString(CultureInfo.InvariantCulture)}, {X2.ToString(CultureInfo.InvariantCulture)})";
         }
-
-        public void Deconstruct(out double d12, out double d21)
-        {
-            d12 = D12;
-            d21 = D21;
-        }
-    }
-
-    public interface IPoint
-    {
-        double X { get; }
-        double Y { get; }
     }
 }

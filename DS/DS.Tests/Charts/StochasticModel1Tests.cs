@@ -7,17 +7,29 @@ using System.Windows.Forms.DataVisualization.Charting;
 using Accord.Math;
 using Accord.Math.Decompositions;
 using DS.Helpers;
-using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.Models;
+using NUnit.Framework;
 
-namespace DS
+namespace DS.Tests.Charts
 {
     /// <summary>
     /// 1, 1, 0 - аддитивный шум
     /// 0, 0, 1 - параметрический шум
     /// </summary>
-    public static class StochasticTest
+    public class StochasticModel1Tests : ChartTests
     {
-        public static ChartForm Test1(DeterministicModel dModel, StochasticModel sModel)
+        private DeterministicModel1 dModel;
+        private StochasticModel1 sModel;
+
+        protected override void OnSetUp()
+        {
+            dModel = new DeterministicModel1(0.0002, 0.00052, 10, 20, 0.25, 1);
+            sModel = new StochasticModel1(0.0002, 0.00052, 10, 20, 0.25, 1);
+        }
+
+        [Test]
+        public void Test1()
         {
             sModel.Sigma1 = 1;
             sModel.Sigma2 = 1;
@@ -61,10 +73,11 @@ namespace DS
 
             //PointSaver.SaveToFile("d12_x1_3_stochastic.txt", points);
 
-            return new ChartForm(points, 0, 0.00245, 0, 45);
+            Chart = new ChartForm(points, 0, 0.00245, 0, 45);
         }
 
-        public static ChartForm Test2(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test2()
         {
             dModel.D12 = 0.00194;
             sModel.D12 = 0.00194;
@@ -97,10 +110,11 @@ namespace DS
                 PointSaver.SaveToFile($"ellipse/ellipse{i + 1}.txt", ellipse);
             }
 
-            return chart;
+            Chart = chart;
         }
 
-        public static ChartForm Test3(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test3()
         {
             const double step = 0.0000005;
 
@@ -196,13 +210,14 @@ namespace DS
             var chart = new ChartForm(mu1, 0, 0.0025, 0, 50, name: "d12 v mu1");
             chart.AddSeries("d12 v mu2", mu2, Color.Orange);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение однокусочного зика [с бассейном]
         /// </summary>
-        public static ChartForm Test4(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test4()
         {
             dModel.D12 = 0.00157;
             sModel.D12 = 0.00157;
@@ -232,13 +247,14 @@ namespace DS
             //PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
             //PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение многокусочного зика
         /// </summary>
-        public static ChartForm Test5(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test5()
         {
             dModel.D12 = 0.00186;
             sModel.D12 = 0.00186;
@@ -270,10 +286,11 @@ namespace DS
             PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
             PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
 
-            return chart;
+            Chart = chart;
         }
 
-        public static ChartForm Test6(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test6()
         {
             const double step = 0.000005;
             var d12 = 0.000943;
@@ -307,11 +324,14 @@ namespace DS
 
             PointSaver.SaveToFile("zik_d12_mu_add.txt", result);
 
-            return chart;
+            Chart = chart;
         }
 
-        // (20, 40) -> [0.00145, 0.001682]; (22.060731438419, 58.3431519485857) -> [0.001909, 0.0019746]
-        public static ChartForm Test7(DeterministicModel dModel, StochasticModel sModel)
+        /// <summary>
+        /// (20, 40) -> [0.00145, 0.001682]; (22.060731438419, 58.3431519485857) -> [0.001909, 0.0019746]
+        /// </summary>
+        [Test]
+        public void Test7()
         {
             const double step = 0.0000005;
 
@@ -392,23 +412,24 @@ namespace DS
             chart.AddSeries("d12 v mu31", mu31, Color.Orange);
             chart.AddSeries("d12 v mu32", mu32, Color.OrangeRed);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Крит. интенсивность. 1 зона: ЗИК - 3цикл, D12 in (0.00145, 0.001682)
         /// </summary>
-        public static ChartForm Test8_1(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test8_1()
         {
             const double step = 0.0000023; // 100 итераций
 
-            SetModels(dModel, sModel);
+            SetModels();
 
             (double D12, double Eps) SearchLR(double d12)
             {
                 var zik = new List<PointX> { new PointX(12, 60) };
-                var dInnerModel = (DeterministicModel) dModel.Copy();
-                var sInnerModel = (StochasticModel) sModel.Copy();
+                var dInnerModel = (DeterministicModel1) dModel.Copy();
+                var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
 
@@ -448,8 +469,8 @@ namespace DS
             (double D12, double Eps) SearchRL(double d12)
             {
                 var cycle3 = new List<PointX> { new PointX(20, 40) };
-                var dInnerModel = (DeterministicModel) dModel.Copy();
-                var sInnerModel = (StochasticModel) sModel.Copy();
+                var dInnerModel = (DeterministicModel1) dModel.Copy();
+                var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
 
@@ -493,23 +514,24 @@ namespace DS
 
             PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Крит. интенсивность. 2 зона: равновесие - 3цикл, D12 in (0.001909, 0.001974)
         /// </summary>
-        public static ChartForm Test8_2(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test8_2()
         {
             const double step = 0.000001; // 65 итераций
 
-            SetModels(dModel, sModel);
+            SetModels();
 
             (double D12, double Eps) SearchLR(double d12)
             {
                 var eq = new List<PointX> { new PointX(18, 65) };
                 var dInnerModel = dModel.Copy();
-                var sInnerModel = (StochasticModel) sModel.Copy();
+                var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
 
@@ -552,7 +574,7 @@ namespace DS
             {
                 var cycle3 = new List<PointX> { new PointX(21, 61) };
                 var dInnerModel = dModel.Copy();
-                var sInnerModel = (StochasticModel) sModel.Copy();
+                var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
 
@@ -598,23 +620,24 @@ namespace DS
 
             PointSaver.SaveToFile("crit_intens\\zone2_2.txt", points);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Крит. интенсивность. 3 зона: равновесие - равновесие, D12 in (0.002166, 0.002294)
         /// </summary>
-        public static ChartForm Test8_3(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test8_3()
         {
             const double step = 0.0000012; // 106 итераций
 
-            SetModels(dModel, sModel);
+            SetModels();
 
             (double D12, double Eps) SearchLR(double d12)
             {
                 var eq1 = new List<PointX> { new PointX(18, 68) };
                 var dInnerModel = dModel.Copy();
-                var sInnerModel = (StochasticModel) sModel.Copy();
+                var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
 
@@ -656,7 +679,7 @@ namespace DS
             {
                 var eq2 = new List<PointX> { new PointX(35.1513396288763, 42.157142188389) };
                 var dInnerModel = dModel.Copy();
-                var sInnerModel = (StochasticModel) sModel.Copy();
+                var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
 
@@ -698,13 +721,14 @@ namespace DS
 
             PointSaver.SaveToFile("crit_intens\\zone3_2.txt", points);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Крит. интенсивность. 4 зона: ЗИК - 3ЗИК, D12 in (0.001682, 0.00173)
         /// </summary>
-        public static ChartForm Test8_4(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test8_4()
         {
             sModel.Sigma1 = 1;
             sModel.Sigma2 = 1;
@@ -750,17 +774,18 @@ namespace DS
             chart.AddSeries("attractor2", new List<PointX> { eq2 }, Color.Blue, markerSize: 8);
             chart.AddSeries("ellipse", _ellipse, Color.Red);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Крит. интенсивность. 5 зона: равновесие - 3ЗИК, D12 in (0.001855, 0.001909)
         /// </summary>
-        public static ChartForm Test8_5(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test8_5()
         {
-            SetModels(dModel, sModel);
+            SetModels();
 
-            IList<(double D12, double Eps)> Search(DeterministicModel dInnerModel, StochasticModel sInnerModel,
+            IList<(double D12, double Eps)> Search(DeterministicModel1 dInnerModel, StochasticModel1 sInnerModel,
                 double d12Start, double d12End)
             {
                 const double step = 0.000001;
@@ -820,13 +845,14 @@ namespace DS
 
             PointSaver.SaveToFile("crit_intens\\zone5_1.txt", points);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.00237) и эллипса рассеивания вокруг границы.
         /// </summary>
-        public static ChartForm Test9(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test9()
         {
             const double eps = 0.05, d12 = 0.00237, d21 = 0.0075;
 
@@ -859,14 +885,15 @@ namespace DS
             PointSaver.SaveToFile("chaos_ellipse/border.txt", borderSegments.SelectMany(s => s.GetBoundaryPoints()));
             PointSaver.SaveToFile("chaos_ellipse/ellipse.txt", ellipse.Select(e => (e.LcIndex, e.Index, e.Point.X1, e.Point.X2)));
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.002538, d21 = 0.0055)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
-        public static ChartForm Test10(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test10()
         {
             const double eps = 0.05, d12 = 0.002538, d21 = 0.0055;
 
@@ -897,14 +924,15 @@ namespace DS
             chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 5);
             //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.0024, d21 = 0.0055)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
-        public static ChartForm Test11(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test11()
         {
             const double eps = 0.05, d12 = 0.0024, d21 = 0.0055;
 
@@ -934,14 +962,15 @@ namespace DS
 
             chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = d21 = 0)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
-        public static ChartForm Test12(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test12()
         {
             const double eps = 0.1, d12 = 0, d21 = 0;
 
@@ -981,14 +1010,15 @@ namespace DS
 
             chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 4);
 
-            return chart;
+            Chart = chart;
         }
 
         /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.001814, d21 = 0.00785312)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
-        public static ChartForm Test13(DeterministicModel dModel, StochasticModel sModel)
+        [Test]
+        public void Test13()
         {
             const double eps = 0.1, d12 = 0.001814, d21 = 0.00785312;
 
@@ -1032,7 +1062,7 @@ namespace DS
 
             //chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 4);
 
-            return chart;
+            Chart = chart;
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,
@@ -1054,8 +1084,8 @@ namespace DS
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel_Old(
-            DeterministicModel dModel, StochasticModel sModel, double d12Start, double d12End,
-            Func<DeterministicModel, StochasticModel, double, double, IList<(double D12, double Eps)>> searcher)
+            DeterministicModel1 dModel1, StochasticModel1 sModel1, double d12Start, double d12End,
+            Func<DeterministicModel1, StochasticModel1, double, double, IList<(double D12, double Eps)>> searcher)
         {
             var n = Environment.ProcessorCount;
             var tasks = new Task<IList<(double D12, double Eps)>>[n];
@@ -1065,8 +1095,8 @@ namespace DS
             {
                 var d12PartStart = d12Start + d12Part * i;
                 var d12PartEnd = d12Start + d12Part * (i + 1);
-                tasks[i] = Task.Run(() => searcher((DeterministicModel) dModel.Copy(),
-                    (StochasticModel) sModel.Copy(), d12PartStart, d12PartEnd));
+                tasks[i] = Task.Run(() => searcher((DeterministicModel1) dModel1.Copy(),
+                    (StochasticModel1) sModel1.Copy(), d12PartStart, d12PartEnd));
             }
 
             var points = tasks.SelectMany(t => t.Result).ToList();
@@ -1075,7 +1105,7 @@ namespace DS
             return (points, chart);
         }
 
-        private static IList<PointX> GetEllipse(StochasticModel model, PointX point, double[,] matrix = null)
+        private static IList<PointX> GetEllipse(StochasticModel1 model, PointX point, double[,] matrix = null)
         {
             var sensitivityMatrix = matrix ?? SensitivityMatrix.Get(model, point);
             var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
@@ -1086,7 +1116,7 @@ namespace DS
                 eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), model.Eps).ToList();
         }
 
-        private static IEnumerable<IList<PointX>> GetEllipses(StochasticModel model, IList<PointX> points)
+        private static IEnumerable<IList<PointX>> GetEllipses(StochasticModel1 model, IList<PointX> points)
         {
             return SensitivityMatrix.Get(model, points).Select((m, i) => GetEllipse(model, points[i], m));
         }
@@ -1114,7 +1144,7 @@ namespace DS
             return true;
         }
 
-        private static void SetModels(DeterministicModel dModel, StochasticModel sModel)
+        private void SetModels()
         {
             sModel.Sigma1 = 0;
             sModel.Sigma2 = 0;

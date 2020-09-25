@@ -1,6 +1,6 @@
-﻿namespace DS.MathStructures
+﻿namespace DS.MathStructures.Points
 {
-    public struct IntersectPoint
+    public readonly struct IntersectPoint
     {
         public bool IsIntersect { get; }
         public PointX? Point { get; }

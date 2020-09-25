@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DS.MathStructures;
+using DS.MathStructures.Points;
+using DS.MathStructures.Vectors;
+using DS.Models;
 
 namespace DS
 {
@@ -26,7 +29,7 @@ namespace DS
             }
         }
 
-        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsX(Model model, PointX start,
+        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsX(IModel model, PointX start,
             double d12End, double step)
         {
             for (; model.D12 < d12End; model.D12 += step)
@@ -40,7 +43,7 @@ namespace DS
             }
         }
 
-        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(Model model, PointX start,
+        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(Model1 model, PointX start,
             double d12End, double step, bool rightToLeft = false)
         {
             var previous = start;
@@ -63,7 +66,7 @@ namespace DS
                 if (points[0].IsInfinity())
                     continue;
 
-                previous = points[points.Count - 1];
+                previous = points[^1];
 
                 if (model.D12 > 0.00156)
                 {
@@ -75,11 +78,11 @@ namespace DS
             }
         }
 
-        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(DeterministicModel dModel,
-            StochasticModel sModel, PointX start, double d12End, double step, bool rightToLeft = false)
+        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(DeterministicModel1 dModel1,
+            StochasticModel1 sModel1, PointX start, double d12End, double step, bool rightToLeft = false)
         {
             var previous = start;
-            var d12 = dModel.D12;
+            var d12 = dModel1.D12;
             Func<bool> condition;
 
             if (rightToLeft)
@@ -92,10 +95,10 @@ namespace DS
 
             for (; condition(); d12 += step)
             {
-                dModel.D12 = d12;
-                sModel.D12 = d12;
-                var attractor = PhaseTrajectory.Get(dModel, previous, 9999, 1)[0];
-                var points = PhaseTrajectory.Get(sModel, attractor, 0, 2000);
+                dModel1.D12 = d12;
+                sModel1.D12 = d12;
+                var attractor = PhaseTrajectory.Get(dModel1, previous, 9999, 1)[0];
+                var points = PhaseTrajectory.Get(sModel1, attractor, 0, 2000);
 
                 if (points[0].IsInfinity())
                     continue;
@@ -107,7 +110,7 @@ namespace DS
             }
         }
 
-        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model model, PointX start,
+        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXParallel(Model1 model, PointX start,
             double d12End, double step)
         {
             var processorCount = Environment.ProcessorCount;
@@ -128,7 +131,7 @@ namespace DS
                     yield return values;
         }
 
-        public static D12VsD21Result GetD12VsD21(Model model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21(Model1 model, PointX start, double d12End, double d21End,
             double step1, double step2)
         {
             var d21Start = model.D21;
@@ -144,7 +147,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousD21(Model model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21ByPreviousD21(IModel model, PointX start, double d12End, double d21End,
             double step1, double step2, bool rightToLeft = false, bool upToDown = false)
         {
             var d21Start = model.D21;
@@ -178,7 +181,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousD12(Model model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21ByPreviousD12(IModel model, PointX start, double d12End, double d21End,
             double step1, double step2)
         {
             var d12Start = model.D12;
@@ -198,7 +201,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ParallelByD12(Model model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21ParallelByD12(Model1 model, PointX start, double d12End, double d21End,
             double step1, double step2, bool rightToLeft = false, bool upToDown = false)
         {
             var processorCount = Environment.ProcessorCount;
@@ -217,7 +220,7 @@ namespace DS
             return UniteResults(tasks);
         }
 
-        public static D12VsD21Result GetD12VsD21ParallelByD21(Model model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21ParallelByD21(Model1 model, PointX start, double d12End, double d21End,
             double step1, double step2)
         {
             var processorCount = Environment.ProcessorCount;
@@ -236,7 +239,7 @@ namespace DS
             return UniteResults(tasks);
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousPolar(Model model, PointX startX, PointD startD,
+        public static D12VsD21Result GetD12VsD21ByPreviousPolar(IModel model, PointX startX, PointD startD,
             Rect dArea, double angleStep, double step1, double step2,
             double startAngle = 0, double endAngle = 2 * Math.PI)
         {
@@ -264,7 +267,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousPolarParallel(Model model, PointX startX, PointD startD,
+        public static D12VsD21Result GetD12VsD21ByPreviousPolarParallel(IModel model, PointX startX, PointD startD,
             Rect dArea, double angleStep, double step1, double step2,
             double startAngle = 0, double endAngle = 2 * Math.PI)
         {
@@ -286,7 +289,7 @@ namespace DS
             return UniteResults(tasks);
         }
 
-        private static void TryAddToResult(Model model, PointX point, D12VsD21Result result)
+        private static void TryAddToResult(IModel model, PointX point, D12VsD21Result result)
         {
             if (point.IsInfinity())
                 result.InfinityPoints.Add(new PointD(model.D12, model.D21));
@@ -306,7 +309,7 @@ namespace DS
             result.CyclePoints[cycle.Period].Add((new PointD(model.D12, model.D21), point));
         }
 
-        private static (bool Found, int Period) FindCycle(Model model, PointX first, PointX second)
+        private static (bool Found, int Period) FindCycle(IModel model, PointX first, PointX second)
         {
             var points = new PointX[16];
             points[0] = first;

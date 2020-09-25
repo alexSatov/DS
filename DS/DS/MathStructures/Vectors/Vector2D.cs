@@ -1,8 +1,9 @@
 ﻿using System;
+using DS.MathStructures.Points;
 
-namespace DS.MathStructures
+namespace DS.MathStructures.Vectors
 {
-    public struct Vector2D
+    public readonly struct Vector2D
     {
         public double X { get; }
         public double Y { get; }

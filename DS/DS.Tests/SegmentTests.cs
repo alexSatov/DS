@@ -1,4 +1,5 @@
 ﻿using DS.MathStructures;
+using DS.MathStructures.Points;
 using FluentAssertions;
 using NUnit.Framework;
 

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using DS.MathStructures.Points;
+using DS.MathStructures.Vectors;
 
 namespace DS.MathStructures
 {
-    public struct Segment
+    public readonly struct Segment
     {
         public PointX Start { get; }
         public PointX End { get; }
