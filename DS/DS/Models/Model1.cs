@@ -2,6 +2,7 @@
 
 namespace DS.Models
 {
+    /// <inheritdoc cref="IModel"/>
     public abstract class Model1 : IModel
     {
         public double A1 { get; set; }
@@ -16,6 +17,7 @@ namespace DS.Models
         public double Pb1 { get; set; }
         public double Pb2 { get; set; }
 
+        /// <inheritdoc />
         public double AbsInf => 100;
 
         protected Model1(double a1, double a2, double b1, double b2, double px, double py,
@@ -34,11 +36,13 @@ namespace DS.Models
             Pb2 = B2 / (Px * Py);
         }
 
+        /// <inheritdoc />
         public PointX GetNextPoint(PointX current)
         {
             return new PointX(F(current.X1, current.X2), G(current.X1, current.X2));
         }
 
+        /// <inheritdoc />
         public abstract IModel Copy();
 
         public double[,] GetMatrixF(PointX attractor)

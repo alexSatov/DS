@@ -11,7 +11,7 @@ using DS.MathStructures.Points;
 using DS.Models;
 using NUnit.Framework;
 
-namespace DS.Tests.Charts
+namespace DS.Tests.Charts.Model1
 {
     /// <summary>
     /// 1, 1, 0 - аддитивный шум
@@ -530,7 +530,7 @@ namespace DS.Tests.Charts
             (double D12, double Eps) SearchLR(double d12)
             {
                 var eq = new List<PointX> { new PointX(18, 65) };
-                var dInnerModel = dModel.Copy();
+                var dInnerModel = (DeterministicModel1) dModel.Copy();
                 var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
@@ -573,7 +573,7 @@ namespace DS.Tests.Charts
             (double D12, double Eps) SearchRL(double d12)
             {
                 var cycle3 = new List<PointX> { new PointX(21, 61) };
-                var dInnerModel = dModel.Copy();
+                var dInnerModel = (DeterministicModel1) dModel.Copy();
                 var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
@@ -636,7 +636,7 @@ namespace DS.Tests.Charts
             (double D12, double Eps) SearchLR(double d12)
             {
                 var eq1 = new List<PointX> { new PointX(18, 68) };
-                var dInnerModel = dModel.Copy();
+                var dInnerModel = (DeterministicModel1) dModel.Copy();
                 var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;
@@ -678,7 +678,7 @@ namespace DS.Tests.Charts
             (double D12, double Eps) SearchRL(double d12)
             {
                 var eq2 = new List<PointX> { new PointX(35.1513396288763, 42.157142188389) };
-                var dInnerModel = dModel.Copy();
+                var dInnerModel = (DeterministicModel1) dModel.Copy();
                 var sInnerModel = (StochasticModel1) sModel.Copy();
                 dInnerModel.D12 = d12;
                 sInnerModel.D12 = d12;

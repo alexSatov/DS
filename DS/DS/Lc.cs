@@ -19,7 +19,7 @@ namespace DS
             Type = type;
         }
 
-        public Lc GetNextLc(DeterministicModel1 model)
+        public Lc GetNextLc(IModel model)
         {
             return new Lc(this.Select(model.GetNextPoint), Type);
         }

@@ -29,7 +29,7 @@ namespace DS
             }
         }
 
-        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsX(IModel model, PointX start,
+        public static IEnumerable<(double D12, double X1, double X2)> GetD12VsX(Model1 model, PointX start,
             double d12End, double step)
         {
             for (; model.D12 < d12End; model.D12 += step)
@@ -119,7 +119,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var d12PartEnd = model.D12 + d12Part * (i + 1);
                 copy.D12 = model.D12 + d12Part * i;
 
@@ -147,7 +147,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousD21(IModel model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21ByPreviousD21(Model1 model, PointX start, double d12End, double d21End,
             double step1, double step2, bool rightToLeft = false, bool upToDown = false)
         {
             var d21Start = model.D21;
@@ -181,7 +181,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousD12(IModel model, PointX start, double d12End, double d21End,
+        public static D12VsD21Result GetD12VsD21ByPreviousD12(Model1 model, PointX start, double d12End, double d21End,
             double step1, double step2)
         {
             var d12Start = model.D12;
@@ -210,7 +210,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var d12PartEnd = model.D12 + d12Part * (i + 1);
                 copy.D12 = model.D12 + d12Part * i;
 
@@ -229,7 +229,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var d21PartEnd = model.D21 + d21Part * (i + 1);
                 copy.D21 = model.D21 + d21Part * i;
 
@@ -239,7 +239,7 @@ namespace DS
             return UniteResults(tasks);
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousPolar(IModel model, PointX startX, PointD startD,
+        public static D12VsD21Result GetD12VsD21ByPreviousPolar(Model1 model, PointX startX, PointD startD,
             Rect dArea, double angleStep, double step1, double step2,
             double startAngle = 0, double endAngle = 2 * Math.PI)
         {
@@ -267,7 +267,7 @@ namespace DS
             return result;
         }
 
-        public static D12VsD21Result GetD12VsD21ByPreviousPolarParallel(IModel model, PointX startX, PointD startD,
+        public static D12VsD21Result GetD12VsD21ByPreviousPolarParallel(Model1 model, PointX startX, PointD startD,
             Rect dArea, double angleStep, double step1, double step2,
             double startAngle = 0, double endAngle = 2 * Math.PI)
         {
@@ -277,7 +277,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var startAnglePart = startAngle + anglePart * i;
                 var endAnglePart = startAngle + anglePart * (i + 1);
 
@@ -289,7 +289,7 @@ namespace DS
             return UniteResults(tasks);
         }
 
-        private static void TryAddToResult(IModel model, PointX point, D12VsD21Result result)
+        private static void TryAddToResult(Model1 model, PointX point, D12VsD21Result result)
         {
             if (point.IsInfinity())
                 result.InfinityPoints.Add(new PointD(model.D12, model.D21));

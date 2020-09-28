@@ -3,6 +3,9 @@ using DS.MathStructures.Points;
 
 namespace DS.Models
 {
+    /// <summary>
+    /// Стохастическая версия модели <see cref="Model1"/>
+    /// </summary>
     public class StochasticModel1 : Model1
     {
         public double Eps { get; set; }
@@ -22,6 +25,7 @@ namespace DS.Models
             Sigma3 = sigma3;
         }
 
+        /// <inheritdoc />
         public override IModel Copy()
         {
             return new StochasticModel1(A1, A2, B1, B2, Px, Py, D12, D21, Eps, Sigma1, Sigma2, Sigma3);

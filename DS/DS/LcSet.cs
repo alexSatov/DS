@@ -115,44 +115,53 @@ namespace DS
                 .All(deltaPoint => IsOutOrBorderPoint(deltaPoint, allSegments));
         }
 
-        public static LcSet FromAttractor(DeterministicModel1 model, IList<PointX> attractor, int count,
-            int x1 = 20, int x2 = 40, int lcPointsCount = 100, double eps = 0.1)
+        public static LcSet FromAttractor(IModel model, IList<PointX> attractor, int count,
+            double? x1 = 20, double? x2 = 40, int lcPointsCount = 100, double eps = 0.1)
         {
+            if (!x1.HasValue && !x2.HasValue)
+                throw new InvalidOperationException("At least one x parameter must have value");
+
             Lc lc0H = null, lc0V = null;
 
-            var lc0HRawPoints = attractor.Where(p => Math.Abs(p.X2 - x2) < eps).ToList();
-            if (lc0HRawPoints.Count != 0)
+            if (x2.HasValue)
             {
-                var (minX1, maxX1) = (lc0HRawPoints.Min(p => p.X1), lc0HRawPoints.Max(p => p.X1));
-                var stepX1 = (maxX1 - minX1) / lcPointsCount;
-                var lc0HPoints = Enumerable.Range(0, lcPointsCount + 1)
-                    .Select(i => minX1 + i * stepX1)
-                    .Select(x1 => new PointX(x1, x2));
+                var lc0HRawPoints = attractor.Where(p => Math.Abs(p.X2 - x2.Value) < eps).ToList();
+                if (lc0HRawPoints.Count != 0)
+                {
+                    var (minX1, maxX1) = (lc0HRawPoints.Min(p => p.X1), lc0HRawPoints.Max(p => p.X1));
+                    var stepX1 = (maxX1 - minX1) / lcPointsCount;
+                    var lc0HPoints = Enumerable.Range(0, lcPointsCount + 1)
+                        .Select(i => minX1 + i * stepX1)
+                        .Select(x => new PointX(x, x2.Value));
 
-                lc0H = new Lc(lc0HPoints);
+                    lc0H = new Lc(lc0HPoints);
+                }
             }
 
-            var lc0VRawPoints = attractor.Where(p => Math.Abs(p.X1 - x1) < eps).ToList();
-            if (lc0VRawPoints.Count != 0)
+            if (x1.HasValue)
             {
-                var (minX2, maxX2) = (lc0VRawPoints.Min(p => p.X2), lc0VRawPoints.Max(p => p.X2));
-                var stepX2 = (maxX2 - minX2) / lcPointsCount;
-                var lc0VPoints = Enumerable.Range(0, lcPointsCount + 1)
-                    .Select(i => minX2 + i * stepX2)
-                    .Select(x2 => new PointX(x1, x2));
+                var lc0VRawPoints = attractor.Where(p => Math.Abs(p.X1 - x1.Value) < eps).ToList();
+                if (lc0VRawPoints.Count != 0)
+                {
+                    var (minX2, maxX2) = (lc0VRawPoints.Min(p => p.X2), lc0VRawPoints.Max(p => p.X2));
+                    var stepX2 = (maxX2 - minX2) / lcPointsCount;
+                    var lc0VPoints = Enumerable.Range(0, lcPointsCount + 1)
+                        .Select(i => minX2 + i * stepX2)
+                        .Select(x => new PointX(x1.Value, x));
 
-                lc0V = new Lc(lc0VPoints, LcType.V);
+                    lc0V = new Lc(lc0VPoints, LcType.V);
+                }
             }
 
             return FromZeroLc(model, lc0H, lc0V, count);
         }
 
-        public static LcSet FromZeroLc(DeterministicModel1 model, Lc lc0H, Lc lc0V, int count)
+        public static LcSet FromZeroLc(IModel model, Lc lc0H, Lc lc0V, int count)
         {
             return new LcSet(IterateLcs(model, lc0H, count), IterateLcs(model, lc0V, count));
         }
 
-        public static IEnumerable<Lc> IterateLcs(DeterministicModel1 model, Lc lc0, int count)
+        public static IEnumerable<Lc> IterateLcs(IModel model, Lc lc0, int count)
         {
             if (lc0 == null)
                 yield break;

@@ -10,7 +10,7 @@ using DS.MathStructures.Points;
 using DS.Models;
 using NUnit.Framework;
 
-namespace DS.Tests.Charts
+namespace DS.Tests.Charts.Model1
 {
     public class DeterministicModel1Tests : ChartTests
     {

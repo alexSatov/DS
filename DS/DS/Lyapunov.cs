@@ -29,7 +29,7 @@ namespace DS
             return x;
         }
 
-        public static IEnumerable<(double D12, double L1, double L2)> GetD12Indicators(IModel model, PointX start,
+        public static IEnumerable<(double D12, double L1, double L2)> GetD12Indicators(Model1 model, PointX start,
             double d12End, double step, bool byPrevious = false, double eps = 0.00001, double t = 100000)
         {
             var result = new List<(double D12, double L1, double L2)>();
@@ -46,7 +46,7 @@ namespace DS
             return result;
         }
 
-        public static IEnumerable<(double D12, double L1, double L2)> GetD12IndicatorsParallel(IModel model, PointX start,
+        public static IEnumerable<(double D12, double L1, double L2)> GetD12IndicatorsParallel(Model1 model, PointX start,
             double d12End, double step, double eps = 0.00001, double t = 100000)
         {
             var processorCount = Environment.ProcessorCount;
@@ -55,7 +55,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var d12PartEnd = model.D12 + d12Part * (i + 1);
                 copy.D12 = model.D12 + d12Part * i;
 
@@ -67,7 +67,7 @@ namespace DS
                     yield return values;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD12(IModel model, PointX start,
+        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD12(Model1 model, PointX start,
             double d12End, double d21End, double step1, double step2, bool byPrevious = false,
             double eps = 0.00001, double t = 100000)
         {
@@ -91,7 +91,7 @@ namespace DS
             return result;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD21(IModel model, PointX start,
+        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD21(Model1 model, PointX start,
             double d12End, double d21End, double step1, double step2, bool byPrevious = false,
             double eps = 0.00001, double t = 100000)
         {
@@ -124,7 +124,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var d12PartEnd = model.D12 + d12Part * (i + 1);
                 copy.D12 = model.D12 + d12Part * i;
 
@@ -145,7 +145,7 @@ namespace DS
 
             for (var i = 0; i < processorCount; i++)
             {
-                var copy = model.Copy();
+                var copy = (Model1) model.Copy();
                 var d21PartEnd = model.D21 + d21Part * (i + 1);
                 copy.D21 = model.D21 + d21Part * i;
 

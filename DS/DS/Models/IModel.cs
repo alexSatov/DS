@@ -3,7 +3,7 @@
 namespace DS.Models
 {
     /// <summary>
-    /// Интерфейс модели исследования
+    /// Модель исследования
     /// </summary>
     public interface IModel
     {
@@ -12,10 +12,14 @@ namespace DS.Models
         /// </summary>
         public double AbsInf { get; }
 
-        public double D12 { get; set; }
-        public double D21 { get; set; }
-
+        /// <summary>
+        /// Итерация точки
+        /// </summary>
         PointX GetNextPoint(PointX current);
+
+        /// <summary>
+        /// Создание копии модели (исп. для распараллеливания)
+        /// </summary>
         IModel Copy();
     }
 }

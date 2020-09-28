@@ -1,5 +1,8 @@
 ﻿namespace DS.Models
 {
+    /// <summary>
+    /// Детерминированная версия модели <see cref="Model1"/>
+    /// </summary>
     public class DeterministicModel1 : Model1
     {
         public DeterministicModel1(double a1, double a2, double b1, double b2, double px, double py,
@@ -7,6 +10,7 @@
         {
         }
 
+        /// <inheritdoc />
         public override IModel Copy()
         {
             return new DeterministicModel1(A1, A2, B1, B2, Px, Py, D12, D21);
