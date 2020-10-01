@@ -9,7 +9,7 @@ namespace DS
 {
     public static class AttractorPool
     {
-        public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2(IModel model, PointX leftBottom, PointX rightTop,
+        public static Dictionary<PointX, HashSet<PointX>> GetX1VsX2(BaseModel baseModel, PointX leftBottom, PointX rightTop,
             double step1, double step2)
         {
             var result = new Dictionary<PointX, HashSet<PointX>>();
@@ -18,7 +18,7 @@ namespace DS
                 for (var x2 = leftBottom.X2; x2 <= rightTop.X2; x2 += step2)
                 {
                     var startPoint = new PointX(x1, x2);
-                    var point = PhaseTrajectory.Get(model, startPoint, 10000, 1)[0];
+                    var point = PhaseTrajectory.Get(baseModel, startPoint, 10000, 1)[0];
 
                     if (point.IsInfinity())
                         continue;

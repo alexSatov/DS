@@ -309,7 +309,7 @@ namespace DS
             result.CyclePoints[cycle.Period].Add((new PointD(model.D12, model.D21), point));
         }
 
-        private static (bool Found, int Period) FindCycle(IModel model, PointX first, PointX second)
+        private static (bool Found, int Period) FindCycle(BaseModel baseModel, PointX first, PointX second)
         {
             var points = new PointX[16];
             points[0] = first;
@@ -317,7 +317,7 @@ namespace DS
 
             for (var i = 1; i < points.Length - 1; i++)
             {
-                points[i + 1] = model.GetNextPoint(points[i]);
+                points[i + 1] = baseModel.GetNextPoint(points[i]);
 
                 if (points[0].AlmostEquals(points[i + 1]))
                     return (true, i + 1);

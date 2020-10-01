@@ -1,9 +1,12 @@
-﻿using DS.MathStructures.Points;
+﻿using System;
+using DS.MathStructures.Points;
 
 namespace DS.Models
 {
-    /// <inheritdoc cref="IModel"/>
-    public abstract class Model1 : IModel
+    /// <summary>
+    /// Моя модель (А. Сатов)
+    /// </summary>
+    public abstract class Model1 : BaseModel
     {
         public double A1 { get; set; }
         public double A2 { get; set; }
@@ -18,7 +21,10 @@ namespace DS.Models
         public double Pb2 { get; set; }
 
         /// <inheritdoc />
-        public double AbsInf => 100;
+        public override Func<double, double> LCH => _ => 40;
+
+        /// <inheritdoc />
+        public override Func<double, double> LCV => _ => 20;
 
         protected Model1(double a1, double a2, double b1, double b2, double px, double py,
             double d12 = 0, double d21 = 0)
@@ -36,15 +42,6 @@ namespace DS.Models
             Pb2 = B2 / (Px * Py);
         }
 
-        /// <inheritdoc />
-        public PointX GetNextPoint(PointX current)
-        {
-            return new PointX(F(current.X1, current.X2), G(current.X1, current.X2));
-        }
-
-        /// <inheritdoc />
-        public abstract IModel Copy();
-
         public double[,] GetMatrixF(PointX attractor)
         {
             var f = new double[2, 2];
@@ -56,9 +53,6 @@ namespace DS.Models
 
             return f;
         }
-
-        protected abstract double F(double x1, double x2);
-        protected abstract double G(double x1, double x2);
 
         private double DFByX1(double x1)
         {

@@ -1,32 +1,25 @@
-﻿using DS.MathStructures.Points;
+﻿using System;
 
 namespace DS.Models
 {
-    /// <inheritdoc cref="IModel"/>
-    public abstract class Model2 : IModel
+    /// <summary>
+    /// Модель Ряшко и Башкирцевой
+    /// </summary>
+    public abstract class Model2 : BaseModel
     {
         public double A { get; set; }
         public double B { get; set; }
 
         /// <inheritdoc />
-        public double AbsInf => 100;
+        public override Func<double, double> LCH => _ => 0;
+
+        /// <inheritdoc />
+        public override Func<double, double> LCV => null;
 
         protected Model2(double a, double b)
         {
             A = a;
             B = b;
         }
-
-        /// <inheritdoc />
-        public PointX GetNextPoint(PointX current)
-        {
-            return new PointX(F(current.X1, current.X2), G(current.X1, current.X2));
-        }
-
-        /// <inheritdoc />
-        public abstract IModel Copy();
-
-        protected abstract double F(double x1, double x2);
-        protected abstract double G(double x1, double x2);
     }
 }

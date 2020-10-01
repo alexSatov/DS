@@ -26,7 +26,7 @@ namespace DS.Models
         }
 
         /// <inheritdoc />
-        public override IModel Copy()
+        public override BaseModel Copy()
         {
             return new StochasticModel1(A1, A2, B1, B2, Px, Py, D12, D21, Eps, Sigma1, Sigma2, Sigma3);
         }

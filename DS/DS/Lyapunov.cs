@@ -157,7 +157,7 @@ namespace DS
                     yield return values;
         }
 
-        private static (PointX O, double L1, double L2) FindL1L2(IModel model, PointX start, PointX previous,
+        private static (PointX O, double L1, double L2) FindL1L2(BaseModel baseModel, PointX start, PointX previous,
             bool byPrevious, double eps, double t)
         {
             var o = byPrevious ? previous : start;
@@ -168,7 +168,7 @@ namespace DS
 
             for (var i = 0; i < t; i++)
             {
-                var (p, p1, p2) = (model.GetNextPoint(o), model.GetNextPoint(a), model.GetNextPoint(b));
+                var (p, p1, p2) = (baseModel.GetNextPoint(o), baseModel.GetNextPoint(a), baseModel.GetNextPoint(b));
                 var (v1, v2) = (new Vector2D(p1, p), new Vector2D(p2, p));
 
                 var b1 = v1 / v1.Length;

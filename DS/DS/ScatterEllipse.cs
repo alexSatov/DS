@@ -337,7 +337,7 @@ namespace DS
                 .ToList();
         }
 
-        private static List<double[]> GetPVectors(IModel model, List<PointX> zik)
+        private static List<double[]> GetPVectors(BaseModel baseModel, List<PointX> zik)
         {
             var pv = new List<double[]>();
             var (p1, p2) = (zik[0], zik[^1]);
@@ -349,8 +349,8 @@ namespace DS
 
                 pv.Add(new[] { y1 - y2, x2 - x1 }.Normalize());
 
-                p1 = model.GetNextPoint(p1);
-                p2 = model.GetNextPoint(p2);
+                p1 = baseModel.GetNextPoint(p1);
+                p2 = baseModel.GetNextPoint(p2);
             }
 
             return pv;

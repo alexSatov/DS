@@ -66,7 +66,7 @@ namespace DS.Tests.Charts.Model2
             model.A = 1.1;
 
             var attractor = PhaseTrajectory.Get(model, new PointX(0.5, 0.5), 5000, 100000);
-            var lcList = LcSet.FromAttractor(model, attractor, 5, null, 0, 100, 0.001)[LcType.H];
+            var lcList = LcSet.FromAttractor(model, attractor, 5, eps: 0.001)[LcType.H];
             var chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);
 
             chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, markerSize);
@@ -89,7 +89,7 @@ namespace DS.Tests.Charts.Model2
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(model, new PointX(0.5, 0.5), 5000, 100000);
-            var lcSet = LcSet.FromAttractor(model, attractor, 5, null, 0, 100, 0.001);
+            var lcSet = LcSet.FromAttractor(model, attractor, 5, eps: 0.001);
             var borderSegments = lcSet.GetBorderSegments(true, true);
 
             var chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);

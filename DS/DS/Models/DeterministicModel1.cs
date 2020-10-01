@@ -11,7 +11,7 @@
         }
 
         /// <inheritdoc />
-        public override IModel Copy()
+        public override BaseModel Copy()
         {
             return new DeterministicModel1(A1, A2, B1, B2, Px, Py, D12, D21);
         }
