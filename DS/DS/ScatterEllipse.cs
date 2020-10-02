@@ -87,7 +87,7 @@ namespace DS
 
             var pv = GetPVectors(zik, orderedZik);
             var p = pv.Select(v => v.Outer(v)).ToList();
-            var f = zik.Select(model.GetMatrixF).ToList();
+            var f = zik.Select(model.GetJacobiMatrix).ToList();
             var phi = GetPhiMatrix(f, p);
             var s = zik.Select(model.GetMatrixQ).ToList();
             var q = GetQMatrix(f, p, s);
@@ -99,7 +99,7 @@ namespace DS
         /// Построение эллипса рассеивания для хаоса, описанного критическими линиями.
         /// </summary>
         public static IEnumerable<(LcType Type, int LcIndex, int Index, PointX Point)> GetForChaosLc(
-            Model1 model, LcSet lcSet, double eps = 0.01, double kq = 0.001)
+            BaseModel model, LcSet lcSet, double eps = 0.01, double kq = 0.001)
         {
             var lcEllipsePoints = GetLcEllipseMap(model, lcSet, eps, kq);
             var borderPoints = lcSet.GetBorderPoints();
@@ -110,26 +110,13 @@ namespace DS
                         lcEllipsePoints[borderPoint.Type][borderPoint.LcIndex, borderPoint.Index]);
         }
 
-        private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(Model1 model, LcSet lcSet,
+        private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(BaseModel model, LcSet lcSet,
             double eps, double kq)
         {
             var keps = 3 * eps;
-            var kf11 = 20 * model.A1;
-            var kf12 = 20 * model.D12;
-            var kf21 = 40 * model.D21;
-            var kf22 = 40 * model.A2;
             var allSegments = lcSet.GetAllSegments().ToList();
             var lcHList = lcSet[LcType.H];
             var lcVList = lcSet[LcType.V];
-
-            double[,] F(PointX point)
-            {
-                return new[,]
-                {
-                    { kf11 * (20 - point.X1), kf12 * (40 - point.X2) },
-                    { kf21 * (20 - point.X1), kf22 * (40 - point.X2) }
-                };
-            }
 
             PointX X(PointX point, double mu, double[] nu)
             {
@@ -147,7 +134,7 @@ namespace DS
                 return LcSet.IsOutOrBorderPoint(s1, allSegments) ? n1.Normalize() : n2.Normalize();
             }
 
-            var s = Matrix.Identity(2);
+            var s = model.GetLcQMatrix();
             var (n, m) = (lcHList.Count, lcHList[0].Count);
             var mapH = new PointX[n, m];
             var mapV = new PointX[n, m];
@@ -164,13 +151,13 @@ namespace DS
                 {
                     var point = lcHList[0][j];
                     qH[(0, j)] = new double[] { 1, 0 };
-                    fH[(0, j)] = F(point);
+                    fH[(0, j)] = model.GetJacobiMatrix(point);
                 }
 
                 for (var j = 0; j < m; j++)
                 {
                     qH[(1, j)] = fH[(0, j)].Dot(qH[(0, j)]);
-                    fH[(1, j)] = F(lcHList[1][j]);
+                    fH[(1, j)] = model.GetJacobiMatrix(lcHList[1][j]);
                     nuH[(1, j)] = Nu(lcHList[1][j], qH[(1, j)]);
                     muH[1, j] = nuH[(1, j)].Dot(s).Dot(nuH[(1, j)]);
                     wH[(1, j)] = nuH[(1, j)].Multiply(muH[1, j]).Outer(nuH[(1, j)]);
@@ -181,7 +168,7 @@ namespace DS
                 for (var j = 0; j < m; j++)
                 {
                     qH[(i, j)] = fH[(i - 1, j)].Dot(qH[(i - 1, j)]);
-                    fH[(i, j)] = F(lcHList[i][j]);
+                    fH[(i, j)] = model.GetJacobiMatrix(lcHList[i][j]);
                     nuH[(i, j)] = Nu(lcHList[i][j], qH[(i, j)]);
                     var st = fH[(i - 1, j)].Dot(wH[(i - 1, j)]).Dot(fH[(i - 1, j)].Transpose()).Add(s);
                     muH[i, j] = nuH[(i, j)].Dot(st).Dot(nuH[(i, j)]);
@@ -202,13 +189,13 @@ namespace DS
                 {
                     var point = lcVList[0][j];
                     qV[(0, j)] = new double[] { 0, 1 };
-                    fV[(0, j)] = F(point);
+                    fV[(0, j)] = model.GetJacobiMatrix(point);
                 }
 
                 for (var j = 0; j < m; j++)
                 {
                     qV[(1, j)] = fV[(0, j)].Dot(qV[(0, j)]);
-                    fV[(1, j)] = F(lcVList[1][j]);
+                    fV[(1, j)] = model.GetJacobiMatrix(lcVList[1][j]);
                     nuV[(1, j)] = Nu(lcVList[1][j], qV[(1, j)]);
                     muV[1, j] = nuV[(1, j)].Dot(s).Dot(nuV[(1, j)]);
                     wV[(1, j)] = nuV[(1, j)].Multiply(muV[1, j]).Outer(nuV[(1, j)]);
@@ -219,7 +206,7 @@ namespace DS
                 for (var j = 0; j < m; j++)
                 {
                     qV[(i, j)] = fV[(i - 1, j)].Dot(qV[(i - 1, j)]);
-                    fV[(i, j)] = F(lcVList[i][j]);
+                    fV[(i, j)] = model.GetJacobiMatrix(lcVList[i][j]);
                     nuV[(i, j)] = Nu(lcVList[i][j], qV[(i, j)]);
                     var st = fV[(i - 1, j)].Dot(wV[(i - 1, j)]).Dot(fV[(i - 1, j)].Transpose()).Add(s);
                     muV[i, j] = nuV[(i, j)].Dot(st).Dot(nuV[(i, j)]);
@@ -235,7 +222,7 @@ namespace DS
             List<PointX> zik, List<double[]> pv, double qu)
         {
             var p = pv.Select(v => v.Outer(v)).ToList();
-            var f = zik.Select(model.GetMatrixF).ToList();
+            var f = zik.Select(model.GetJacobiMatrix).ToList();
             var phi = GetPhiMatrix(f, p);
             var s = zik.Select(model.GetMatrixQ).ToList();
             var q = GetQMatrix(f, p, s);

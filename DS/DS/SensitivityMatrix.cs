@@ -23,7 +23,7 @@ namespace DS
 
             foreach (var point in attractorPoints)
             {
-                var f = model.GetMatrixF(point);
+                var f = model.GetJacobiMatrix(point);
 
                 fn.Add(f);
                 ftn.Add(f.Transpose());

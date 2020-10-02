@@ -21,10 +21,10 @@ namespace DS.Models
         public double Pb2 { get; set; }
 
         /// <inheritdoc />
-        public override Func<double, double> LCH => _ => 40;
+        public override Func<double, double> LcH => _ => 40;
 
         /// <inheritdoc />
-        public override Func<double, double> LCV => _ => 20;
+        public override Func<double, double> LcV => _ => 20;
 
         protected Model1(double a1, double a2, double b1, double b2, double px, double py,
             double d12 = 0, double d21 = 0)
@@ -42,36 +42,24 @@ namespace DS.Models
             Pb2 = B2 / (Px * Py);
         }
 
-        public double[,] GetMatrixF(PointX attractor)
+        protected override double DfX1(PointX point)
         {
-            var f = new double[2, 2];
-
-            f[0, 0] = DFByX1(attractor.X1);
-            f[0, 1] = DFByX2(attractor.X2);
-            f[1, 0] = DGByX1(attractor.X1);
-            f[1, 1] = DGByX2(attractor.X2);
-
-            return f;
+            return Pb1 * A1 * (B1 - 2 * Px * point.X1);
         }
 
-        private double DFByX1(double x1)
+        protected override double DfX2(PointX point)
         {
-            return Pb1 * (A1 * B1 - 2 * A1 * Px * x1);
+            return Pb1 * D12 * (B2 - 2 * Px * point.X2);
         }
 
-        private double DFByX2(double x2)
+        protected override double DgX1(PointX point)
         {
-            return Pb1 * (D12 * B2 - 2 * D12 * Px * x2);
+            return Pb2 * D21 * (B1 - 2 * Px * point.X1);
         }
 
-        private double DGByX1(double x1)
+        protected override double DgX2(PointX point)
         {
-            return Pb2 * (D21 * B1 - 2 * D21 * Px * x1);
-        }
-
-        private double DGByX2(double x2)
-        {
-            return Pb2 * (A2 * B2 - 2 * A2 * Px * x2);
+            return Pb2 * A2 * (B2 - 2 * Px * point.X2);
         }
     }
 }

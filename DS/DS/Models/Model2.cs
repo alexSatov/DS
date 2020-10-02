@@ -1,4 +1,5 @@
 ﻿using System;
+using DS.MathStructures.Points;
 
 namespace DS.Models
 {
@@ -11,15 +12,35 @@ namespace DS.Models
         public double B { get; set; }
 
         /// <inheritdoc />
-        public override Func<double, double> LCH => _ => 0;
+        public override Func<double, double> LcH => _ => 0;
 
         /// <inheritdoc />
-        public override Func<double, double> LCV => null;
+        public override Func<double, double> LcV => null;
 
         protected Model2(double a, double b)
         {
             A = a;
             B = b;
+        }
+
+        protected override double DfX1(PointX point)
+        {
+            return B;
+        }
+
+        protected override double DfX2(PointX point)
+        {
+            return -2 * A * point.X2;
+        }
+
+        protected override double DgX1(PointX point)
+        {
+            return 1;
+        }
+
+        protected override double DgX2(PointX point)
+        {
+            return 0;
         }
     }
 }

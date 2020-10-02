@@ -5,6 +5,8 @@ namespace DS.Models
 {
     /// <summary>
     /// Стохастическая версия модели <see cref="Model1"/>
+    /// sigma: 1, 1, 0 - аддитивный шум
+    /// sigma: 0, 0, 1 - параметрический шум
     /// </summary>
     public class StochasticModel1 : Model1
     {

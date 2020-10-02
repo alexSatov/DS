@@ -9,6 +9,7 @@
         {
         }
 
+        /// <inheritdoc />
         public override BaseModel Copy()
         {
             return new DeterministicModel3(A, B, C, D);
