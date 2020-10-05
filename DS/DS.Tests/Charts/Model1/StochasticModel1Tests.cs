@@ -94,7 +94,7 @@ namespace DS.Tests.Charts.Model1
 
             var sensitivityMatrices = SensitivityMatrix.Get(sModel, attractorPoints).ToList();
 
-            PointSaver.SaveToFile("ellipse/attractor.txt", points);
+            // PointSaver.SaveToFile("ellipse/attractor.txt", points);
 
             for (var i = 0; i < sensitivityMatrices.Count; i++)
             {
@@ -107,7 +107,7 @@ namespace DS.Tests.Charts.Model1
                     eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
 
                 chart.AddSeries($"ellipse{i + 1}", ellipse, Color.Red);
-                PointSaver.SaveToFile($"ellipse/ellipse{i + 1}.txt", ellipse);
+                // PointSaver.SaveToFile($"ellipse/ellipse{i + 1}.txt", ellipse);
             }
 
             Chart = chart;
@@ -202,7 +202,7 @@ namespace DS.Tests.Charts.Model1
 
             var points = I3().ToList();
 
-            PointSaver.SaveToFile("I3_param.txt", points);
+            // PointSaver.SaveToFile("I3_param.txt", points);
 
             var mu1 = points.Where(p => Math.Abs(p.Mu1) < 10000).Select(p => (p.D12, p.Mu1));
             var mu2 = points.Where(p => Math.Abs(p.Mu2) < 10000).Select(p => (p.D12, p.Mu2));
@@ -279,12 +279,12 @@ namespace DS.Tests.Charts.Model1
             chart.AddSeries("ellipse1", ellipse1, Color.Red);
             chart.AddSeries("ellipse2", ellipse2, Color.Red);
 
-            PointSaver.SaveToFile("ellipse/chaosZik.txt", chaosZik);
-            PointSaver.SaveToFile("ellipse/zik1.txt", zik1);
-            PointSaver.SaveToFile("ellipse/zik2.txt", zik2);
-            PointSaver.SaveToFile("ellipse/zik3.txt", zik3);
-            PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
-            PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
+            // PointSaver.SaveToFile("ellipse/chaosZik.txt", chaosZik);
+            // PointSaver.SaveToFile("ellipse/zik1.txt", zik1);
+            // PointSaver.SaveToFile("ellipse/zik2.txt", zik2);
+            // PointSaver.SaveToFile("ellipse/zik3.txt", zik3);
+            // PointSaver.SaveToFile("ellipse/ellipse1.txt", ellipse1);
+            // PointSaver.SaveToFile("ellipse/ellipse2.txt", ellipse2);
 
             Chart = chart;
         }
@@ -312,7 +312,7 @@ namespace DS.Tests.Charts.Model1
                 dModel.D12 = d12;
                 sModel.D12 = d12;
                 var zik = PhaseTrajectory.Get(dModel, previous, 10000, 40000);
-                previous = zik[zik.Count - 1];
+                previous = zik[^1];
 
                 var mu = ScatterEllipse.GetMuForZik(sModel, zik);
 
@@ -322,7 +322,7 @@ namespace DS.Tests.Charts.Model1
             var chart = new ChartForm(result.Select(p => (p.D12, p.MuMax)), 0, 0.0019, 0, 2000);
             chart.AddSeries("min", result.Select(p => (p.D12, p.MuMin)), Color.Orange);
 
-            PointSaver.SaveToFile("zik_d12_mu_add.txt", result);
+            // PointSaver.SaveToFile("zik_d12_mu_add.txt", result);
 
             Chart = chart;
         }
@@ -396,7 +396,7 @@ namespace DS.Tests.Charts.Model1
 
             var points = I2().ToList();
 
-            PointSaver.SaveToFile("I2.txt", points);
+            // PointSaver.SaveToFile("I2.txt", points);
 
             var mu11 = points.Select(p => (p.D12, p.Mu11));
             var mu12 = points.Select(p => (p.D12, p.Mu12));
@@ -512,7 +512,7 @@ namespace DS.Tests.Charts.Model1
 
             var (points, chart) = Test8_Parallel(0.00145, 0.001682, step, SearchLR);
 
-            PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
+            // PointSaver.SaveToFile("crit_intens\\zone1_1.txt", points);
 
             Chart = chart;
         }
@@ -618,7 +618,7 @@ namespace DS.Tests.Charts.Model1
 
             var (points, chart) = Test8_Parallel(0.001909, 0.001974, step, SearchRL);
 
-            PointSaver.SaveToFile("crit_intens\\zone2_2.txt", points);
+            // PointSaver.SaveToFile("crit_intens\\zone2_2.txt", points);
 
             Chart = chart;
         }
@@ -719,7 +719,7 @@ namespace DS.Tests.Charts.Model1
 
             var (points, chart) = Test8_Parallel(0.002166, 0.002294, step, SearchRL);
 
-            PointSaver.SaveToFile("crit_intens\\zone3_2.txt", points);
+            // PointSaver.SaveToFile("crit_intens\\zone3_2.txt", points);
 
             Chart = chart;
         }
@@ -843,7 +843,7 @@ namespace DS.Tests.Charts.Model1
 
             var (points, chart) = Test8_Parallel_Old(dModel, sModel, 0.001855, 0.001909, Search);
 
-            PointSaver.SaveToFile("crit_intens\\zone5_1.txt", points);
+            // PointSaver.SaveToFile("crit_intens\\zone5_1.txt", points);
 
             Chart = chart;
         }
@@ -866,26 +866,23 @@ namespace DS.Tests.Charts.Model1
             sModel.Eps = eps;
 
             var i = 0;
-            var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
-            //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(31, 64), 50000, 50000);
+            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 9);
             var borderSegments = lcSet.GetBorderSegments();
-            //var borderPoints = lcSet.GetBorderPoints();
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
-            var chart = new ChartForm(attractor, 31, 40, 20, 55);
+            Chart = new ChartForm(attractor2, 31, 40, 20, 55);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine, 5);
+                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine, 5);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 5);
-            //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Red, 5, SeriesChartType.Point);
+            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 5);
 
-            PointSaver.SaveToFile("chaos_ellipse/chaos.txt", attractor);
-            PointSaver.SaveToFile("chaos_ellipse/border.txt", borderSegments.SelectMany(s => s.GetBoundaryPoints()));
-            PointSaver.SaveToFile("chaos_ellipse/ellipse.txt", ellipse.Select(e => (e.LcIndex, e.Index, e.Point.X1, e.Point.X2)));
-
-            Chart = chart;
+            attractor.SaveToFile("model1_chaos1\\chaos.txt");
+            attractor2.SaveToFile("model1_chaos1\\chaos_with_noise.txt");
+            lcSet.SaveToFile("model1_chaos1\\LC.txt");
+            ellipse.SaveToFile("model1_chaos1\\ellipse.txt");
         }
 
         /// <summary>
@@ -913,18 +910,19 @@ namespace DS.Tests.Charts.Model1
             var borderSegments = lcSet.GetBorderSegments()
                 .Where(s => s.Start.X1 > 24 || s.End.X1 > 24)
                 .Concat(lcSet.GetBorderSegments2().Where(s => s.Start.X1 <= 24 && s.End.X1 <= 24));
-            //var borderPoints = lcSet.GetBorderPoints();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
+            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
-            var chart = new ChartForm(attractor2, 10, 46, 0, 64);
+            Chart = new ChartForm(attractor2, 10, 46, 0, 64);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine);
+                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine);
 
-            chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 5);
-            //chart.AddSeries("borderPoints", borderPoints.Select(t => t.Point), Color.Orange, 5, SeriesChartType.Point);
+            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 5);
 
-            Chart = chart;
+            attractor.SaveToFile("model1_chaos3\\chaos.txt");
+            attractor2.SaveToFile("model1_chaos3\\chaos_with_noise.txt");
+            lcSet.SaveToFile("model1_chaos3\\LC.txt");
+            ellipse.SaveToFile("model1_chaos3\\ellipse.txt");
         }
 
         /// <summary>
@@ -1033,36 +1031,39 @@ namespace DS.Tests.Charts.Model1
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(20, 40), 50000, 100000);
-            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 7);
-            //var borderSegments = lcSet.GetBorderSegments();
-            //var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps, kq: 1);
+            var borderSegments = lcSet.GetBorderSegments();
+            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
-            var chart = new ChartForm(attractor, 1, 31, 20, 80);
-            chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
-            chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
-            chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
-            chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
-            chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
-            chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
-            chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
-            chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
-            chart.AddSeries("4H", lcSet[LcType.H][4], Color.SaddleBrown, SeriesChartType.Line, 4);
-            chart.AddSeries("4V", lcSet[LcType.V][4], Color.SaddleBrown, SeriesChartType.Line, 4);
-            chart.AddSeries("5H", lcSet[LcType.H][5], Color.DarkOrange, SeriesChartType.Line, 4);
-            chart.AddSeries("5V", lcSet[LcType.V][5], Color.DarkOrange, SeriesChartType.Line, 4);
-            chart.AddSeries("6H", lcSet[LcType.H][6], Color.Olive, SeriesChartType.Line, 4);
-            chart.AddSeries("6V", lcSet[LcType.V][6], Color.Olive, SeriesChartType.Line, 4);
-            chart.AddSeries("7H", lcSet[LcType.H][7], Color.Gold, SeriesChartType.Line, 4);
-            chart.AddSeries("7V", lcSet[LcType.V][7], Color.Gold, SeriesChartType.Line, 4);
+            Chart = new ChartForm(attractor2, 0, 31, 20, 81);
+            // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
+            // Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
+            // Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
+            // Chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
+            // Chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
+            // Chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
+            // Chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
+            // Chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
+            // Chart.AddSeries("4H", lcSet[LcType.H][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            // Chart.AddSeries("4V", lcSet[LcType.V][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            // Chart.AddSeries("5H", lcSet[LcType.H][5], Color.DarkOrange, SeriesChartType.Line, 4);
+            // Chart.AddSeries("5V", lcSet[LcType.V][5], Color.DarkOrange, SeriesChartType.Line, 4);
+            // Chart.AddSeries("6H", lcSet[LcType.H][6], Color.Olive, SeriesChartType.Line, 4);
+            // Chart.AddSeries("6V", lcSet[LcType.V][6], Color.Olive, SeriesChartType.Line, 4);
+            // Chart.AddSeries("7H", lcSet[LcType.H][7], Color.Gold, SeriesChartType.Line, 4);
+            // Chart.AddSeries("7V", lcSet[LcType.V][7], Color.Gold, SeriesChartType.Line, 4);
 
-            //foreach (var borderSegment in borderSegments)
-            //    chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-            //        SeriesChartType.Line, 4);
+            foreach (var borderSegment in borderSegments)
+                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    SeriesChartType.Line, 4);
 
-            //chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, SeriesChartType.Point, 4);
+            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 4);
 
-            Chart = chart;
+            attractor.SaveToFile("model1_chaos2\\chaos.txt");
+            attractor2.SaveToFile("model1_chaos2\\chaos_with_noise.txt");
+            lcSet.SaveToFile("model1_chaos2\\LC.txt");
+            ellipse.SaveToFile("model1_chaos2\\ellipse.txt");
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,

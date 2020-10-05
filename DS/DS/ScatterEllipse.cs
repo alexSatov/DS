@@ -98,16 +98,16 @@ namespace DS
         /// <summary>
         /// Построение эллипса рассеивания для хаоса, описанного критическими линиями.
         /// </summary>
-        public static IEnumerable<(LcType Type, int LcIndex, int Index, PointX Point)> GetForChaosLc(
+        public static IEnumerable<LcPoint> GetForChaosLc(
             BaseModel model, LcSet lcSet, double eps = 0.01, double kq = 0.001)
         {
             var lcEllipsePoints = GetLcEllipseMap(model, lcSet, eps, kq);
             var borderPoints = lcSet.GetBorderPoints();
 
             foreach (var borderPoint in borderPoints)
-                if (lcEllipsePoints.ContainsKey(borderPoint.Type))
-                    yield return (borderPoint.Type, borderPoint.LcIndex, borderPoint.Index,
-                        lcEllipsePoints[borderPoint.Type][borderPoint.LcIndex, borderPoint.Index]);
+                if (lcEllipsePoints.ContainsKey(borderPoint.LcType))
+                    yield return new LcPoint(borderPoint.LcType, borderPoint.LcIndex, borderPoint.Index,
+                        lcEllipsePoints[borderPoint.LcType][borderPoint.LcIndex, borderPoint.Index]);
         }
 
         private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(BaseModel model, LcSet lcSet,

@@ -22,11 +22,11 @@ namespace DS
                 .Concat(this[LcType.V].SelectMany(lc => lc.Segments));
         }
 
-        public IEnumerable<(LcType Type, int LcIndex, int Index, PointX Point)> GetBorderPoints()
+        public IEnumerable<LcPoint> GetBorderPoints()
         {
             var allSegments = GetAllSegments().ToList();
 
-            foreach (var lcType in Enum.GetValues(typeof(LcType)).Cast<LcType>())
+            foreach (var lcType in Keys)
             {
                 for (var lcIndex = 0; lcIndex < this[lcType].Count; lcIndex++)
                 {
@@ -34,7 +34,7 @@ namespace DS
                     {
                         var point = this[lcType][lcIndex][index];
                         if (IsOutOrBorderPoint(point, allSegments))
-                            yield return (lcType, lcIndex, index, point);
+                            yield return new LcPoint(lcType, lcIndex, index, point);
                     }
                 }
             }
@@ -277,7 +277,7 @@ namespace DS
             }
         }
 
-        public struct IntersectSearchResult
+        private readonly struct IntersectSearchResult
         {
             public bool FoundOnStart { get; }
             public bool FoundOnEnd { get; }

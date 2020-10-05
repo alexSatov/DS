@@ -36,10 +36,10 @@ namespace DS.Tests.Charts
             chart.AddSeries(nameof(chaosAttractors), chaosAttractors, Color.GreenYellow, markerSize: 5);
             chart.AddSeries(nameof(eqAttractor), eqAttractor, Color.Blue, markerSize: 5);
 
-            PointSaver.SaveToFile($"pool_simple\\{nameof(eqAttractor)}.txt", eqAttractor);
-            PointSaver.SaveToFile($"pool_simple\\{nameof(chaosAttractors)}.txt", chaosAttractors);
-            PointSaver.SaveToFile($"pool_simple\\{nameof(eq)}.txt", eq);
-            PointSaver.SaveToFile($"pool_simple\\{nameof(chaos)}.txt", chaos);
+            eqAttractor.SaveToFile($"pool_simple\\{nameof(eqAttractor)}.txt");
+            chaosAttractors.SaveToFile($"pool_simple\\{nameof(chaosAttractors)}.txt");
+            eq.SaveToFile($"pool_simple\\{nameof(eq)}.txt");
+            chaos.SaveToFile($"pool_simple\\{nameof(chaos)}.txt");
 
             return chart;
         }

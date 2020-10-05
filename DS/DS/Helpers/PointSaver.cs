@@ -7,44 +7,65 @@ namespace DS.Helpers
 {
     public static class PointSaver
     {
-        public static void SaveToFile(string filename, IEnumerable<(double, double)> points)
+        public static void SaveToFile(this IEnumerable<(double, double)> points, string filename)
         {
             var lines = points.Select(p => $"{p.Item1.Format()} {p.Item2.Format()}");
-            var directory = Path.GetDirectoryName(filename);
-            Directory.CreateDirectory(directory);
-            File.WriteAllLines(filename, lines);
+            WriteToFile(lines, filename);
         }
 
-        public static void SaveToFile(string filename, IEnumerable<(int, int, double, double)> points)
+        public static void SaveToFile(this IEnumerable<(int, int, double, double)> points, string filename)
         {
             var lines = points.Select(p => $"{p.Item1} {p.Item2} {p.Item3.Format()} {p.Item4.Format()}");
-            var directory = Path.GetDirectoryName(filename);
-            Directory.CreateDirectory(directory);
-            File.WriteAllLines(filename, lines);
+            WriteToFile(lines, filename);
         }
 
-        public static void SaveToFile(string filename, IEnumerable<(double, double, double)> points)
+        public static void SaveToFile(this IEnumerable<(double, double, double)> points, string filename)
         {
             var lines = points.Select(p => $"{p.Item1.Format()} {p.Item2.Format()} {p.Item3.Format()}");
-            File.WriteAllLines(filename, lines);
+            WriteToFile(lines, filename);
         }
 
-        public static void SaveToFile(string filename,
-            IEnumerable<(double, double, double, double, double, double, double)> points)
+        public static void SaveToFile(this IEnumerable<(double, double, double, double, double, double, double)> points,
+            string filename)
         {
             var lines = points.Select(p =>
                 $"{p.Item1.Format()} {p.Item2.Format()} {p.Item3.Format()} {p.Item4.Format()} {p.Item5.Format()} {p.Item6.Format()} {p.Item7.Format()}");
+            WriteToFile(lines, filename);
+        }
+
+        public static void SaveToFile<T>(this IEnumerable<T> points, string filename)
+            where T : IPoint
+        {
+            var lines = points.Select(p => $"{p.X.Format()} {p.Y.Format()}");
+            WriteToFile(lines, filename);
+        }
+
+        public static void SaveToFile(this LcSet lcSet, string filename)
+        {
+            var lines = new List<string>();
+
+            foreach (var lcType in lcSet.Keys)
+                for (var i = 0; i < lcSet[lcType].Count; i++)
+                    foreach (var point in lcSet[lcType][i])
+                        lines.Add($"{lcType:D} {i} {point.X1.Format()} {point.X2.Format()}");
+
+            WriteToFile(lines, filename);
+        }
+
+        public static void SaveToFile(this IEnumerable<LcPoint> points, string filename)
+        {
+            var lines = points
+                .Select(p => $"{p.LcType:D} {p.LcIndex} {p.Index} {p.Point.X1.Format()} {p.Point.X2.Format()}");
+
+            WriteToFile(lines, filename);
+        }
+
+        private static void WriteToFile(IEnumerable<string> lines, string filename)
+        {
+            filename = Path.Combine("..", "data", filename);
+            var directory = Path.GetDirectoryName(filename);
+            Directory.CreateDirectory(directory);
             File.WriteAllLines(filename, lines);
-        }
-
-        public static void SaveToFile(string filename, IEnumerable<PointX> points)
-        {
-            SaveToFile(filename, points.Select(p => (p.X1, p.X2)));
-        }
-
-        public static void SaveToFile(string filename, IEnumerable<PointD> points)
-        {
-            SaveToFile(filename, points.Select(p => (p.D12, p.D21)));
         }
     }
 }

@@ -29,7 +29,7 @@ namespace DS.MathStructures
         /// <summary>
         /// Gets the intersection of two segments if it exists
         /// </summary>
-        /// <seealso cref="https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282"/>
+        /// <remarks>https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect/565282#565282</remarks>/>
         /// <param name="other"></param>
         /// <param name="includeBoundaryPoints">Determines whether to include boundary points case (if same, return start point)</param>
         /// <param name="includeOverlap">Determines whether to include overlap case (point will be null)</param>

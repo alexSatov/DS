@@ -197,8 +197,8 @@ namespace DS.Tests.Charts.Model1
 
             chart.AddSeries("D12vsL2", l2Points, Color.Red);
 
-            PointSaver.SaveToFile("lyapunov\\l1.txt", l1Points);
-            PointSaver.SaveToFile("lyapunov\\l2.txt", l2Points);
+            l1Points.SaveToFile("lyapunov\\l1.txt");
+            l2Points.SaveToFile("lyapunov\\l2.txt");
 
             Chart = chart;
         }
@@ -253,13 +253,13 @@ namespace DS.Tests.Charts.Model1
             var points = PhaseTrajectory.Get(model, new PointX(32.95, 47.38), 10000, 10000);
             var chart = new ChartForm(points, -5, 45, -5, 85);
 
-            PointSaver.SaveToFile("chaosAttractor.txt", points);
+            points.SaveToFile("chaosAttractor.txt");
 
             Chart = chart;
         }
 
         /// <summary>
-        /// Построение критических линий (для хаоса d12 = 0.002382)
+        /// Построение критических линий (для хаоса d12 = 0.00237)
         /// </summary>
         [Test]
         public void Test12()
@@ -267,21 +267,20 @@ namespace DS.Tests.Charts.Model1
             model.D12 = 0.00237;
             model.D21 = 0.0075;
 
-            var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcSet.FromAttractor(model, attractor, 9)[LcType.H];
-            var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
+            var attractor = PhaseTrajectory.Get(model, new PointX(31, 64), 50000, 50000);
+            var lcSet = LcSet.FromAttractor(model, attractor, 9);
+            var lcList = lcSet[LcType.H];
+            Chart = new ChartForm(attractor, 32.8, 38.6, 25, 50.5);
 
-            chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, 5);
-            chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, 5);
-            chart.AddSeries("lc2", lcList[2], Color.DarkBlue, SeriesChartType.Line, 5);
-            chart.AddSeries("lc3", lcList[3], Color.Blue, SeriesChartType.Line, 5);
-            chart.AddSeries("lc4", lcList[4], Color.Green, SeriesChartType.Line, 5);
-            chart.AddSeries("lc5", lcList[5], Color.Gold, SeriesChartType.Line, 5);
-            chart.AddSeries("lc6", lcList[6], Color.Orange, SeriesChartType.Line, 5);
-            chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 5);
-            chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 5);
-
-            Chart = chart;
+            Chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc2", lcList[2], Color.DarkBlue, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc3", lcList[3], Color.Blue, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc4", lcList[4], Color.Green, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc5", lcList[5], Color.Gold, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc6", lcList[6], Color.Orange, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 5);
         }
 
         /// <summary>
@@ -388,9 +387,9 @@ namespace DS.Tests.Charts.Model1
             chart.AddSeries("equilibrium x2 > 2x1", eqX2Gt2X1, Color.DeepSkyBlue);
             chart.AddSeries("equilibrium x1 = x2 = 0", eqX1EqX2Eq0, Color.Goldenrod);
 
-            PointSaver.SaveToFile("map\\infinity.txt", infinity);
-            PointSaver.SaveToFile("map\\eqX2Lt2X1.txt", eqX2Lt2X1);
-            PointSaver.SaveToFile("map\\eqX2Gt2X1.txt", eqX2Gt2X1);
+            infinity.SaveToFile("map\\infinity.txt");
+            eqX2Lt2X1.SaveToFile("map\\eqX2Lt2X1.txt");
+            eqX2Gt2X1.SaveToFile("map\\eqX2Gt2X1.txt");
 
             AddCycles(chart, points.CyclePoints);
 
@@ -412,7 +411,7 @@ namespace DS.Tests.Charts.Model1
                 var name = $"cycle{i}";
 
                 chart.AddSeries(name, points, colors[i - 2]);
-                PointSaver.SaveToFile($"map\\{name}.txt", points);
+                points.SaveToFile($"map\\{name}.txt");
             }
         }
     }

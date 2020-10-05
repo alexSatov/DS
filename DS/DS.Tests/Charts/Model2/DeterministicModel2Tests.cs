@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms.DataVisualization.Charting;
+using DS.Helpers;
 using DS.MathStructures.Points;
 using DS.Models;
 using NUnit.Framework;
@@ -35,12 +36,10 @@ namespace DS.Tests.Charts.Model2
             var points3 = PhaseTrajectory.Get(model3, new PointX(0.5, 0.5), 2000, 1000);
             var points4 = PhaseTrajectory.Get(model4, new PointX(0.5, 0.5), 2000, 1000);
 
-            var chart = new ChartForm(points1, -0.5, 1.5, -0.5, 1.5, Color.Black, null, 5);
-            chart.AddSeries(nameof(points2), points2, Color.DodgerBlue);
-            chart.AddSeries(nameof(points3), points3, Color.Red);
-            chart.AddSeries(nameof(points4), points4, Color.Green, SeriesChartType.Line, 5, 1);
-
-            Chart = chart;
+            Chart = new ChartForm(points1, -0.5, 1.5, -0.5, 1.5, Color.Black, null, 5);
+            Chart.AddSeries(nameof(points2), points2, Color.DodgerBlue);
+            Chart.AddSeries(nameof(points3), points3, Color.Red);
+            Chart.AddSeries(nameof(points4), points4, Color.Green, SeriesChartType.Line, 5, 1);
         }
 
         /// <summary>
@@ -66,17 +65,19 @@ namespace DS.Tests.Charts.Model2
             model.A = 1.1;
 
             var attractor = PhaseTrajectory.Get(model, new PointX(0.5, 0.5), 5000, 100000);
-            var lcList = LcSet.FromAttractor(model, attractor, 5, eps: 0.001)[LcType.H];
-            var chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);
+            var lcSet = LcSet.FromAttractor(model, attractor, 5, eps: 0.001);
+            var lcList = lcSet[LcType.H];
+            Chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);
 
-            chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, markerSize);
-            chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, markerSize);
-            chart.AddSeries("lc2", lcList[2], Color.Green, SeriesChartType.Line, markerSize);
-            chart.AddSeries("lc3", lcList[3], Color.DarkViolet, SeriesChartType.Line, markerSize);
-            chart.AddSeries("lc4", lcList[4], Color.DeepPink, SeriesChartType.Line, markerSize);
-            chart.AddSeries("lc5", lcList[5], Color.SaddleBrown, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc2", lcList[2], Color.Green, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc3", lcList[3], Color.DarkViolet, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc4", lcList[4], Color.DeepPink, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc5", lcList[5], Color.SaddleBrown, SeriesChartType.Line, markerSize);
 
-            Chart = chart;
+            attractor.SaveToFile("model2\\chaos.txt");
+            lcSet.SaveToFile("model2\\LC.txt");
         }
 
         /// <summary>
@@ -92,13 +93,11 @@ namespace DS.Tests.Charts.Model2
             var lcSet = LcSet.FromAttractor(model, attractor, 5, eps: 0.001);
             var borderSegments = lcSet.GetBorderSegments(true, true);
 
-            var chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);
+            Chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);
 
             foreach (var borderSegment in borderSegments)
-                chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                Chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
                     SeriesChartType.FastLine);
-
-            Chart = chart;
         }
     }
 }
