@@ -52,6 +52,19 @@ namespace DS.Helpers
             WriteToFile(lines, filename);
         }
 
+        public static void SaveToFile(this LcSet lcSet, IEnumerable<LcPoint> points, string filename)
+        {
+            var lines = new List<string>();
+
+            foreach (var point in points)
+            {
+                var (x1, x2) = lcSet[point.LcType][point.LcIndex][point.Index];
+                lines.Add($"{point.LcType:D} {point.LcIndex} {x1.Format()} {x2.Format()}");
+            }
+
+            WriteToFile(lines, filename);
+        }
+
         public static void SaveToFile(this IEnumerable<LcPoint> points, string filename)
         {
             var lines = points

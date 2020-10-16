@@ -42,6 +42,7 @@ namespace DS.Tests.Charts.Model3
 
             attractor2.SaveToFile("model3\\chaos_with_noise.txt");
             ellipse.SaveToFile("model3\\ellipse.txt");
+            lcSet.SaveToFile(ellipse, "model3\\LC_border.txt");
         }
     }
 }

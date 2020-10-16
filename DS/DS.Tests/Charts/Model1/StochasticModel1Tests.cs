@@ -882,6 +882,7 @@ namespace DS.Tests.Charts.Model1
             attractor.SaveToFile("model1_chaos1\\chaos.txt");
             attractor2.SaveToFile("model1_chaos1\\chaos_with_noise.txt");
             lcSet.SaveToFile("model1_chaos1\\LC.txt");
+            lcSet.SaveToFile(ellipse, "model1_chaos1\\LC_border.txt");
             ellipse.SaveToFile("model1_chaos1\\ellipse.txt");
         }
 
@@ -922,6 +923,7 @@ namespace DS.Tests.Charts.Model1
             attractor.SaveToFile("model1_chaos3\\chaos.txt");
             attractor2.SaveToFile("model1_chaos3\\chaos_with_noise.txt");
             lcSet.SaveToFile("model1_chaos3\\LC.txt");
+            lcSet.SaveToFile(ellipse, "model1_chaos3\\LC_border.txt");
             ellipse.SaveToFile("model1_chaos3\\ellipse.txt");
         }
 
@@ -1063,6 +1065,7 @@ namespace DS.Tests.Charts.Model1
             attractor.SaveToFile("model1_chaos2\\chaos.txt");
             attractor2.SaveToFile("model1_chaos2\\chaos_with_noise.txt");
             lcSet.SaveToFile("model1_chaos2\\LC.txt");
+            lcSet.SaveToFile(ellipse, "model1_chaos2\\LC_border.txt");
             ellipse.SaveToFile("model1_chaos2\\ellipse.txt");
         }
 
