@@ -23,6 +23,15 @@ namespace DS.Models
             B = b;
         }
 
+        public override double[,] GetLcQMatrix()
+        {
+            return new[,]
+            {
+                { 1.0, 0.0 },
+                { 0.0, 0.0 }
+            };
+        }
+
         protected override double DfX1(PointX point)
         {
             return B;

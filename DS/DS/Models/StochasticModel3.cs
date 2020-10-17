@@ -15,7 +15,7 @@ namespace DS.Models
         private readonly NormalDistribution random = new NormalDistribution();
 
         public StochasticModel3(double a, double b, double c, double d,
-            double eps = 0, double sigma1 = 0, double sigma2 = 0) : base(a, b, c, d)
+            double eps = 0, double sigma1 = 1, double sigma2 = 1) : base(a, b, c, d)
         {
             Eps = eps;
             Sigma1 = sigma1;

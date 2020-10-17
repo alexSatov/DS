@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms.DataVisualization.Charting;
 using DS.Helpers;
@@ -17,7 +16,7 @@ namespace DS.Tests.Charts.Model3
         protected override void OnSetUp()
         {
             dModel = new DeterministicModel3(4, 1, 0.2, 3.3);
-            sModel = new StochasticModel3(4, 1, 0.2, 3.3, 0.005, 1, 1);
+            sModel = new StochasticModel3(4, 1, 0.2, 3.3, 0.005);
         }
 
         /// <summary>
