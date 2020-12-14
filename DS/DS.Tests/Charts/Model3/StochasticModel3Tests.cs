@@ -32,16 +32,17 @@ namespace DS.Tests.Charts.Model3
             var borderSegments = lcSet.GetBorderSegments2(false, true);
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, sModel.Eps).ToList();
 
-            Chart = new ChartForm(attractor2, 0.15, 0.7, 0.5, 2.4);
+            Chart = new ChartForm(attractor2, 0.1, 0.75, 0.4, 2.4);
 
             foreach (var borderSegment in borderSegments)
-                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine);
+                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    SeriesChartType.FastLine, borderWidth: 4);
 
-            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 4);
+            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 6);
 
-            attractor2.SaveToFile("model3\\chaos_with_noise.txt");
-            ellipse.SaveToFile("model3\\ellipse.txt");
-            lcSet.SaveToFile(ellipse, "model3\\LC_border.txt");
+            // attractor2.SaveToFile("model3\\chaos_with_noise.txt");
+            // ellipse.SaveToFile("model3\\ellipse.txt");
+            // lcSet.SaveToFile(ellipse, "model3\\LC_border.txt");
         }
     }
 }

@@ -62,6 +62,7 @@ namespace DS.Tests.Charts.Model2
         public void Test3()
         {
             const int markerSize = 6;
+            const int borderWidth = 4;
             model.A = 1.1;
 
             var attractor = PhaseTrajectory.Get(model, new PointX(0.5, 0.5), 5000, 100000);
@@ -69,15 +70,15 @@ namespace DS.Tests.Charts.Model2
             var lcList = lcSet[LcType.H];
             Chart = new ChartForm(attractor, -1, 1.5, -1, 1.5);
 
-            Chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, markerSize);
-            Chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, markerSize);
-            Chart.AddSeries("lc2", lcList[2], Color.Green, SeriesChartType.Line, markerSize);
-            Chart.AddSeries("lc3", lcList[3], Color.DarkViolet, SeriesChartType.Line, markerSize);
-            Chart.AddSeries("lc4", lcList[4], Color.DeepPink, SeriesChartType.Line, markerSize);
-            Chart.AddSeries("lc5", lcList[5], Color.SaddleBrown, SeriesChartType.Line, markerSize);
+            Chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.FastLine, borderWidth: borderWidth);
+            Chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.FastLine, borderWidth: borderWidth);
+            Chart.AddSeries("lc2", lcList[2], Color.Green, SeriesChartType.FastLine, borderWidth: borderWidth);
+            Chart.AddSeries("lc3", lcList[3], Color.DarkViolet, SeriesChartType.FastLine, borderWidth: borderWidth);
+            Chart.AddSeries("lc4", lcList[4], Color.DeepPink, SeriesChartType.FastLine, borderWidth: borderWidth);
+            Chart.AddSeries("lc5", lcList[5], Color.SaddleBrown, SeriesChartType.FastLine, borderWidth: borderWidth);
 
-            attractor.SaveToFile("model2\\chaos.txt");
-            lcSet.SaveToFile("model2\\LC.txt");
+            // attractor.SaveToFile("model2\\chaos.txt");
+            // lcSet.SaveToFile("model2\\LC.txt");
         }
 
         /// <summary>

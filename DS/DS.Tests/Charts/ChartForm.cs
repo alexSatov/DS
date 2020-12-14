@@ -24,6 +24,12 @@ namespace DS.Tests.Charts
                 AxisY = { Minimum = oy1, Maximum = oy2 }
             };
 
+            // ChartArea.AxisX.MajorGrid.Enabled = false;
+            // ChartArea.AxisY.MajorGrid.Enabled = false;
+
+            ChartArea.AxisX.MajorGrid.LineColor = Color.FromArgb(50, Color.Black);
+            ChartArea.AxisY.MajorGrid.LineColor = Color.FromArgb(50, Color.Black);
+
             Chart.ChartAreas.Add(ChartArea);
             AddSeries(name ?? "main", points, color ?? Color.DodgerBlue, markerSize: markerSize);
         }

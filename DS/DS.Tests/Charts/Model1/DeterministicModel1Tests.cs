@@ -284,7 +284,7 @@ namespace DS.Tests.Charts.Model1
         }
 
         /// <summary>
-        /// Построение критических линий (для хаоса d12 = 0.00237). Выделяем границу.
+        /// Построение критических линий (для хаоса d12 = 0.00237 - первый). Выделяем границу.
         /// </summary>
         [Test]
         public void Test13()
@@ -301,7 +301,7 @@ namespace DS.Tests.Charts.Model1
 
             foreach (var borderSegment in borderSegments)
                 chart.AddSeries($"border{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-                    seriesChartType: SeriesChartType.FastLine);
+                    SeriesChartType.FastLine, borderWidth: 3);
 
             Chart = chart;
         }

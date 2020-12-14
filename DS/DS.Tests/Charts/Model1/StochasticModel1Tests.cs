@@ -887,7 +887,7 @@ namespace DS.Tests.Charts.Model1
         }
 
         /// <summary>
-        /// Построение критических линий (для хаоса d12 = 0.002538, d21 = 0.0055)
+        /// Построение критических линий (для хаоса d12 = 0.002538, d21 = 0.0055 - сложный)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
         [Test]
@@ -906,25 +906,26 @@ namespace DS.Tests.Charts.Model1
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
-            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
-            var lcSet = LcSet.FromAttractor(dModel, attractor, 5);
+            // var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcSet = LcSet.FromAttractor(dModel, attractor, 5, 95);
             var borderSegments = lcSet.GetBorderSegments()
                 .Where(s => s.Start.X1 > 24 || s.End.X1 > 24)
                 .Concat(lcSet.GetBorderSegments2().Where(s => s.Start.X1 <= 24 && s.End.X1 <= 24));
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
+            // var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
-            Chart = new ChartForm(attractor2, 10, 46, 0, 64);
+            Chart = new ChartForm(attractor, 10, 46, 0, 64);
 
             foreach (var borderSegment in borderSegments)
-                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red, SeriesChartType.FastLine);
+                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    SeriesChartType.FastLine, borderWidth: 4);
 
-            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 5);
+            // Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 5);
 
-            attractor.SaveToFile("model1_chaos3\\chaos.txt");
-            attractor2.SaveToFile("model1_chaos3\\chaos_with_noise.txt");
-            lcSet.SaveToFile("model1_chaos3\\LC.txt");
-            lcSet.SaveToFile(ellipse, "model1_chaos3\\LC_border.txt");
-            ellipse.SaveToFile("model1_chaos3\\ellipse.txt");
+            // attractor.SaveToFile("model1_chaos3\\chaos.txt");
+            // attractor2.SaveToFile("model1_chaos3\\chaos_with_noise.txt");
+            // lcSet.SaveToFile("model1_chaos3\\LC.txt");
+            // lcSet.SaveToFile(ellipse, "model1_chaos3\\LC_border.txt");
+            // ellipse.SaveToFile("model1_chaos3\\ellipse.txt");
         }
 
         /// <summary>
@@ -966,7 +967,7 @@ namespace DS.Tests.Charts.Model1
         }
 
         /// <summary>
-        /// Построение критических линий (для хаоса d12 = d21 = 0)
+        /// Построение критических линий (для хаоса d12 = d21 = 0 - квадрат)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
         [Test]
@@ -1014,7 +1015,7 @@ namespace DS.Tests.Charts.Model1
         }
 
         /// <summary>
-        /// Построение критических линий (для хаоса d12 = 0.001814, d21 = 0.00785312)
+        /// Построение критических линий (для хаоса d12 = 0.001814, d21 = 0.00785312 - птичка)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
         [Test]
@@ -1033,12 +1034,12 @@ namespace DS.Tests.Charts.Model1
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(20, 40), 50000, 100000);
-            var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
+            // var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 7);
             var borderSegments = lcSet.GetBorderSegments();
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
-            Chart = new ChartForm(attractor2, 0, 31, 20, 81);
+            Chart = new ChartForm(attractor, 0, 31, 20, 81);
             // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
             // Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
             // Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
@@ -1058,15 +1059,15 @@ namespace DS.Tests.Charts.Model1
 
             foreach (var borderSegment in borderSegments)
                 Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-                    SeriesChartType.Line, 4);
+                    SeriesChartType.FastLine, borderWidth: 3);
 
             Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 4);
 
-            attractor.SaveToFile("model1_chaos2\\chaos.txt");
-            attractor2.SaveToFile("model1_chaos2\\chaos_with_noise.txt");
-            lcSet.SaveToFile("model1_chaos2\\LC.txt");
-            lcSet.SaveToFile(ellipse, "model1_chaos2\\LC_border.txt");
-            ellipse.SaveToFile("model1_chaos2\\ellipse.txt");
+            // attractor.SaveToFile("model1_chaos2\\chaos.txt");
+            // attractor2.SaveToFile("model1_chaos2\\chaos_with_noise.txt");
+            // lcSet.SaveToFile("model1_chaos2\\LC.txt");
+            // lcSet.SaveToFile(ellipse, "model1_chaos2\\LC_border.txt");
+            // ellipse.SaveToFile("model1_chaos2\\ellipse.txt");
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,
