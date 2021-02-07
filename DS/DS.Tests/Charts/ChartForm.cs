@@ -14,7 +14,7 @@ namespace DS.Tests.Charts
         public ChartArea ChartArea { get; }
 
         public ChartForm(IEnumerable<(double x, double y)> points, double ox1, double ox2, double oy1, double oy2,
-            Color? color = null, string name = null, int markerSize = 2)
+            Color? color = null, string name = null, int markerSize = 2, bool gridEnabled = false)
         {
             Size = new Size(700, 600);
             Chart = new Chart { Parent = this, Dock = DockStyle.Fill };
@@ -24,8 +24,11 @@ namespace DS.Tests.Charts
                 AxisY = { Minimum = oy1, Maximum = oy2 }
             };
 
-            // ChartArea.AxisX.MajorGrid.Enabled = false;
-            // ChartArea.AxisY.MajorGrid.Enabled = false;
+            if (!gridEnabled)
+            {
+                ChartArea.AxisX.MajorGrid.Enabled = false;
+                ChartArea.AxisY.MajorGrid.Enabled = false;
+            }
 
             ChartArea.AxisX.MajorGrid.LineColor = Color.FromArgb(50, Color.Black);
             ChartArea.AxisY.MajorGrid.LineColor = Color.FromArgb(50, Color.Black);
@@ -35,14 +38,14 @@ namespace DS.Tests.Charts
         }
 
         public ChartForm(IEnumerable<PointX> points, double ox1, double ox2, double oy1, double oy2,
-            Color? color = null, string name = null, int markerSize = 2)
-            : this(points.Select(p => (p.X1, p.X2)), ox1, ox2, oy1, oy2, color, name, markerSize)
+            Color? color = null, string name = null, int markerSize = 2, bool gridEnabled = false)
+            : this(points.Select(p => (p.X1, p.X2)), ox1, ox2, oy1, oy2, color, name, markerSize, gridEnabled)
         {
         }
 
         public ChartForm(IEnumerable<PointD> points, double ox1, double ox2, double oy1, double oy2,
-            Color? color = null, string name = null, int markerSize = 2)
-            : this(points.Select(p => (p.D12, p.D21)), ox1, ox2, oy1, oy2, color, name, markerSize)
+            Color? color = null, string name = null, int markerSize = 2, bool gridEnabled = false)
+            : this(points.Select(p => (p.D12, p.D21)), ox1, ox2, oy1, oy2, color, name, markerSize, gridEnabled)
         {
         }
 

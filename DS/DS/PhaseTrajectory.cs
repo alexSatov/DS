@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Accord.Math;
+using DS.Helpers;
 using DS.MathStructures.Points;
 using DS.Models;
 
@@ -52,6 +56,27 @@ namespace DS
 
                 points.Add(current);
             } while (!current.AlmostEquals(start, eps));
+
+            return points;
+        }
+
+        public static List<double[]> Get(BaseNModel baseModel, double[] start, int skipCount, int getCount)
+        {
+            var current = start;
+            var points = new List<double[]>();
+
+            for (var i = 0; i < skipCount + getCount; i++)
+            {
+                var next = baseModel.GetNextPoint(current);
+
+                if (next.TendsToValue(baseModel.AbsInf))
+                    return new List<double[]> { Vector.Create(baseModel.N, double.MaxValue) };
+
+                if (i >= skipCount)
+                    points.Add(next);
+
+                current = next;
+            }
 
             return points;
         }
