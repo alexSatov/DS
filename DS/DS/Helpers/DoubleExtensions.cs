@@ -15,5 +15,10 @@ namespace DS.Helpers
         {
             return vector.Any(x => Math.Abs(x) >= value);
         }
+
+        public static bool IsInfinity(this double[] vector)
+        {
+            return vector.All(x => x == double.MaxValue);
+        }
     }
 }

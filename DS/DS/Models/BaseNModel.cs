@@ -38,6 +38,11 @@ namespace DS.Models
             return next;
         }
 
+        /// <summary>
+        /// Создание копии модели (исп. для распараллеливания)
+        /// </summary>
+        public abstract BaseNModel Copy();
+
         protected abstract double F_i(double[] x, int i);
     }
 }

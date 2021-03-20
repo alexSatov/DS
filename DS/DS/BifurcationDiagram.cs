@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using DS.Helpers;
 using DS.MathStructures;
 using DS.MathStructures.Points;
 using DS.MathStructures.Vectors;
@@ -287,6 +289,26 @@ namespace DS
             }
 
             return UniteResults(tasks);
+        }
+
+        public static IEnumerable<(double D12, double[] X)> GetD12VsX(NModel1 model, Interval<double> d12,
+            double[] start, int count, int skip = 10000, int get = 2000)
+        {
+            var query = d12.Range(count)
+                .AsParallel()
+                .Select(d =>
+                {
+                    var copy = (NModel1) model.Copy();
+                    model.D[0, 1] = d;
+                    return (D12: d, Points: PhaseTrajectory.Get(copy, start, 10000, 2000));
+                })
+                .Where(t => !t.Points[0].IsInfinity());
+
+            foreach (var (d, points) in query)
+            foreach (var point in points)
+            {
+                yield return (d, point);
+            }
         }
 
         private static void TryAddToResult(Model1 model, PointX point, D12VsD21Result result)
