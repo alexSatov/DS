@@ -1,4 +1,6 @@
-﻿namespace DS.Models
+﻿using Accord.Math;
+
+namespace DS.Models
 {
     /// <summary>
     /// Детерминированная версия модели <see cref="NModel1"/>
@@ -11,7 +13,10 @@
 
         public override BaseNModel Copy()
         {
-            return new DeterministicNModel1(N, B, D, Px, Py);
+            var b = B.Copy();
+            var d = D.Copy();
+
+            return new DeterministicNModel1(N, b, d, Px, Py);
         }
 
         protected override double F_i(double[] x, int i)

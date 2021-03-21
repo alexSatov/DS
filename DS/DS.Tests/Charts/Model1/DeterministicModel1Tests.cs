@@ -36,6 +36,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test2()
         {
+            model.D12 = 0.0017;
             model.D21 = 0.0063;
 
             var points = BifurcationDiagram.GetD12VsXParallel(model, new PointX(10, 10), 0.0025, 0.000001)

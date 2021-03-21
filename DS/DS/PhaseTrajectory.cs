@@ -10,19 +10,19 @@ namespace DS
 {
     public static class PhaseTrajectory
     {
-        public static List<PointX> Get(BaseModel baseModel, PointX start, int skipCount, int getCount)
+        public static List<PointX> Get(BaseModel baseModel, PointX start, int skip, int get)
         {
             var current = start;
             var points = new List<PointX>();
 
-            for (var i = 0; i < skipCount + getCount; i++)
+            for (var i = 0; i < skip + get; i++)
             {
                 var next = baseModel.GetNextPoint(current);
 
                 if (next.TendsToInfinity(baseModel.AbsInf))
                     return new List<PointX> { PointX.Infinity };
 
-                if (i >= skipCount)
+                if (i >= skip)
                     points.Add(next);
 
                 current = next;
@@ -60,19 +60,18 @@ namespace DS
             return points;
         }
 
-        public static List<double[]> Get(BaseNModel baseModel, double[] start, int skipCount, int getCount)
+        public static List<double[]> Get(BaseNModel baseModel, double[] start, int skip, int get)
         {
             var current = start;
             var points = new List<double[]>();
 
-            for (var i = 0; i < skipCount + getCount; i++)
+            for (var i = 0; i < skip + get; i++)
             {
                 var next = baseModel.GetNextPoint(current);
-
                 if (next.TendsToValue(baseModel.AbsInf))
                     return new List<double[]> { Vector.Create(baseModel.N, double.MaxValue) };
 
-                if (i >= skipCount)
+                if (i >= skip)
                     points.Add(next);
 
                 current = next;

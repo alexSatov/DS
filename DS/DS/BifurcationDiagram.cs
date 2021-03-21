@@ -299,8 +299,8 @@ namespace DS
                 .Select(d =>
                 {
                     var copy = (NModel1) model.Copy();
-                    model.D[0, 1] = d;
-                    return (D12: d, Points: PhaseTrajectory.Get(copy, start, 10000, 2000));
+                    copy.D[0, 1] = d;
+                    return (D12: d, Points: PhaseTrajectory.Get(copy, start, skip, get));
                 })
                 .Where(t => !t.Points[0].IsInfinity());
 
