@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
 using Accord.Math;
 using Accord.Math.Decompositions;
+using DS.Extensions;
 using DS.Helpers;
 using DS.MathStructures.Points;
 using DS.Models;
@@ -237,7 +238,7 @@ namespace DS.Tests.Charts.Model1
             chart.AddSeries("ellipse1", ellipse1, Color.Red);
             //chart.AddSeries("ellipse2", ellipse2, Color.Red);
 
-            var pool = AttractorPool.GetPoolFor2AttractorsParallel(dModel, Attractor.Is3Cycle, new PointX(10, 52),
+            var pool = AttractorPool.GetPoolFor2AttractorsParallel(dModel, AttractorExtensions.Is3Cycle, new PointX(10, 52),
                 new PointX(22, 75), 0.25, 0.4);
 
             chart.AddSeries("pool_first", pool.First, Color.HotPink);
@@ -450,7 +451,7 @@ namespace DS.Tests.Charts.Model1
                     {
                         var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                        if (!Attractor.Is3Cycle(cycle3))
+                        if (!AttractorExtensions.Is3Cycle(cycle3))
                             continue;
 
                         Console.WriteLine($"zik: {zik.Take(4).Format()};\r\n" +
@@ -476,7 +477,7 @@ namespace DS.Tests.Charts.Model1
 
                 cycle3 = PhaseTrajectory.Get(dInnerModel, cycle3[^1], 9996, 4);
 
-                if (!Attractor.Is3Cycle(cycle3))
+                if (!AttractorExtensions.Is3Cycle(cycle3))
                 {
                     Console.WriteLine($"Error: 3-cycle not build on d12: {d12}\r\n" +
                         $"result: {cycle3.Format()};\r\n");
@@ -494,7 +495,7 @@ namespace DS.Tests.Charts.Model1
                     {
                         var zik = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                        if (Attractor.Is3Cycle(zik))
+                        if (AttractorExtensions.Is3Cycle(zik))
                             continue;
 
                         Console.WriteLine($"3-cycle: {cycle3.Format()};\r\n" +
@@ -537,7 +538,7 @@ namespace DS.Tests.Charts.Model1
 
                 eq = PhaseTrajectory.Get(dInnerModel, eq[^1], 9996, 4);
 
-                if (!Attractor.IsEquilibrium(eq))
+                if (!AttractorExtensions.IsEquilibrium(eq))
                 {
                     Console.WriteLine($"Error: eq not build on d12: {d12}\r\n" +
                         $"result: {eq.Format()};\r\n");
@@ -554,7 +555,7 @@ namespace DS.Tests.Charts.Model1
                         var skipCount = d12 == 0.001909 ? 299996 : 9996;
                         var cycle3 = PhaseTrajectory.Get(dInnerModel, ellipsePoint, skipCount, 4);
 
-                        if (!Attractor.Is3Cycle(cycle3))
+                        if (!AttractorExtensions.Is3Cycle(cycle3))
                             continue;
 
                         Console.WriteLine($"eq: {eq.Format()};\r\n" +
@@ -582,7 +583,7 @@ namespace DS.Tests.Charts.Model1
                     ? PhaseTrajectory.Get(dInnerModel, cycle3[^1], 199996, 4)
                     : PhaseTrajectory.Get(dInnerModel, cycle3[^1], 9996, 4);
 
-                if (!Attractor.Is3Cycle(cycle3))
+                if (!AttractorExtensions.Is3Cycle(cycle3))
                 {
                     Console.WriteLine($"Error: 3-cycle not build on d12: {d12}\r\n" +
                         $"result: {cycle3.Format()};\r\n");
@@ -600,7 +601,7 @@ namespace DS.Tests.Charts.Model1
                     {
                         var eq = PhaseTrajectory.Get(dInnerModel, ellipsePoint, 9996, 4);
 
-                        if (!Attractor.IsEquilibrium(eq))
+                        if (!AttractorExtensions.IsEquilibrium(eq))
                             continue;
 
                         Console.WriteLine($"3-cycle: {cycle3.Format()};\r\n" +
@@ -643,7 +644,7 @@ namespace DS.Tests.Charts.Model1
 
                 eq1 = PhaseTrajectory.Get(dInnerModel, eq1[0], 9998, 2);
 
-                if (!Attractor.IsEquilibrium(eq1))
+                if (!AttractorExtensions.IsEquilibrium(eq1))
                 {
                     Console.WriteLine($"Error: eq1 not build on d12: {d12}\r\n" +
                         $"result: {eq1.Format()};\r\n");
@@ -685,7 +686,7 @@ namespace DS.Tests.Charts.Model1
 
                 eq2 = PhaseTrajectory.Get(dInnerModel, eq2[0], 9998, 2);
 
-                if (!Attractor.IsEquilibrium(eq2))
+                if (!AttractorExtensions.IsEquilibrium(eq2))
                 {
                     Console.WriteLine($"Error: eq2 not build on d12: {d12}\r\n" +
                         $"result: {eq2.Format()};\r\n");
@@ -803,7 +804,7 @@ namespace DS.Tests.Charts.Model1
                     //if (!ValidateZik(d12, attractor))
                     //    continue;
 
-                    if (!Attractor.IsEquilibrium(attractor))
+                    if (!AttractorExtensions.IsEquilibrium(attractor))
                     {
                         Console.WriteLine($"Error: eq not build on d12 = {d12}");
                         continue;
@@ -1134,13 +1135,13 @@ namespace DS.Tests.Charts.Model1
                 return false;
             }
 
-            if (Attractor.Is3Cycle(attractor))
+            if (AttractorExtensions.Is3Cycle(attractor))
             {
                 Console.WriteLine($"Error: 3-cycle on d12 = {d12}");
                 return false;
             }
 
-            if (Attractor.IsEquilibrium(attractor))
+            if (AttractorExtensions.IsEquilibrium(attractor))
             {
                 Console.WriteLine($"Error: eq on d12 = {d12}");
                 return false;

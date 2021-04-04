@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using DS.MathStructures;
 using DS.Models;
 using NUnit.Framework;
@@ -10,19 +7,6 @@ namespace DS.Tests.Charts.NModel1
 {
     public class DeterministicNModel1Tests : ChartTests
     {
-        [Test]
-        public void Test0()
-        {
-            var points = File.ReadAllLines("D:\\src\\DS\\DS\\zik.txt")
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(s => s.Split(' '))
-                .Select(s => (double.Parse(s[0], CultureInfo.InvariantCulture),
-                    double.Parse(s[1], CultureInfo.InvariantCulture)))
-                .ToList();
-
-            Chart = new ChartForm(points, 0, 1, 0, 1);
-        }
-
         [Test]
         public void Test1()
         {
@@ -44,7 +28,7 @@ namespace DS.Tests.Charts.NModel1
                 .Select(p => (p.D12, p.X[0]))
                 .Distinct();
 
-            Chart = new ChartForm(points, 0.0017, 0.0025, 0, 1);
+            Chart = new ChartForm(points, 0.0017, 0.0025, 0.25, 1.125);
         }
 
         private static DeterministicNModel1 GetModel_2(double d12 = 0.0014, double d21 = 0.0075)

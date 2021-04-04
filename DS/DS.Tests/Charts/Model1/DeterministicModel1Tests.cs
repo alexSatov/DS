@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
+using DS.Extensions;
 using DS.Helpers;
 using DS.MathStructures;
 using DS.MathStructures.Points;
@@ -39,7 +40,7 @@ namespace DS.Tests.Charts.Model1
             model.D12 = 0.0017;
             model.D21 = 0.0063;
 
-            var points = BifurcationDiagram.GetD12VsXParallel(model, new PointX(10, 10), 0.0025, 0.000001)
+            var points = BifurcationDiagram.GetD12VsXByPrevious(model, new PointX(10, 10), 0.0025, 0.000001)
                 .Distinct()
                 .Select(v => (v.D12, v.X1));
 
@@ -316,7 +317,7 @@ namespace DS.Tests.Charts.Model1
             model.D12 = 0.00236;
             model.D21 = 0.0075;
 
-            var pool = AttractorPool.GetPoolFor2AttractorsParallel(model, Attractor.Is3Cycle, new PointX(0, 0),
+            var pool = AttractorPool.GetPoolFor2AttractorsParallel(model, AttractorExtensions.Is3Cycle, new PointX(0, 0),
                 new PointX(40, 80), 0.5, 0.8);
 
             var chart = new ChartForm(pool.First, 0, 40, 0, 80, markerSize: 4);

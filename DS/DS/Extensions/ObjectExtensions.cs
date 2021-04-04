@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DS.Helpers
+namespace DS.Extensions
 {
     public static class ObjectExtensions
     {

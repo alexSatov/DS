@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Accord.Math;
-using DS.Helpers;
+using DS.Extensions;
 using DS.MathStructures.Points;
 using DS.Models;
 
@@ -58,19 +58,20 @@ namespace DS
             return points;
         }
 
-        public static List<double[]> Get(BaseNModel baseModel, double[] start, int skip, int get)
+        public static double[][] Get(BaseNModel baseModel, double[] start, int skip, int get)
         {
             var current = start;
-            var points = new List<double[]>();
+            var points = new double[][get];
+            var j = 0;
 
             for (var i = 0; i < skip + get; i++)
             {
                 var next = baseModel.GetNextPoint(current);
                 if (next.TendsToValue(baseModel.AbsInf))
-                    return new List<double[]> { Vector.Create(baseModel.N, double.MaxValue) };
+                    return new[] { Vector.Create(baseModel.N, double.MaxValue) };
 
                 if (i >= skip)
-                    points.Add(next);
+                    points[j++] = next;
 
                 current = next;
             }

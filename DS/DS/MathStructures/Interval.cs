@@ -19,11 +19,4 @@ namespace DS.MathStructures
             End = end;
         }
     }
-
-    public enum IntervalDirections
-    {
-        Asc = -1,
-        None = 0,
-        Desc = 1
-    }
 }

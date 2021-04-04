@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DS.MathStructures;
 
-namespace DS.Helpers
+namespace DS.Extensions
 {
     public static class IntervalExtensions
     {
@@ -15,9 +15,10 @@ namespace DS.Helpers
                 throw new ArgumentException("Must be greater than 1", nameof(count));
 
             var step = (interval.Max - interval.Min) / (count - 1);
-            var range = Enumerable.Range(0, count).Select(i => interval.Start + i * step);
 
-            return interval.Direction == IntervalDirections.Asc ? range : range.OrderByDescending(d => d);
+            return interval.Direction == IntervalDirections.Asc
+                ? Enumerable.Range(0, count).Select(i => interval.Start + i * step)
+                : Enumerable.Range(0, count).Select(i => interval.Start - i * step);
         }
     }
 }

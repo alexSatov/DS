@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Linq;
 
-namespace DS.Helpers
+namespace DS.Extensions
 {
     public static class DoubleExtensions
     {
@@ -19,6 +19,14 @@ namespace DS.Helpers
         public static bool IsInfinity(this double[] vector)
         {
             return vector.All(x => x == double.MaxValue);
+        }
+
+        public static bool AlmostEquals(this double[] vector, double[] other, double eps)
+        {
+            if (vector.Length != other.Length)
+                return false;
+
+            return !vector.Where((t, i) => Math.Abs(t - other[i]) > eps).Any();
         }
     }
 }

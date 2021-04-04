@@ -1,23 +1,53 @@
-﻿using System.Collections.Generic;
-using DS.MathStructures.Points;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using DS.Extensions;
 
 namespace DS
 {
+    public class Attractor<TPoint, TParams>
+    {
+        public AttractorType Type { get; }
+        public IList<TPoint> Points { get; }
+        public TParams Params { get; }
+
+        public Attractor(AttractorType type, IList<TPoint> points, TParams @params)
+        {
+            Type = type;
+            Points = points;
+            Params = @params;
+        }
+    }
+
     public static class Attractor
     {
-        public static bool Is3Cycle(IList<PointX> points)
+        public static int MaxCyclePeriod { get; }
+
+        static Attractor()
         {
-            return points.Count > 3 && points[0].AlmostEquals(points[3]) && !points[0].AlmostEquals(points[1]);
+            MaxCyclePeriod = Enum.GetValues<AttractorType>().Cast<int>().Max();
         }
 
-        public static bool IsEquilibrium(IList<PointX> points)
+        public static Attractor<double[], T> From<T>(double[][] points, T @params, double eps = 0.00001)
         {
-            return points.Count > 1 && points[0].AlmostEquals(points[1]);
-        }
+            if (points.Length == 0)
+                throw new ArgumentException("Empty point list", nameof(points));
 
-        public static string Format(this IEnumerable<PointX> points)
-        {
-            return string.Join(", ", points);
+            if (points[^1].IsInfinity())
+                return new Attractor<double[], T>(AttractorType.Infinity, points, @params);
+
+            if (points.Length == 1 || points[^1].AlmostEquals(points[^2], eps))
+                return new Attractor<double[], T>(AttractorType.Equilibrium, new[] { points[^1] }, @params);
+
+            var period = 2;
+
+            while (period <= MaxCyclePeriod && points.Length > period)
+            {
+                if (points[^1].AlmostEquals(points[^(period + 1)], eps))
+                    return new Attractor<double[], T>((AttractorType) period, points[^period..], @params);
+            }
+
+            return new Attractor<double[], T>(AttractorType.Chaos, points, @params);
         }
     }
 }

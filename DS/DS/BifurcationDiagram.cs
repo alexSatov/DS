@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DS.Helpers;
+using DS.Extensions;
 using DS.MathStructures;
 using DS.MathStructures.Points;
 using DS.MathStructures.Vectors;
@@ -12,6 +12,8 @@ namespace DS
 {
     public static class BifurcationDiagram
     {
+        #region 2-Model
+
         public class D12VsD21Result
         {
             public List<(PointD D, PointX X)> EquilibriumPoints { get; }
@@ -48,7 +50,6 @@ namespace DS
         public static IEnumerable<(double D12, double X1, double X2)> GetD12VsXByPrevious(Model1 model, PointX start,
             double d12End, double step, bool rightToLeft = false)
         {
-            var previous = start;
             Func<bool> condition;
 
             if (rightToLeft)
@@ -61,19 +62,12 @@ namespace DS
 
             for (; condition(); model.D12 += step)
             {
-                if (model.D12 > 0.0019)
-                    Console.WriteLine("kek");
-                var points = PhaseTrajectory.Get(model, previous, 10000, 2000);
+                var points = PhaseTrajectory.Get(model, start, 10000, 2000);
 
                 if (points[0].IsInfinity())
                     continue;
 
-                previous = points[^1];
-
-                if (model.D12 > 0.00156)
-                {
-                    Console.WriteLine(previous);
-                }
+                start = points[^1];
 
                 foreach (var (x1, x2) in points)
                     yield return (model.D12, x1, x2);
@@ -129,8 +123,8 @@ namespace DS
             }
 
             foreach (var task in tasks)
-                foreach (var values in task.Result)
-                    yield return values;
+            foreach (var values in task.Result)
+                yield return values;
         }
 
         public static D12VsD21Result GetD12VsD21(Model1 model, PointX start, double d12End, double d21End,
@@ -291,26 +285,6 @@ namespace DS
             return UniteResults(tasks);
         }
 
-        public static IEnumerable<(double D12, double[] X)> GetD12VsX(NModel1 model, Interval<double> d12,
-            double[] start, int count, int skip = 10000, int get = 2000)
-        {
-            var query = d12.Range(count)
-                .AsParallel()
-                .Select(d =>
-                {
-                    var copy = (NModel1) model.Copy();
-                    copy.D[0, 1] = d;
-                    return (D12: d, Points: PhaseTrajectory.Get(copy, start, skip, get));
-                })
-                .Where(t => !t.Points[0].IsInfinity());
-
-            foreach (var (d, points) in query)
-            foreach (var point in points)
-            {
-                yield return (d, point);
-            }
-        }
-
         private static void TryAddToResult(Model1 model, PointX point, D12VsD21Result result)
         {
             if (point.IsInfinity())
@@ -365,5 +339,41 @@ namespace DS
 
             return result;
         }
+
+        #endregion
+
+        #region N-Model
+
+        public static IEnumerable<(double D12, double[] X)> GetD12VsX(NModel1 model, Interval<double> d12,
+            double[] start, int count, int skip = 8000, int get = 2000, bool byPrevious = false)
+        {
+            (double D12, double[][] Points) Selector(double d)
+            {
+                var copy = (NModel1) model.Copy();
+                copy.D[0, 1] = d;
+
+                if (!byPrevious)
+                    return (D12: d, Points: PhaseTrajectory.Get(copy, start, skip, get));
+
+                var points = PhaseTrajectory.Get(copy, start, skip, get);
+                start = points[^1];
+
+                return (D12: d, Points: points);
+            }
+
+            bool Predicate((double D12, double[][] Points) t) => !t.Points[0].IsInfinity();
+
+            var query = byPrevious
+                ? d12.Range(count).Select(Selector).Where(Predicate)
+                : d12.Range(count).AsParallel().Select(Selector).Where(Predicate);
+
+            foreach (var (d, points) in query)
+            foreach (var point in points)
+            {
+                yield return (d, point);
+            }
+        }
+
+        #endregion
     }
 }
