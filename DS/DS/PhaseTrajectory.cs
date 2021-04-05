@@ -61,7 +61,7 @@ namespace DS
         public static double[][] Get(BaseNModel baseModel, double[] start, int skip, int get)
         {
             var current = start;
-            var points = new double[][get];
+            var points = new double[get][];
             var j = 0;
 
             for (var i = 0; i < skip + get; i++)

@@ -23,8 +23,9 @@ namespace DS.Tests.Charts.NModel1
         {
             var model = GetModel_2(0.0017, 0.0063);
             var interval = new Interval<double>(0.0017, 0.0025);
+            var dParams = new DParams(interval, 0, 1);
 
-            var points = BifurcationDiagram.GetD12VsX(model, interval, new[] { 0.25, 0.125 }, 1000)
+            var points = BifurcationDiagram.GetDVsX(model, dParams, new[] { 0.25, 0.125 }, 1000)
                 .Select(p => (p.D12, p.X[0]))
                 .Distinct();
 

@@ -1,23 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using DS.Extensions;
 
 namespace DS
 {
-    public class Attractor<TPoint, TParams>
-    {
-        public AttractorType Type { get; }
-        public IList<TPoint> Points { get; }
-        public TParams Params { get; }
-
-        public Attractor(AttractorType type, IList<TPoint> points, TParams @params)
-        {
-            Type = type;
-            Points = points;
-            Params = @params;
-        }
-    }
+    public record Attractor<TPoint, TParams>(AttractorType Type, TPoint[] Points, TParams Params);
 
     public static class Attractor
     {
@@ -34,14 +21,14 @@ namespace DS
                 throw new ArgumentException("Empty point list", nameof(points));
 
             if (points[^1].IsInfinity())
-                return new Attractor<double[], T>(AttractorType.Infinity, points, @params);
+                return new Attractor<double[], T>(AttractorType.Infinity, points[^1..], @params);
 
             if (points.Length == 1 || points[^1].AlmostEquals(points[^2], eps))
-                return new Attractor<double[], T>(AttractorType.Equilibrium, new[] { points[^1] }, @params);
+                return new Attractor<double[], T>(AttractorType.Equilibrium, points[^1..], @params);
 
-            var period = 2;
+            var period = 1;
 
-            while (period <= MaxCyclePeriod && points.Length > period)
+            while (++period <= MaxCyclePeriod && points.Length > period)
             {
                 if (points[^1].AlmostEquals(points[^(period + 1)], eps))
                     return new Attractor<double[], T>((AttractorType) period, points[^period..], @params);

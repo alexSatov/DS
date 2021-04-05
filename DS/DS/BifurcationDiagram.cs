@@ -344,28 +344,28 @@ namespace DS
 
         #region N-Model
 
-        public static IEnumerable<(double D12, double[] X)> GetD12VsX(NModel1 model, Interval<double> d12,
-            double[] start, int count, int skip = 8000, int get = 2000, bool byPrevious = false)
+        public static IEnumerable<(double D12, double[] X)> GetDVsX(NModel1 model, DParams dParams,
+            double[] start, int count, int skip = 8000, int get = 2000)
         {
-            (double D12, double[][] Points) Selector(double d)
+            (double D, double[][] Points) Selector(double d)
             {
                 var copy = (NModel1) model.Copy();
-                copy.D[0, 1] = d;
+                copy.D[dParams.Di, dParams.Dj] = d;
 
-                if (!byPrevious)
-                    return (D12: d, Points: PhaseTrajectory.Get(copy, start, skip, get));
+                if (!dParams.ByPrevious)
+                    return (D: d, Points: PhaseTrajectory.Get(copy, start, skip, get));
 
                 var points = PhaseTrajectory.Get(copy, start, skip, get);
                 start = points[^1];
 
-                return (D12: d, Points: points);
+                return (D: d, Points: points);
             }
 
             bool Predicate((double D12, double[][] Points) t) => !t.Points[0].IsInfinity();
 
-            var query = byPrevious
-                ? d12.Range(count).Select(Selector).Where(Predicate)
-                : d12.Range(count).AsParallel().Select(Selector).Where(Predicate);
+            var query = dParams.ByPrevious
+                ? dParams.Interval.Range(count).Select(Selector).Where(Predicate)
+                : dParams.Interval.Range(count).AsParallel().Select(Selector).Where(Predicate);
 
             foreach (var (d, points) in query)
             foreach (var point in points)
