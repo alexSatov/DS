@@ -11,7 +11,7 @@ namespace DS.Tests
         public void Equilibrium()
         {
             var points = new[] { new double[] { 1, 1 } };
-            var attractor = Attractor.From(points, "");
+            var attractor = Attractor.From(points, "", double.Epsilon);
 
             attractor.Type.Should().Be(AttractorType.Equilibrium);
             attractor.Points.Should().BeEquivalentTo(new[] { new double[] { 1, 1 } });
@@ -22,7 +22,7 @@ namespace DS.Tests
         public void Equilibrium2()
         {
             var points = new[] { new double[] { 1, 1 }, new double[] { 1, 1 } };
-            var attractor = Attractor.From(points, "");
+            var attractor = Attractor.From(points, "", double.Epsilon);
 
             attractor.Type.Should().Be(AttractorType.Equilibrium);
             attractor.Points.Should().BeEquivalentTo(new[] { new double[] { 1, 1 } });
@@ -33,7 +33,7 @@ namespace DS.Tests
         public void Infinity()
         {
             var points = new[] { new[] { double.MaxValue, double.MaxValue }, new[] { double.MaxValue, double.MaxValue } };
-            var attractor = Attractor.From(points, "");
+            var attractor = Attractor.From(points, "", double.Epsilon);
 
             attractor.Type.Should().Be(AttractorType.Infinity);
             attractor.Points.Should().BeEquivalentTo(new[] { new[] { double.MaxValue, double.MaxValue } });
@@ -53,7 +53,7 @@ namespace DS.Tests
                 if (loop)
                     points[^1] = points[0];
 
-                var cycle = Attractor.From(points, "");
+                var cycle = Attractor.From(points, "", double.Epsilon);
 
                 if (loop)
                 {
@@ -79,7 +79,7 @@ namespace DS.Tests
 
             points[^1] = points[0]; // trying to loop
 
-            var chaos = Attractor.From(points, "");
+            var chaos = Attractor.From(points, "", double.Epsilon);
 
             chaos.Type.Should().Be(AttractorType.Chaos);
             chaos.Points.Should().BeEquivalentTo(points);

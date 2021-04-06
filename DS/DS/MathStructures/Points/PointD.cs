@@ -4,27 +4,27 @@ namespace DS.MathStructures.Points
 {
     public readonly struct PointD : IPoint
     {
-        public double D12 { get; }
-        public double D21 { get; }
+        public double Dx { get; }
+        public double Dy { get; }
 
-        public double X => D12;
-        public double Y => D21;
+        public double X => Dx;
+        public double Y => Dy;
 
-        public PointD(double d12, double d21)
+        public PointD(double dx, double dy)
         {
-            D12 = d12;
-            D21 = d21;
+            Dx = dx;
+            Dy = dy;
         }
 
-        public void Deconstruct(out double d12, out double d21)
+        public void Deconstruct(out double dx, out double dy)
         {
-            d12 = D12;
-            d21 = D21;
+            dx = Dx;
+            dy = Dy;
         }
 
         public override string ToString()
         {
-            return $"({D12.ToString(CultureInfo.InvariantCulture)}, {D21.ToString(CultureInfo.InvariantCulture)})";
+            return $"({Dx.ToString(CultureInfo.InvariantCulture)}, {Dy.ToString(CultureInfo.InvariantCulture)})";
         }
     }
 }

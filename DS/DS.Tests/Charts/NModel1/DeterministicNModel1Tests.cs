@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using DS.MathStructures;
 using DS.Models;
+using DS.Tests.Extensions;
 using NUnit.Framework;
 
 namespace DS.Tests.Charts.NModel1
@@ -25,11 +26,32 @@ namespace DS.Tests.Charts.NModel1
             var interval = new Interval<double>(0.0017, 0.0025);
             var dParams = new DParams(interval, 0, 1);
 
-            var points = BifurcationDiagram.GetDVsX(model, dParams, new[] { 0.25, 0.125 }, 1000)
-                .Select(p => (p.D12, p.X[0]))
+            var points = BifurcationDiagram.Get(model, dParams, new[] { 0.25, 0.125 }, 1000)
+                .Select(p => (p.D, p.Point[0]))
                 .Distinct();
 
             Chart = new ChartForm(points, 0.0017, 0.0025, 0.25, 1.125);
+        }
+
+        [Test]
+        public void Test3()
+        {
+            var model = GetModel_2(0, 0);
+            var intervalX = new Interval<double>(0, 0.004);
+            var intervalY = new Interval<double>(0, 0.016);
+            var dParams = new D2Params(intervalX, intervalY, 0, 1, 1, 0, ByPreviousType.Y);
+
+            var attractors = BifurcationDiagram.Get(model, dParams, new[] { 0.25, 0.125 }, 400, 400)
+                .GroupBy(a => a.Type)
+                .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
+
+            Chart = new ChartForm(attractors[AttractorType.Infinity], 0, 0.004, 0, 0.016,
+                AttractorType.Infinity.ToColor());
+
+            foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Infinity))
+            {
+                Chart.AddSeries(type.ToString(), points, type.ToColor());
+            }
         }
 
         private static DeterministicNModel1 GetModel_2(double d12 = 0.0014, double d21 = 0.0075)

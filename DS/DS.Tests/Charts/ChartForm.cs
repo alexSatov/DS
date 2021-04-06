@@ -45,7 +45,7 @@ namespace DS.Tests.Charts
 
         public ChartForm(IEnumerable<PointD> points, double ox1, double ox2, double oy1, double oy2,
             Color? color = null, string name = null, int markerSize = 2, bool gridEnabled = false)
-            : this(points.Select(p => (p.D12, p.D21)), ox1, ox2, oy1, oy2, color, name, markerSize, gridEnabled)
+            : this(points.Select(p => (D12: p.Dx, D21: p.Dy)), ox1, ox2, oy1, oy2, color, name, markerSize, gridEnabled)
         {
         }
 

@@ -58,11 +58,11 @@ namespace DS.Tests.Charts.Model1
 
             var eqX2Gt2X1 = points.EquilibriumPoints
                 .Where(t => t.X.X2 > 2 * t.X.X1)
-                .Select(t => (t.D.D12, t.D.D21));
+                .Select(t => (D12: t.D.Dx, D21: t.D.Dy));
 
             var eqX2Lt2X1 = points.EquilibriumPoints
                 .Where(t => t.X.X2 < 2 * t.X.X1)
-                .Select(t => (t.D.D12, t.D.D21));
+                .Select(t => (D12: t.D.Dx, D21: t.D.Dy));
 
             var chart = new ChartForm(eqX2Gt2X1, 0.0017, 0.00245, 0.005, 0.00792);
 
@@ -76,7 +76,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test4()
         {
-            var points = BifurcationDiagram.GetD12VsD21ParallelByD12(model, new PointX(20, 40), 0.004, 0.016,
+            var points = BifurcationDiagram.GetD12VsD21ParallelByD21(model, new PointX(20, 40), 0.004, 0.016,
                 0.00002, 0.00008);
 
             Chart = GetCyclesChart(points, 0, 0.004, 0, 0.016);
@@ -409,7 +409,7 @@ namespace DS.Tests.Charts.Model1
 
             for (var i = 2; i < 16; i++)
             {
-                var points = cyclePoints[i].Select(p => (p.D.D12, p.D.D21)).ToList();
+                var points = cyclePoints[i].Select(p => (D12: p.D.Dx, D21: p.D.Dy)).ToList();
                 var name = $"cycle{i}";
 
                 chart.AddSeries(name, points, colors[i - 2]);

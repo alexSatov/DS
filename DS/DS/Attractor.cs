@@ -15,7 +15,7 @@ namespace DS
             MaxCyclePeriod = Enum.GetValues<AttractorType>().Cast<int>().Max();
         }
 
-        public static Attractor<double[], T> From<T>(double[][] points, T @params, double eps = 0.00001)
+        public static Attractor<double[], T> From<T>(double[][] points, T @params, double eps)
         {
             if (points.Length == 0)
                 throw new ArgumentException("Empty point list", nameof(points));
