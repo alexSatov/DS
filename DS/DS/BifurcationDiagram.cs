@@ -385,7 +385,7 @@ namespace DS
                     .AsParallel()
                     .SelectMany(dx =>
                     {
-                        var current = start;
+                        var previous = start;
                         var copy = (NModel1) model.Copy();
                         copy.D[dParams.Dxi, dParams.Dxj] = dx;
 
@@ -393,10 +393,10 @@ namespace DS
                         {
                             copy.D[dParams.Dyi, dParams.Dyj] = dy;
 
-                            var points = PhaseTrajectory.Get(copy, current, skip, get);
+                            var points = PhaseTrajectory.Get(copy, previous, skip, get);
 
                             if (byPrevious)
-                                current = points[^1];
+                                previous = points[^1];
 
                             return Attractor.From(points, new PointD(dx, dy), eps);
                         });
@@ -410,7 +410,7 @@ namespace DS
                     .AsParallel()
                     .SelectMany(dy =>
                     {
-                        var current = start;
+                        var previous = start;
                         var copy = (NModel1) model.Copy();
                         copy.D[dParams.Dyi, dParams.Dyj] = dy;
 
@@ -418,8 +418,8 @@ namespace DS
                         {
                             copy.D[dParams.Dxi, dParams.Dxj] = dx;
 
-                            var points = PhaseTrajectory.Get(copy, current, skip, get);
-                            current = points[^1];
+                            var points = PhaseTrajectory.Get(copy, previous, skip, get);
+                            previous = points[^1];
 
                             return Attractor.From(points, new PointD(dx, dy), eps);
                         });
@@ -427,6 +427,74 @@ namespace DS
                     .ToList();
             }
         }
+
+        public static List<Attractor<double[], PointD>> GetPolar(NModel1 model, D2Params dParams,
+            PointD center, double[] start, int countA, int countX, int countY, int skip = 8000, int get = 2000,
+            double eps = 0.00001)
+        {
+            if (dParams.ByPreviousType != ByPreviousType.Polar)
+                throw new ArgumentException("Unsupported type", nameof(dParams.ByPreviousType));
+
+            model.D[dParams.Dxi, dParams.Dxj] = center.X;
+            model.D[dParams.Dyi, dParams.Dyj] = center.Y;
+
+            var centerAttractor = Attractor.From(PhaseTrajectory.Get(model, start, skip, get), center, eps);
+            var startVector = new Vector2D(1, 0);
+            var stepX = (dParams.IntervalX.Max - dParams.IntervalX.Min) / countX;
+            var stepY = (dParams.IntervalY.Max - dParams.IntervalY.Min) / countY;
+            var dArea = new Rect(dParams.IntervalX.Min, dParams.IntervalX.Max, dParams.IntervalY.Min,
+                dParams.IntervalY.Max);
+
+            var result = new Interval<double>(0, 2 * Math.PI).Range(countA)
+                .AsParallel()
+                .SelectMany(a =>
+                {
+                    var previous = start;
+                    var copy = (NModel1) model.Copy();
+                    var list = new List<Attractor<double[], PointD>>(Math.Max(countX, countY));
+                    var shiftVector = startVector.Rotate(a);
+                    shiftVector = new Vector2D(shiftVector.X * stepX, shiftVector.Y * stepY);
+
+                    while (dArea.Contains(copy.D[dParams.Dxi, dParams.Dxj], copy.D[dParams.Dyi, dParams.Dyj]))
+                    {
+                        copy.D[dParams.Dxi, dParams.Dxj] += shiftVector.X;
+                        copy.D[dParams.Dyi, dParams.Dyj] += shiftVector.Y;
+
+                        var points = PhaseTrajectory.Get(copy, previous, skip, get);
+                        previous = points[^1];
+                        list.Add(Attractor.From(points,
+                            new PointD(copy.D[dParams.Dxi, dParams.Dxj], copy.D[dParams.Dyi, dParams.Dyj]), eps));
+                    }
+
+                    return list;
+                })
+                .ToList();
+
+            result.Add(centerAttractor);
+
+            return result;
+        }
+
+        // var result = new D12VsD21Result();
+        // var startVector = new Vector2D(1, 0);
+        //
+        //     for (var angle = startAngle; angle < endAngle; angle += angleStep)
+        // {
+        //     var previous = startX;
+        //     var vector = startVector.Rotate(angle);
+        //     var shiftVector = new Vector2D(vector.X * step1, vector.Y * step2);
+        //
+        //     model.D12 = startD.Dx;
+        //     model.D21 = startD.Dy;
+        //
+        //     while (dArea.Contains(model.D12, model.D21))
+        //     {
+        //         model.D12 += shiftVector.X;
+        //         model.D21 += shiftVector.Y;
+        //         previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
+        //         TryAddToResult(model, previous, result);
+        //     }
+        // }
 
         #endregion
     }

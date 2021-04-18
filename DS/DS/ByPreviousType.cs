@@ -4,6 +4,7 @@
     {
         None,
         X,
-        Y
+        Y,
+        Polar
     }
 }

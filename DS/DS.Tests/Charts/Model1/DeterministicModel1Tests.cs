@@ -155,7 +155,7 @@ namespace DS.Tests.Charts.Model1
         public void Test8()
         {
             var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(20, 40),
-                new PointD(0.00159, 0.0072622), new Rect(0, 0.00245, 0.007, 0.008), 0.001, 0.000004, 0.0000017);
+                new PointD(0.00159, 0.0072622), new Rect(0, 0.00245, 0.007, 0.008), 0.01, 0.000004, 0.0000017);
             var chart = GetCyclesChart(points, 0, 0.00245, 0.007, 0.008);
 
             Chart = chart;

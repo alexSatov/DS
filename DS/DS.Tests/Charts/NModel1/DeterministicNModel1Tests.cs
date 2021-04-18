@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using DS.MathStructures;
+using DS.MathStructures.Points;
 using DS.Models;
 using DS.Tests.Extensions;
 using NUnit.Framework;
@@ -41,7 +42,7 @@ namespace DS.Tests.Charts.NModel1
             var intervalY = new Interval<double>(0, 0.016);
             var dParams = new D2Params(intervalX, intervalY, 0, 1, 1, 0, ByPreviousType.Y);
 
-            var attractors = BifurcationDiagram.Get(model, dParams, new[] { 0.25, 0.125 }, 400, 400)
+            var attractors = BifurcationDiagram.Get(model, dParams, new[] { 0.5, 0.5 }, 400, 400)
                 .GroupBy(a => a.Type)
                 .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
 
@@ -49,6 +50,27 @@ namespace DS.Tests.Charts.NModel1
                 AttractorType.Infinity.ToColor());
 
             foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Infinity))
+            {
+                Chart.AddSeries(type.ToString(), points, type.ToColor());
+            }
+        }
+
+        [Test]
+        public void Test4()
+        {
+            var model = GetModel_2(0, 0);
+            var intervalX = new Interval<double>(0, 0.00245);
+            var intervalY = new Interval<double>(0.007, 0.008);
+            var dParams = new D2Params(intervalX, intervalY, 0, 1, 1, 0, ByPreviousType.Polar);
+
+            var attractors = BifurcationDiagram.GetPolar(model, dParams, new PointD(0.00159, 0.0072622), new[] { 0.5, 0.5 }, 360 * 4, 400, 400)
+                .GroupBy(a => a.Type)
+                .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
+
+            Chart = new ChartForm(attractors[AttractorType.Equilibrium], 0, 0.00245, 0.007, 0.008,
+                AttractorType.Equilibrium.ToColor());
+
+            foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Equilibrium))
             {
                 Chart.AddSeries(type.ToString(), points, type.ToColor());
             }
