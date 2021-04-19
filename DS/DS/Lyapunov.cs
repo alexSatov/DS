@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Accord.Math;
+using DS.Extensions;
 using DS.MathStructures.Points;
 using DS.MathStructures.Vectors;
 using DS.Models;
@@ -29,6 +31,8 @@ namespace DS
             return x;
         }
 
+        #region 2-Model
+
         public static IEnumerable<(double D12, double L1, double L2)> GetD12Indicators(Model1 model, PointX start,
             double d12End, double step, bool byPrevious = false, double eps = 0.00001, double t = 100000)
         {
@@ -44,27 +48,6 @@ namespace DS
             }
 
             return result;
-        }
-
-        public static IEnumerable<(double D12, double L1, double L2)> GetD12IndicatorsParallel(Model1 model, PointX start,
-            double d12End, double step, double eps = 0.00001, double t = 100000)
-        {
-            var processorCount = Environment.ProcessorCount;
-            var tasks = new Task<IEnumerable<(double D12, double L1, double L2)>>[processorCount];
-            var d12Part = (d12End - model.D12) / processorCount;
-
-            for (var i = 0; i < processorCount; i++)
-            {
-                var copy = (Model1) model.Copy();
-                var d12PartEnd = model.D12 + d12Part * (i + 1);
-                copy.D12 = model.D12 + d12Part * i;
-
-                tasks[i] = Task.Run(() => GetD12Indicators(copy, start, d12PartEnd, step, false, eps, t));
-            }
-
-            foreach (var task in tasks)
-                foreach (var values in task.Result)
-                    yield return values;
         }
 
         public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsByD12(Model1 model, PointX start,
@@ -115,48 +98,6 @@ namespace DS
             return result;
         }
 
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD12(Model1 model, PointX start,
-            double d12End, double d21End, double step1, double step2, double eps = 0.00001, double t = 100000)
-        {
-            var processorCount = Environment.ProcessorCount;
-            var tasks = new Task<IEnumerable<(double D12, double D21, double L1, double L2)>>[processorCount];
-            var d12Part = (d12End - model.D12) / processorCount;
-
-            for (var i = 0; i < processorCount; i++)
-            {
-                var copy = (Model1) model.Copy();
-                var d12PartEnd = model.D12 + d12Part * (i + 1);
-                copy.D12 = model.D12 + d12Part * i;
-
-                tasks[i] = Task.Run(() => GetIndicatorsByD21(copy, start, d12PartEnd, d21End, step1, step2, true, eps, t));
-            }
-
-            foreach (var task in tasks)
-                foreach (var values in task.Result)
-                    yield return values;
-        }
-
-        public static IEnumerable<(double D12, double D21, double L1, double L2)> GetIndicatorsParallelByD21(Model1 model, PointX start,
-            double d12End, double d21End, double step1, double step2, double eps = 0.00001, double t = 100000)
-        {
-            var processorCount = Environment.ProcessorCount;
-            var tasks = new Task<IEnumerable<(double D12, double D21, double L1, double L2)>>[processorCount];
-            var d21Part = (d21End - model.D21) / processorCount;
-
-            for (var i = 0; i < processorCount; i++)
-            {
-                var copy = (Model1) model.Copy();
-                var d21PartEnd = model.D21 + d21Part * (i + 1);
-                copy.D21 = model.D21 + d21Part * i;
-
-                tasks[i] = Task.Run(() => GetIndicatorsByD12(copy, start, d12End, d21PartEnd, step1, step2, true, eps, t));
-            }
-
-            foreach (var task in tasks)
-                foreach (var values in task.Result)
-                    yield return values;
-        }
-
         private static (PointX O, double L1, double L2) FindL1L2(BaseModel baseModel, PointX start, PointX previous,
             bool byPrevious, double eps, double t)
         {
@@ -192,5 +133,86 @@ namespace DS
 
             return (o, l1, l2);
         }
+
+        #endregion
+
+        #region N-Model
+
+        public static List<(double D, double[] L)> Get(NModel1 model, DParams dParams, double[] start,
+            double eps = 0.00001, double t = 100000)
+        {
+            var range = dParams.Interval.Range(dParams.Count);
+
+            if (dParams.ByPrevious)
+                return range
+                    .Select(d =>
+                    {
+                        model.D[dParams.Di, dParams.Dj] = d;
+                        var (o, l) = FindLn(model, start, eps, t);
+                        start = o;
+                        return (d, l);
+                    })
+                    .ToList();
+
+            return range
+                .AsParallel()
+                .Select(d =>
+                {
+                    var copy = (NModel1) model.Copy();
+                    copy.D[dParams.Di, dParams.Dj] = d;
+                    return (d, FindLn(copy, start, eps, t).L);
+                })
+                .ToList();
+        }
+
+        private static (double[] O, double[] L) FindLn(BaseNModel model, double[] o, double eps, double t)
+        {
+            var n = o.Length;
+            var z = new double[n];
+            var a = new double[n][];
+
+            for (var i = 0; i < n; i++)
+            {
+                a[i] = o.Copy();
+                a[i][i] += eps;
+            }
+
+            for (var i = 0; i < t; i++)
+            {
+                var p = model.GetNextPoint(o);
+                var v = new double[n][];
+                var b = new double[n][];
+
+                v[0] = model.GetNextPoint(a[0]).Subtract(p);
+                b[0] = v[0].Normalize();
+                z[0] += Math.Log10(v[0].Euclidean() / eps);
+
+                for (var j = 1; j < n; j++)
+                {
+                    b[j] = v[j] = model.GetNextPoint(a[j]).Subtract(p);
+                    for (var k = 0; k < j; k++)
+                        b[j] = b[j].Subtract(b[k].Multiply(v[j].Dot(b[k])));
+
+                    z[j] += Math.Log10(b[j].Euclidean() / eps);
+                    b[j] = b[j].Normalize();
+                }
+
+                for (var j = 0; j < n; j++)
+                {
+                    b[j] = b[j].Multiply(eps);
+                    a[j] = b[j].Add(p);
+                }
+
+                o = p;
+            }
+
+            var l = new double[n];
+            for (var i = 0; i < n; i++)
+                l[i] = z[i] / t;
+
+            return (o, l);
+        }
+
+        #endregion
     }
 }

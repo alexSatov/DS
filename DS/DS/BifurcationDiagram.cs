@@ -345,30 +345,38 @@ namespace DS
         #region N-Model
 
         public static List<(double D, double[] Point)> Get(NModel1 model, DParams dParams,
-            double[] start, int count, int skip = 8000, int get = 2000)
+            double[] start, int skip = 8000, int get = 2000)
         {
-            return dParams.ByPrevious
-                ? dParams.Interval.Range(count).SelectMany(Selector).Where(Predicate).ToList()
-                : dParams.Interval.Range(count).AsParallel().SelectMany(Selector).Where(Predicate).ToList();
+            var range = dParams.Interval.Range(dParams.Count);
 
-            IEnumerable<(double D, double[] Point)> Selector(double d)
-            {
-                var copy = (NModel1) model.Copy();
-                copy.D[dParams.Di, dParams.Dj] = d;
+            if (dParams.ByPrevious)
+                return range
+                    .SelectMany(d =>
+                    {
+                        model.D[dParams.Di, dParams.Dj] = d;
+                        var points = PhaseTrajectory.Get(model, start, skip, get);
+                        start = points[^1];
+                        return points.Select(p => (D: d, Point: p));
+                    })
+                    .Where(Predicate)
+                    .ToList();
 
-                var points = PhaseTrajectory.Get(copy, start, skip, get);
+            return range
+                .AsParallel()
+                .SelectMany(d =>
+                {
+                    var copy = (NModel1) model.Copy();
+                    copy.D[dParams.Di, dParams.Dj] = d;
+                    return PhaseTrajectory.Get(copy, start, skip, get).Select(p => (D: d, Point: p));
+                })
+                .Where(Predicate)
+                .ToList();
 
-                if (dParams.ByPrevious)
-                    start = points[^1];
-
-                return points.Select(p => (D: d, Point: p));
-            }
-
-            bool Predicate((double D12, double[] Point) t) => !t.Point.IsInfinity();
+            static bool Predicate((double D12, double[] Point) t) => !t.Point.IsInfinity();
         }
 
         public static List<Attractor<double[], PointD>> Get(NModel1 model, D2Params dParams,
-            double[] start, int countX, int countY, int skip = 8000, int get = 2000, double eps = 0.00001)
+            double[] start, int skip = 8000, int get = 2000, double eps = 0.00001)
         {
             return dParams.ByPreviousType switch
             {
@@ -381,7 +389,7 @@ namespace DS
 
             List<Attractor<double[], PointD>> X(bool byPrevious)
             {
-                return dParams.IntervalX.Range(countX)
+                return dParams.IntervalX.Range(dParams.CountX)
                     .AsParallel()
                     .SelectMany(dx =>
                     {
@@ -389,7 +397,7 @@ namespace DS
                         var copy = (NModel1) model.Copy();
                         copy.D[dParams.Dxi, dParams.Dxj] = dx;
 
-                        return dParams.IntervalY.Range(countY).Select(dy =>
+                        return dParams.IntervalY.Range(dParams.CountY).Select(dy =>
                         {
                             copy.D[dParams.Dyi, dParams.Dyj] = dy;
 
@@ -406,7 +414,7 @@ namespace DS
 
             List<Attractor<double[], PointD>> Y()
             {
-                return dParams.IntervalY.Range(countY)
+                return dParams.IntervalY.Range(dParams.CountY)
                     .AsParallel()
                     .SelectMany(dy =>
                     {
@@ -414,7 +422,7 @@ namespace DS
                         var copy = (NModel1) model.Copy();
                         copy.D[dParams.Dyi, dParams.Dyj] = dy;
 
-                        return dParams.IntervalX.Range(countX).Select(dx =>
+                        return dParams.IntervalX.Range(dParams.CountX).Select(dx =>
                         {
                             copy.D[dParams.Dxi, dParams.Dxj] = dx;
 
@@ -429,7 +437,7 @@ namespace DS
         }
 
         public static List<Attractor<double[], PointD>> GetPolar(NModel1 model, D2Params dParams,
-            PointD center, double[] start, int countA, int countX, int countY, int skip = 8000, int get = 2000,
+            PointD center, double[] start, int countA, int skip = 8000, int get = 2000,
             double eps = 0.00001)
         {
             if (dParams.ByPreviousType != ByPreviousType.Polar)
@@ -440,8 +448,8 @@ namespace DS
 
             var centerAttractor = Attractor.From(PhaseTrajectory.Get(model, start, skip, get), center, eps);
             var startVector = new Vector2D(1, 0);
-            var stepX = (dParams.IntervalX.Max - dParams.IntervalX.Min) / countX;
-            var stepY = (dParams.IntervalY.Max - dParams.IntervalY.Min) / countY;
+            var stepX = (dParams.IntervalX.Max - dParams.IntervalX.Min) / dParams.CountX;
+            var stepY = (dParams.IntervalY.Max - dParams.IntervalY.Min) / dParams.CountY;
             var dArea = new Rect(dParams.IntervalX.Min, dParams.IntervalX.Max, dParams.IntervalY.Min,
                 dParams.IntervalY.Max);
 
@@ -451,7 +459,7 @@ namespace DS
                 {
                     var previous = start;
                     var copy = (NModel1) model.Copy();
-                    var list = new List<Attractor<double[], PointD>>(Math.Max(countX, countY));
+                    var list = new List<Attractor<double[], PointD>>(Math.Max(dParams.CountX, dParams.CountY));
                     var shiftVector = startVector.Rotate(a);
                     shiftVector = new Vector2D(shiftVector.X * stepX, shiftVector.Y * stepY);
 
@@ -474,27 +482,6 @@ namespace DS
 
             return result;
         }
-
-        // var result = new D12VsD21Result();
-        // var startVector = new Vector2D(1, 0);
-        //
-        //     for (var angle = startAngle; angle < endAngle; angle += angleStep)
-        // {
-        //     var previous = startX;
-        //     var vector = startVector.Rotate(angle);
-        //     var shiftVector = new Vector2D(vector.X * step1, vector.Y * step2);
-        //
-        //     model.D12 = startD.Dx;
-        //     model.D21 = startD.Dy;
-        //
-        //     while (dArea.Contains(model.D12, model.D21))
-        //     {
-        //         model.D12 += shiftVector.X;
-        //         model.D21 += shiftVector.Y;
-        //         previous = PhaseTrajectory.Get(model, previous, 10000, 1)[0];
-        //         TryAddToResult(model, previous, result);
-        //     }
-        // }
 
         #endregion
     }

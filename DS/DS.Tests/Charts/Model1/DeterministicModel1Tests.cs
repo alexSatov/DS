@@ -164,13 +164,13 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test9()
         {
-            const double step = 0.0000002;
+            const double step = 0.000002;
             model.D21 = 0.0075;
 
             IEnumerable<(double D12, double L1, double L2)> FirstAttractor()
             {
                 model.D12 = 0.000045;
-                return Lyapunov.GetD12Indicators(model, new PointX(20, 40), 0.00245, step, true, t: 500000);
+                return Lyapunov.GetD12Indicators(model, new PointX(20, 40), 0.00245, step, true);
             }
 
             IEnumerable<(double D12, double L1, double L2)> SecondAttractor()
@@ -199,8 +199,8 @@ namespace DS.Tests.Charts.Model1
 
             chart.AddSeries("D12vsL2", l2Points, Color.Red);
 
-            l1Points.SaveToFile("lyapunov\\l1.txt");
-            l2Points.SaveToFile("lyapunov\\l2.txt");
+            // l1Points.SaveToFile("lyapunov\\l1.txt");
+            // l2Points.SaveToFile("lyapunov\\l2.txt");
 
             Chart = chart;
         }
