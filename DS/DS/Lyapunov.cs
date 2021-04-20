@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Accord.Math;
 using DS.Extensions;
 using DS.MathStructures.Points;
@@ -110,7 +109,7 @@ namespace DS
             for (var i = 0; i < t; i++)
             {
                 var (p, p1, p2) = (baseModel.GetNextPoint(o), baseModel.GetNextPoint(a), baseModel.GetNextPoint(b));
-                var (v1, v2) = (new Vector2D(p1, p), new Vector2D(p2, p));
+                var (v1, v2) = (new Vector2D(p, p1), new Vector2D(p, p2));
 
                 var b1 = v1 / v1.Length;
                 var b2 = v2 - v2 * b1 * b1;

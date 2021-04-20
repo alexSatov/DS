@@ -106,7 +106,7 @@ namespace DS.Tests.Charts.NModel1
         {
             var model = GetModel_2(0.000045, 0.0075);
             var interval = new Interval<double>(0.000045, 0.00245);
-            var dParams = new DParams(interval);
+            var dParams = new DParams(interval, ByPrevious: true);
 
             var result = Lyapunov.Get(model, dParams, new[] { 0.5, 0.5 });
             var l1Points = result.Select(p => (p.D, p.L[0])).ToList();
