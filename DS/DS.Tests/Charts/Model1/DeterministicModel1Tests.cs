@@ -162,6 +162,16 @@ namespace DS.Tests.Charts.Model1
         }
 
         [Test]
+        public void Test8_1()
+        {
+            var points = BifurcationDiagram.GetD12VsD21ByPreviousPolarParallel(model, new PointX(37, 66.4),
+                new PointD(0.002272, 0.007308), new Rect(0.00205, 0.00245, 0.0068, 0.008), 0.0025, 0.000004, 0.0000017);
+            var chart = GetCyclesChart(points, 0.00205, 0.00245, 0.0068, 0.008);
+
+            Chart = chart;
+        }
+
+        [Test]
         public void Test9()
         {
             const double step = 0.000002;

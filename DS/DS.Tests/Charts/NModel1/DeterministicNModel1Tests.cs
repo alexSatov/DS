@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Linq;
+using DS.Helpers;
 using DS.MathStructures;
 using DS.MathStructures.Points;
 using DS.Models;
@@ -11,7 +12,7 @@ namespace DS.Tests.Charts.NModel1
     public class DeterministicNModel1Tests : ChartTests
     {
         [Test]
-        public void Test1()
+        public void TestCycle()
         {
             var model = GetModel_2(0.0014, 0.0075);
 
@@ -22,7 +23,7 @@ namespace DS.Tests.Charts.NModel1
         }
 
         [Test]
-        public void Test2()
+        public void TestDiagram()
         {
             var model = GetModel_2(0.0017, 0.0063);
             var interval = new Interval<double>(0.0017, 0.0025);
@@ -36,7 +37,7 @@ namespace DS.Tests.Charts.NModel1
         }
 
         [Test]
-        public void Test3()
+        public void TestDiagram2()
         {
             var model = GetModel_2();
             var intervalX = new Interval<double>(0, 0.004);
@@ -57,14 +58,14 @@ namespace DS.Tests.Charts.NModel1
         }
 
         [Test]
-        public void Test4()
+        public void TestDiagramPolar()
         {
             var model = GetModel_2();
             var intervalX = new Interval<double>(0, 0.00245);
             var intervalY = new Interval<double>(0.007, 0.008);
             var dParams = new D2Params(intervalX, intervalY, ByPreviousType: ByPreviousType.Polar);
 
-            var attractors = BifurcationDiagram.GetPolar(model, dParams, new PointD(0.00159, 0.0072622), new[] { 0.5, 0.5 }, 360, 400, 400)
+            var attractors = BifurcationDiagram.GetPolar(model, dParams, new PointD(0.00159, 0.0072622), new[] { 0.5, 0.5 }, 360)
                 .GroupBy(a => a.Type)
                 .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
 
@@ -78,7 +79,30 @@ namespace DS.Tests.Charts.NModel1
         }
 
         [Test]
-        public void Test5()
+        public void TestDiagramPolar2()
+        {
+            var model = GetModel_2();
+            var intervalX = new Interval<double>(0.00205, 0.00245);
+            var intervalY = new Interval<double>(0.0068, 0.008);
+            var dParams = new D2Params(intervalX, intervalY, ByPreviousType: ByPreviousType.Polar);
+
+            var attractors = BifurcationDiagram.GetPolar(model, dParams, new PointD(0.002272, 0.007308), new[] { 0.925, 0.83 }, 360)
+                .GroupBy(a => a.Type)
+                .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
+
+            Chart = new ChartForm(attractors[AttractorType.Equilibrium], 0.00205, 0.00245, 0.0068, 0.008,
+                AttractorType.Equilibrium.ToColor());
+
+            foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Equilibrium))
+            {
+                Chart.AddSeries(type.ToString(), points, type.ToColor());
+            }
+
+            attractors.SaveToDir();
+        }
+
+        [Test]
+        public void TestLyapunov()
         {
             var model = GetModel_2(0.000045, 0.0075);
             var interval = new Interval<double>(0.000045, 0.00245);
