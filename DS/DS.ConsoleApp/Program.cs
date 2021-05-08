@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Linq;
-using DS.Helpers;
-using DS.Models;
+using System.Diagnostics;
+using System.IO;
+using CommandLine;
+using DS.ConsoleApp.Algorithms;
+using Newtonsoft.Json;
 
 namespace DS.ConsoleApp
 {
@@ -9,26 +11,66 @@ namespace DS.ConsoleApp
     {
         internal static void Main(string[] args)
         {
-            Console.WriteLine(string.Join("; ", args));
-            Console.WriteLine($"Processor count: " + Environment.ProcessorCount);
+            Console.WriteLine($"Processor count: {Environment.ProcessorCount}");
 
-            var model = GetModel_2();
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(o =>
+                {
+                    var algorithmType = (AlgorithmType) o.Algorithm;
+                    var watch = Stopwatch.StartNew();
+                    var exitCode = 0;
 
-            var points = PhaseTrajectory.Get(model, new[] { 0.5, 0.5 }, 2000, 1000)
-                .Select(p => (p[0], p[1]));
-
-            points.SaveToFile("zik.txt");
+                    try
+                    {
+                        Execute(algorithmType, o.InputFilePath);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Unexpected error: {e.Message}");
+                        exitCode = -1;
+                    }
+                    finally
+                    {
+                        Console.WriteLine($"Finished in {watch.Elapsed}");
+                        Environment.Exit(exitCode);
+                    }
+                });
         }
 
-        private static DeterministicNModel1 GetModel_2(double d12 = 0.0014, double d21 = 0.0075)
+        private static void Execute(AlgorithmType algorithmType, string inputFilePath)
         {
-            var d = new[,]
+            switch (algorithmType)
             {
-                { 0.0002, d12 },
-                { d21, 0.00052 }
-            };
+                case AlgorithmType.PhaseTrajectory:
+                    var ptParameters = DeserializeFromFile<PhaseTrajectoryParameters>(inputFilePath);
+                    var ptAlgorithm = new PhaseTrajectoryAlgorithm();
+                    ptAlgorithm.Execute(ptParameters);
+                    break;
+                case AlgorithmType.BifurcationDiagram:
+                    var bdParameters = DeserializeFromFile<BifurcationDiagramParameters>(inputFilePath);
+                    var bdAlgorithm = new BifurcationDiagramAlgorithm();
+                    bdAlgorithm.Execute(bdParameters);
+                    break;
+                case AlgorithmType.ModeMap:
+                    var mmParameters = DeserializeFromFile<ModeMapParameters>(inputFilePath);
+                    var mmAlgorithm = new ModeMapAlgorithm();
+                    mmAlgorithm.Execute(mmParameters);
+                    break;
+                case AlgorithmType.LyapunovComponents:
+                    var lcParameters = DeserializeFromFile<LyapunovComponentsParameters>(inputFilePath);
+                    var lcAlgorithm = new LyapunovComponentsAlgorithm();
+                    lcAlgorithm.Execute(lcParameters);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(algorithmType), algorithmType,
+                        $"Invalid algorithm type");
+            }
+        }
 
-            return new DeterministicNModel1(2, new double[] { 10, 20 }, d, 0.25, 1);
+        private static T DeserializeFromFile<T>(string path)
+        {
+            var json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<T>(json);
         }
     }
 }

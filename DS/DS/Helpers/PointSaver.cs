@@ -81,6 +81,12 @@ namespace DS.Helpers
                 points.SaveToFile(type.ToString().ToLowerInvariant(), dir);
         }
 
+        public static void SaveToFile(this IEnumerable<double[]> points, string filename, string dir = null)
+        {
+            var lines = points.Select(p => string.Join(' ', p.Select(v => v.Format())));
+            WriteToFile(lines, filename, dir);
+        }
+
         private static void WriteToFile(IEnumerable<string> lines, string filename, string subdir = null)
         {
             filename = subdir == null

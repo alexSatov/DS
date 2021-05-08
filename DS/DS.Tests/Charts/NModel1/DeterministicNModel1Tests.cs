@@ -16,7 +16,7 @@ namespace DS.Tests.Charts.NModel1
         {
             var model = GetModel_2(0.0014, 0.0075);
 
-            var points = PhaseTrajectory.Get(model, new[] { 0.5, 0.5 }, 2000, 1000)
+            var points = PhaseTrajectory.Get(model, new[] { 0.5, 0.5 }, 8000, 2000)
                 .Select(p => (p[0], p[1]));
 
             Chart = new ChartForm(points, 0, 1, 0, 1);

@@ -1,5 +1,6 @@
 ﻿using Accord.Math;
 using FluentAssertions;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace DS.Tests
