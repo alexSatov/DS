@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DS.Extensions;
@@ -105,8 +106,11 @@ namespace DS.Helpers
                 filename += ".txt";
 
             var directory = Path.GetDirectoryName(filename);
+
             Directory.CreateDirectory(directory);
             File.WriteAllLines(filename, lines);
+
+            Console.WriteLine($"Saved file '{filename}'");
         }
     }
 }
