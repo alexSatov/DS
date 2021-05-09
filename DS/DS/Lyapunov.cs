@@ -138,7 +138,7 @@ namespace DS
         #region N-Model
 
         public static List<(double D, double[] L)> Get(NModel1 model, DParams dParams, double[] start,
-            double eps = 0.00001, double t = 100000)
+            double eps = 0.00001, int t = 100000)
         {
             var range = dParams.Interval.Range(dParams.Count);
 
@@ -164,7 +164,7 @@ namespace DS
                 .ToList();
         }
 
-        private static (double[] O, double[] L) FindLn(BaseNModel model, double[] o, double eps, double t)
+        private static (double[] O, double[] L) FindLn(BaseNModel model, double[] o, double eps, int t)
         {
             var n = o.Length;
             var z = new double[n];

@@ -78,12 +78,20 @@ namespace DS.Helpers
         public static void SaveToDir(this Dictionary<AttractorType, List<PointD>> attractors, string dir = "diagram2d")
         {
             foreach (var (type, points) in attractors)
-                points.SaveToFile(type.ToString().ToLowerInvariant(), dir);
+                points.SaveToFile(type.ToString(), dir);
         }
 
         public static void SaveToFile(this IEnumerable<double[]> points, string filename, string dir = null)
         {
             var lines = points.Select(p => string.Join(' ', p.Select(v => v.Format())));
+            WriteToFile(lines, filename, dir);
+        }
+
+        public static void SaveToFile(this IEnumerable<(double, double[])> points, string filename, string dir = null)
+        {
+            var lines = points
+                .Select(p => $"{p.Item1.Format()} {string.Join(' ', p.Item2.Select(v => v.Format()))}");
+
             WriteToFile(lines, filename, dir);
         }
 

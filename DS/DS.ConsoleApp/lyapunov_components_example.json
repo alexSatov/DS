@@ -1,0 +1,18 @@
+{
+    "N": 2,
+    "I": [10, 20],
+    "Alpha": [
+        [0.0002, 0.000045],
+        [0.0075, 0.00052]
+    ],
+    "Px": 0.25,
+    "Py": 1,
+    "Start": [0.5, 0.5],
+    "ParameterInterval": { "Start": 0.000045, "End": 0.00245 },
+    "ParameterRow": 0,
+    "ParameterColumn": 1,
+    "PointCount": 400,
+    "SavePreviousPoint": true,
+    "Eps": 0.00001,
+    "T": 100000
+}

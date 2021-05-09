@@ -437,7 +437,7 @@ namespace DS
         }
 
         public static List<Attractor<double[], PointD>> GetPolar(NModel1 model, D2Params dParams,
-            PointD center, double[] start, int countA, int skip = 8000, int get = 2000,
+            PointD center, int rayCount, double[] start, int skip = 8000, int get = 2000,
             double eps = 0.00001)
         {
             if (dParams.ByPreviousType != ByPreviousType.Polar)
@@ -453,7 +453,7 @@ namespace DS
             var dArea = new Rect(dParams.IntervalX.Min, dParams.IntervalX.Max, dParams.IntervalY.Min,
                 dParams.IntervalY.Max);
 
-            var result = new Interval<double>(0, 2 * Math.PI).Range(countA)
+            var result = new Interval<double>(0, 2 * Math.PI).Range(rayCount)
                 .AsParallel()
                 .SelectMany(a =>
                 {

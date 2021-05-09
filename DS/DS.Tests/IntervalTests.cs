@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using DS.Extensions;
-using DS.Helpers;
 using DS.MathStructures;
 using FluentAssertions;
 using NUnit.Framework;

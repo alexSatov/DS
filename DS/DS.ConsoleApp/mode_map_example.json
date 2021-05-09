@@ -1,0 +1,23 @@
+{
+    "N": 2,
+    "I": [10, 20],
+    "Alpha": [
+        [0.0002, 0],
+        [0, 0.00052]
+    ],
+    "Px": 0.25,
+    "Py": 1,
+    "Start": [0.5, 0.5],
+    "Skip": 8000,
+    "Get": 2000,
+    "ParameterXInterval": { "Start": 0, "End": 0.004 },
+    "ParameterXRow": 0,
+    "ParameterXColumn": 1,
+    "PointCountX": 400,
+    "ParameterYInterval": { "Start": 0, "End": 0.016 },
+    "ParameterYRow": 1,
+    "ParameterYColumn": 0,
+    "PointCountY": 400,
+    "SavePreviousPointType": 1,
+    "Eps": 0.00001
+}
