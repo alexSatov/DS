@@ -46,7 +46,7 @@ namespace DS.Tests.Charts.NModel1
         {
             var model = GetModel_2(0.0017, 0.0063);
             var interval = new Interval<double>(0.0017, 0.0025);
-            var dParams = new DParams(interval);
+            var dParams = new DParams(interval, ByPrevious: true);
 
             var points = BifurcationDiagram.Get(model, dParams, new[] { 0.25, 0.125 })
                 .Select(p => (p.D, p.Point[0]))
@@ -74,18 +74,18 @@ namespace DS.Tests.Charts.NModel1
         public void TestModeMap()
         {
             var model = GetModel_2();
-            var intervalX = new Interval<double>(0, 0.004);
-            var intervalY = new Interval<double>(0, 0.016);
-            var dParams = new D2Params(intervalX, intervalY);
+            var intervalX = new Interval<double>(0, 0.00245);
+            var intervalY = new Interval<double>(0.007, 0.008);
+            var dParams = new D2Params(intervalX, intervalY, ByPreviousType: ByPreviousType.None);
 
             var attractors = BifurcationDiagram.Get(model, dParams, new[] { 0.5, 0.5 })
                 .GroupBy(a => a.Type)
                 .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
 
-            Chart = new ChartForm(attractors[AttractorType.Infinity], 0, 0.004, 0, 0.016,
-                AttractorType.Infinity.ToColor());
+            Chart = new ChartForm(attractors[AttractorType.Equilibrium], 0, 0.00245, 0.007, 0.008,
+                AttractorType.Equilibrium.ToColor());
 
-            foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Infinity))
+            foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Equilibrium))
             {
                 Chart.AddSeries(type.ToString(), points, type.ToColor());
             }
@@ -166,8 +166,8 @@ namespace DS.Tests.Charts.NModel1
                 attractors[type] = points;
             }
 
-            Chart = new ChartForm(attractors[AttractorType.Equilibrium], 0, 0.00245, 0.007, 0.008,
-                AttractorType.Equilibrium.ToColor());
+            Chart = new ChartForm(attractors[AttractorType.Infinity], 0, 0.00245, 0.007, 0.008,
+                AttractorType.Infinity.ToColor());
 
             foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Equilibrium))
             {

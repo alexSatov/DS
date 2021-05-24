@@ -198,8 +198,7 @@ namespace DS
 
                 for (var j = 0; j < n; j++)
                 {
-                    b[j] = b[j].Multiply(eps);
-                    a[j] = b[j].Add(p);
+                    a[j] = b[j].Multiply(eps).Add(p);
                 }
 
                 o = p;
