@@ -284,15 +284,15 @@ namespace DS.Tests.Charts.Model1
             var lcList = lcSet[LcType.H];
             Chart = new ChartForm(attractor, 32.8, 38.6, 25, 50.5);
 
-            Chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc2", lcList[2], Color.DarkBlue, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc3", lcList[3], Color.Blue, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc4", lcList[4], Color.Green, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc5", lcList[5], Color.Gold, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc6", lcList[6], Color.Orange, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 5);
-            Chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 5);
+            Chart.AddSeries("lc0", lcList[0], Color.Red, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc1", lcList[1], Color.Black, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc2", lcList[2], Color.DarkBlue, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc3", lcList[3], Color.Blue, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc4", lcList[4], Color.Green, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc5", lcList[5], Color.Gold, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc6", lcList[6], Color.Orange, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 6, 3);
+            Chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 6, 3);
         }
 
         /// <summary>

@@ -370,6 +370,7 @@ namespace DS
                     return PhaseTrajectory.Get(copy, start, skip, get).Select(p => (D: d, Point: p));
                 })
                 .Where(Predicate)
+                .OrderBy(p => p.D)
                 .ToList();
 
             static bool Predicate((double D12, double[] Point) t) => !t.Point.IsInfinity();

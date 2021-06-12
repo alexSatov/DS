@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms.DataVisualization.Charting;
 using DS.Helpers;
 using DS.MathStructures;
 using DS.MathStructures.Points;
@@ -16,7 +17,7 @@ namespace DS.Tests.Charts.NModel1
     public class DeterministicNModel1Tests : ChartTests
     {
         [Test]
-        public void TestZik()
+        public void TestPhaseTrajectory()
         {
             var model = GetModel_2(0.0014, 0.0075);
 
@@ -27,7 +28,18 @@ namespace DS.Tests.Charts.NModel1
         }
 
         [Test]
-        public void TestZik_FromFile()
+        public void TestPhaseTrajectory3D()
+        {
+            var model = GetModel_3(0.001, 0.008);
+            var points = PhaseTrajectory.Get(model, new[] { 0.5, 0.5, 0.5 }, 8000, 2000);
+
+            Chart = new ChartForm(points.Select(p => (p[0], p[1])), 0, 1, 0, 1);
+
+            points.SaveToFile("PhaseTrajectory3D.txt");
+        }
+
+        [Test]
+        public void TestPhaseTrajectory_FromFile()
         {
             var points = File
                 .ReadAllLines("D:\\src\\DS\\DS\\DS.ConsoleApp\\bin\\Debug\\data\\PhaseTrajectory_2021-05-09T17-40-30\\PhaseTrajectory.txt")
@@ -53,6 +65,20 @@ namespace DS.Tests.Charts.NModel1
                 .Distinct();
 
             Chart = new ChartForm(points, 0.0017, 0.0025, 0.25, 1.125);
+        }
+
+        [Test]
+        public void TestBifurcationDiagram3D()
+        {
+            var model = GetModel_3(d21: 0.0075);
+            var interval = new Interval<double>(0, 0.0024);
+            var dParams = new DParams(interval, ByPrevious: true);
+
+            var points = BifurcationDiagram.Get(model, dParams, new[] { 0.5, 0.5, 0.5 })
+                .Select(p => (p.D, p.Point[0]))
+                .Distinct();
+
+            Chart = new ChartForm(points, interval.Min, interval.Max, 0, 1);
         }
 
         [Test]
@@ -86,6 +112,28 @@ namespace DS.Tests.Charts.NModel1
                 AttractorType.Equilibrium.ToColor());
 
             foreach (var (type, points) in attractors.Where(a => a.Key != AttractorType.Equilibrium))
+            {
+                Chart.AddSeries(type.ToString(), points, type.ToColor());
+            }
+        }
+
+        [Test]
+        public void TestModeMap3D()
+        {
+            var model = GetModel_3();
+            var intervalX = new Interval<double>(0, 0.00245);
+            var intervalY = new Interval<double>(0.007, 0.008);
+            var dParams = new D2Params(intervalX, intervalY, ByPreviousType: ByPreviousType.None);
+
+            var attractors = BifurcationDiagram.Get(model, dParams, new[] { 0.5, 0.5, 0.5 })
+                .GroupBy(a => a.Type)
+                .ToDictionary(g => g.Key, g => g.Select(a => a.Params).ToList());
+
+            var fKey = attractors.Keys.First();
+            Chart = new ChartForm(attractors[fKey], intervalX.Min, intervalX.Max, intervalY.Min, intervalY.Max,
+                fKey.ToColor(), fKey.ToString());
+
+            foreach (var (type, points) in attractors.Where(a => a.Key != fKey))
             {
                 Chart.AddSeries(type.ToString(), points, type.ToColor());
             }
@@ -214,6 +262,23 @@ namespace DS.Tests.Charts.NModel1
         }
 
         [Test]
+        public void TestLyapunovComponents3D()
+        {
+            var model = GetModel_3(d21: 0.0075);
+            var interval = new Interval<double>(0.0001, 0.0024);
+            var dParams = new DParams(interval);
+
+            var result = Lyapunov.Get(model, dParams, new[] { 0.5, 0.5, 0.5 });
+            var l1Points = result.Select(p => (p.D, p.L[0])).ToList();
+            var l2Points = result.Select(p => (p.D, p.L[1])).ToList();
+            var l3Points = result.Select(p => (p.D, p.L[2])).ToList();
+
+            Chart = new ChartForm(l1Points, interval.Min, interval.Max, -2, 0.5, seriesChartType: SeriesChartType.FastLine, borderWidth: 3);
+            Chart.AddSeries("D12vsL2", l2Points, Color.Red, SeriesChartType.FastLine, borderWidth: 3);
+            Chart.AddSeries("D12vsL3", l3Points, Color.Green, SeriesChartType.FastLine, borderWidth: 3);
+        }
+
+        [Test]
         public void TestLyapunovComponents_FromFile()
         {
             var points = File
@@ -243,6 +308,18 @@ namespace DS.Tests.Charts.NModel1
             };
 
             return new DeterministicNModel1(2, new double[] { 10, 20 }, d, 0.25, 1);
+        }
+
+        private static DeterministicNModel1 GetModel_3(double d12 = 0, double d21 = 0, double d23 = 0, double d32 = 0)
+        {
+            var d = new[,]
+            {
+                { 0.0002, d12, 0 },
+                { d21, 0.00052, d23 },
+                { 0, d32, 0.00052 }
+            };
+
+            return new DeterministicNModel1(3, new double[] { 10, 20, 20 }, d, 0.25, 1);
         }
 
         protected override void OnSetUp()

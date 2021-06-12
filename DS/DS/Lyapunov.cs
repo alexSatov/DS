@@ -159,8 +159,9 @@ namespace DS
                 {
                     var copy = (NModel1) model.Copy();
                     copy.D[dParams.Di, dParams.Dj] = d;
-                    return (d, FindLn(copy, start, eps, t).L);
+                    return (D: d, FindLn(copy, start, eps, t).L);
                 })
+                .OrderBy(p => p.D)
                 .ToList();
         }
 

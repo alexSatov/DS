@@ -14,7 +14,8 @@ namespace DS.Tests.Charts
         public ChartArea ChartArea { get; }
 
         public ChartForm(IEnumerable<(double x, double y)> points, double ox1, double ox2, double oy1, double oy2,
-            Color? color = null, string name = null, int markerSize = 2, bool gridEnabled = false)
+            Color? color = null, string name = null, int markerSize = 2, bool gridEnabled = false,
+            int borderWidth = 2, SeriesChartType seriesChartType = SeriesChartType.FastPoint)
         {
             Size = new Size(700, 600);
             Chart = new Chart { Parent = this, Dock = DockStyle.Fill };
@@ -34,7 +35,8 @@ namespace DS.Tests.Charts
             ChartArea.AxisY.MajorGrid.LineColor = Color.FromArgb(50, Color.Black);
 
             Chart.ChartAreas.Add(ChartArea);
-            AddSeries(name ?? "main", points, color ?? Color.DodgerBlue, markerSize: markerSize);
+            AddSeries(name ?? "main", points, color ?? Color.DodgerBlue, markerSize: markerSize,
+                seriesChartType: seriesChartType, borderWidth: borderWidth);
         }
 
         public ChartForm(IEnumerable<PointX> points, double ox1, double ox2, double oy1, double oy2,
