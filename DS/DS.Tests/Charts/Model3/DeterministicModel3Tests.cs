@@ -67,7 +67,7 @@ namespace DS.Tests.Charts.Model3
             var i = 0;
             var attractor = PhaseTrajectory.Get(model, new PointX(0.5, 0.5), 5000, 100000);
             var lcSet = LcSet.FromAttractor(model, attractor, 10, eps: 0.01);
-            var borderSegments = lcSet.GetBorderSegments2(false, true);
+            var borderSegments = lcSet.GetBorderSegments(true, true);
 
             var chart = new ChartForm(attractor, 0.15, 0.7, 0.5, 2.4);
 
