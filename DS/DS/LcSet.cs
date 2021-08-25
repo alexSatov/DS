@@ -116,14 +116,12 @@ namespace DS
         }
 
         public static LcSet FromAttractor(BaseModel baseModel, IList<PointX> attractor, int count,
-            int lcPointsCount = 100, double eps = 0.1)
+            int lcPointsCount = 100, double eps = 0.1, Lc lc0H = null, Lc lc0V = null)
         {
             if (baseModel.LcH == null && baseModel.LcV == null)
                 throw new InvalidOperationException("Model must implement at least one LC_-1 function");
 
-            Lc lc0H = null, lc0V = null;
-
-            if (baseModel.LcH != null)
+            if (baseModel.LcH != null && lc0H == null)
             {
                 var lc0HRawPoints = attractor
                     .Where(p => Math.Abs(p.X2 - baseModel.LcH(p.X1)) < eps)
@@ -132,16 +130,11 @@ namespace DS
                 if (lc0HRawPoints.Count != 0)
                 {
                     var (minX1, maxX1) = (lc0HRawPoints.Min(p => p.X1), lc0HRawPoints.Max(p => p.X1));
-                    var stepX1 = (maxX1 - minX1) / lcPointsCount;
-                    var lc0HPoints = Enumerable.Range(0, lcPointsCount + 1)
-                        .Select(i => minX1 + i * stepX1)
-                        .Select(x => new PointX(x, baseModel.LcH(x)));
-
-                    lc0H = new Lc(lc0HPoints);
+                    lc0H = baseModel.GetLc0H(minX1, maxX1, lcPointsCount);
                 }
             }
 
-            if (baseModel.LcV != null)
+            if (baseModel.LcV != null && lc0V == null)
             {
                 var lc0VRawPoints = attractor
                     .Where(p => Math.Abs(p.X1 - baseModel.LcV(p.X2)) < eps)
@@ -150,12 +143,7 @@ namespace DS
                 if (lc0VRawPoints.Count != 0)
                 {
                     var (minX2, maxX2) = (lc0VRawPoints.Min(p => p.X2), lc0VRawPoints.Max(p => p.X2));
-                    var stepX2 = (maxX2 - minX2) / lcPointsCount;
-                    var lc0VPoints = Enumerable.Range(0, lcPointsCount + 1)
-                        .Select(i => minX2 + i * stepX2)
-                        .Select(x => new PointX(baseModel.LcV(x), x));
-
-                    lc0V = new Lc(lc0VPoints, LcType.V);
+                    lc0V = baseModel.GetLc0V(minX2, maxX2, lcPointsCount);
                 }
             }
 
