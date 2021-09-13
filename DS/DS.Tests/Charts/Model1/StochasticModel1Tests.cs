@@ -1116,7 +1116,7 @@ namespace DS.Tests.Charts.Model1
             // attractor2.SaveToFile("eq_with_noise.txt", "model1_lc1");
             // lcSet.SaveToFile("lc.txt", "model1_lc1");
             // ellipse.SaveToFile("band.txt", "model1_lc1");
-            // lcSet.SaveToFile(ellipse, "model1_chaos2\\LC_border.txt");
+            // borderSegments.SaveToFile("border.txt", "model1_lc1");
         }
 
         /// <summary>
@@ -1149,7 +1149,7 @@ namespace DS.Tests.Charts.Model1
             var lc0V = dModel.GetLc0V(25.20, 67.22);
 
             var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V);
-            var borderSegments = lcSet.GetBorderSegments();
+            var borderSegments = lcSet.GetBorderSegments2();
             var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor2, 0, 40, 0, 80);
@@ -1170,10 +1170,10 @@ namespace DS.Tests.Charts.Model1
 
             Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 4);
 
-            attractor2.SaveToFile("eq_with_noise.txt", "model1_lc2");
-            lcSet.SaveToFile("lc.txt", "model1_lc2");
-            ellipse.SaveToFile("band.txt", "model1_lc2");
-            // lcSet.SaveToFile(ellipse, "model1_chaos2\\LC_border.txt");
+            // attractor2.SaveToFile("eq_with_noise.txt", "model1_lc2");
+            // lcSet.SaveToFile("lc.txt", "model1_lc2");
+            // ellipse.SaveToFile("band.txt", "model1_lc2");
+            borderSegments.SaveToFile("border.txt", "model1_lc2");
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DS.Extensions;
+using DS.MathStructures;
 using DS.MathStructures.Points;
 
 namespace DS.Helpers
@@ -92,6 +93,15 @@ namespace DS.Helpers
         {
             var lines = points
                 .Select(p => $"{p.Item1.Format()} {string.Join(' ', p.Item2.Select(v => v.Format()))}");
+
+            WriteToFile(lines, filename, dir);
+        }
+
+        public static void SaveToFile(this IEnumerable<Segment> segments, string filename, string dir = null)
+        {
+            var lines = segments
+                .Select(s => s.GetBoundaryPoints().ToList())
+                .Select(p => $"{p[0].X1.Format()} {p[0].X2.Format()} {p[1].X1.Format()} {p[1].X2.Format()}");
 
             WriteToFile(lines, filename, dir);
         }
