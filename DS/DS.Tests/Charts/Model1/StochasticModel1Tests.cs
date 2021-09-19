@@ -1117,7 +1117,6 @@ namespace DS.Tests.Charts.Model1
             // lcSet.SaveToFile("lc.txt", "model1_lc1");
             // ellipse.SaveToFile("band.txt", "model1_lc1");
             // borderSegments.SaveToFile("border.txt", "model1_lc1");
-            // lcSet.SaveToFile(ellipse, "band_lc.txt", "model1_lc1");
         }
 
         /// <summary>
@@ -1127,7 +1126,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test14_2()
         {
-            const double eps = 0.1, d12 = 0.002271, d21 = 0.0073;
+            const double eps = 0.6, d12 = 0.002271, d21 = 0.0073;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
@@ -1143,13 +1142,13 @@ namespace DS.Tests.Charts.Model1
             var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
 
             // 0.1
-            var lc0H = dModel.GetLc0H(12.08, 27.42);
-            var lc0V = dModel.GetLc0V(25.20, 52.68);
+            // var lc0H = dModel.GetLc0H(12.08, 27.42);
+            // var lc0V = dModel.GetLc0V(25.20, 52.68);
             // 0.6
-            // var lc0H = dModel.GetLc0H(12.08, 36.64);
-            // var lc0V = dModel.GetLc0V(25.20, 67.22);
+            var lc0H = dModel.GetLc0H(12.08, 36.64);
+            var lc0V = dModel.GetLc0V(25.20, 67.22);
 
-            var lcSet = LcSet.FromAttractor(dModel, attractor2, 4, lc0H: lc0H, lc0V: lc0V);
+            var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V);
             var borderSegments = lcSet.GetBorderSegments2();
             var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
@@ -1173,9 +1172,8 @@ namespace DS.Tests.Charts.Model1
 
             // attractor2.SaveToFile("eq_with_noise.txt", "model1_lc2");
             // lcSet.SaveToFile("lc.txt", "model1_lc2");
-            // ellipse.SaveToFile("band.txt", "model1_lc2");
+            ellipse.SaveToFile("band.txt", "model1_lc2");
             // borderSegments.SaveToFile("border.txt", "model1_lc2");
-            lcSet.SaveToFile(ellipse, "band_lc.txt", "model1_lc2");
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,

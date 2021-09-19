@@ -71,10 +71,22 @@ namespace DS.Helpers
 
         public static void SaveToFile(this IEnumerable<LcPoint> points, string filename, string dir = null)
         {
-            var lines = points
-                .Select(p => $"{p.LcType:D} {p.LcIndex} {p.Index} {p.Point.X1.Format()} {p.Point.X2.Format()}");
+            if (filename.EndsWith(".txt"))
+                filename = filename[..^4];
 
-            WriteToFile(lines, filename, dir);
+            var groups = points
+                .GroupBy(p => p.LcType)
+                .ToDictionary(g => g.Key, g => g.GroupBy(p => p.LcIndex));
+
+            foreach (var typeGroup in groups)
+            foreach (var lcGroup in typeGroup.Value)
+            {
+                var lines = lcGroup
+                    .OrderBy(p => p.Index)
+                    .Select(p => $"{p.Point.X1.Format()} {p.Point.X2.Format()}");
+
+                WriteToFile(lines, $"{filename}_type{typeGroup.Key:D}_lc{lcGroup.Key}", dir);
+            }
         }
 
         public static void SaveToDir(this Dictionary<AttractorType, List<PointD>> attractors, string dir = "diagram2d")
