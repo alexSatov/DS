@@ -30,7 +30,7 @@ namespace DS.Tests.Charts.Model3
             var attractor2 = PhaseTrajectory.Get(sModel, new PointX(0.5, 0.5), 5000, 100000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 10, eps: 0.01);
             var borderSegments = lcSet.GetBorderSegments2(false, true);
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, sModel.Eps).ToList();
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, sModel.Eps).ToList();
 
             Chart = new ChartForm(attractor2, 0.1, 0.75, 0.4, 2.4);
 

@@ -104,7 +104,7 @@ namespace DS.Tests.Charts.Model1
                 var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
                 Console.WriteLine(string.Join("; ", eigenvalues));
                 var eigenvectors = eigenvalueDecomposition.Eigenvectors;
-                var ellipse = ScatterEllipse.Get(attractorPoints[i], eigenvalues[0], eigenvalues[1],
+                var ellipse = SensivityBand.Get(attractorPoints[i], eigenvalues[0], eigenvalues[1],
                     eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
 
                 chart.AddSeries($"ellipse{i + 1}", ellipse, Color.Red);
@@ -231,7 +231,7 @@ namespace DS.Tests.Charts.Model1
 
             var zik = PhaseTrajectory.GetWhileNotConnect(dModel, new PointX(12, 60), 10000, 0.0001);
             var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 2000);
-            var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
+            var (ellipse1, ellipse2) = SensivityBand.GetForZik2(dModel, sModel, zik);
 
             var chart = new ChartForm(chaosZik, 10, 22, 52, 75);
             chart.AddSeries("zik", zik, Color.Black);
@@ -271,7 +271,7 @@ namespace DS.Tests.Charts.Model1
             var zik2 = zik.Where((p, i) => i % 3 == 1).ToList();
             var zik3 = zik.Where((p, i) => i % 3 == 2).ToList();
             var chaosZik = PhaseTrajectory.Get(sModel, zik[0], 0, 60000);
-            var (ellipse1, ellipse2) = ScatterEllipse.GetForZik2(dModel, sModel, zik);
+            var (ellipse1, ellipse2) = SensivityBand.GetForZik2(dModel, sModel, zik);
 
             var chart = new ChartForm(chaosZik, 7, 30, 50, 80);
             chart.AddSeries("zik1", zik1, Color.Black);
@@ -315,7 +315,7 @@ namespace DS.Tests.Charts.Model1
                 var zik = PhaseTrajectory.Get(dModel, previous, 10000, 40000);
                 previous = zik[^1];
 
-                var mu = ScatterEllipse.GetMuForZik(sModel, zik);
+                var mu = SensivityBand.GetMuForZik(sModel, zik);
 
                 result.Add((d12, mu.Max(), mu.Min()));
             }
@@ -445,7 +445,7 @@ namespace DS.Tests.Charts.Model1
                 for (var eps = 0.01; eps < 2; eps += 0.01)
                 {
                     sInnerModel.Eps = eps;
-                    var (ellipse, _) = ScatterEllipse.GetForZik2(dInnerModel, sInnerModel, zik);
+                    var (ellipse, _) = SensivityBand.GetForZik2(dInnerModel, sInnerModel, zik);
 
                     foreach (var ellipsePoint in ellipse)
                     {
@@ -753,7 +753,7 @@ namespace DS.Tests.Charts.Model1
                         var eigenvalueDecomposition = new EigenvalueDecomposition(sensitivityMatrix);
                         var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
                         var eigenvectors = eigenvalueDecomposition.Eigenvectors;
-                        var ellipse = ScatterEllipse.Get(eq, eigenvalues[0], eigenvalues[1],
+                        var ellipse = SensivityBand.Get(eq, eigenvalues[0], eigenvalues[1],
                             eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), sModel.Eps).ToList();
 
                         foreach (var ellipsePoint in ellipse)
@@ -871,7 +871,7 @@ namespace DS.Tests.Charts.Model1
             var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 9);
             var borderSegments = lcSet.GetBorderSegments();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor2, 31, 40, 22, 54);
 
@@ -913,7 +913,7 @@ namespace DS.Tests.Charts.Model1
                 .Where(s => s.Start.X1 > 24 || s.End.X1 > 24)
                 .Concat(lcSet.GetBorderSegments2().Where(s => s.Start.X1 <= 24 && s.End.X1 <= 24));
             // var borderSegments = lcSet.GetBorderSegments2();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor2, 10, 44, 0, 64);
 
@@ -953,7 +953,7 @@ namespace DS.Tests.Charts.Model1
             //var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 8);
             var borderSegments = lcSet.GetBorderSegments();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps);
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps);
 
             var chart = new ChartForm(attractor, 27, 40, 14, 54);
 
@@ -995,7 +995,7 @@ namespace DS.Tests.Charts.Model1
             var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 3);
             var borderSegments = lcSet.GetBorderSegments();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps, kq:1);
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps, kq:1);
 
             var chart = new ChartForm(attractor2, 0, 40, 0, 80);
             //chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
@@ -1039,7 +1039,7 @@ namespace DS.Tests.Charts.Model1
             // var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 7);
             var borderSegments = lcSet.GetBorderSegments();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor, 0, 31, 20, 81);
             // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
@@ -1079,7 +1079,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test14_1()
         {
-            const double eps = 1, d12 = 0.00222, d21 = 0.0073;
+            const double eps = 0.6, d12 = 0.00222, d21 = 0.0073;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
@@ -1097,7 +1097,7 @@ namespace DS.Tests.Charts.Model1
             var lc0V = dModel.GetLc0V(29.22, 67.39);
             var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V);
             var borderSegments = lcSet.GetBorderSegments();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor2, 0, 40, 0, 80);
             // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
@@ -1117,6 +1117,7 @@ namespace DS.Tests.Charts.Model1
             // lcSet.SaveToFile("lc.txt", "model1_lc1");
             // ellipse.SaveToFile("band.txt", "model1_lc1");
             // borderSegments.SaveToFile("border.txt", "model1_lc1");
+            // lcSet.SaveToFile(ellipse, "band_lc.txt", "model1_lc1");
         }
 
         /// <summary>
@@ -1126,7 +1127,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test14_2()
         {
-            const double eps = 0.6, d12 = 0.002271, d21 = 0.0073;
+            const double eps = 0.1, d12 = 0.002271, d21 = 0.0073;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
@@ -1142,15 +1143,15 @@ namespace DS.Tests.Charts.Model1
             var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
 
             // 0.1
-            // var lc0H = dModel.GetLc0H(12.08, 27.42);
-            // var lc0V = dModel.GetLc0V(25.20, 52.68);
+            var lc0H = dModel.GetLc0H(12.08, 27.42);
+            var lc0V = dModel.GetLc0V(25.20, 52.68);
             // 0.6
-            var lc0H = dModel.GetLc0H(12.08, 36.64);
-            var lc0V = dModel.GetLc0V(25.20, 67.22);
+            // var lc0H = dModel.GetLc0H(12.08, 36.64);
+            // var lc0V = dModel.GetLc0V(25.20, 67.22);
 
-            var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V);
+            var lcSet = LcSet.FromAttractor(dModel, attractor2, 4, lc0H: lc0H, lc0V: lc0V);
             var borderSegments = lcSet.GetBorderSegments2();
-            var ellipse = ScatterEllipse.GetForChaosLc(dModel, lcSet, eps).ToList();
+            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor2, 0, 40, 0, 80);
             // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
@@ -1173,7 +1174,8 @@ namespace DS.Tests.Charts.Model1
             // attractor2.SaveToFile("eq_with_noise.txt", "model1_lc2");
             // lcSet.SaveToFile("lc.txt", "model1_lc2");
             // ellipse.SaveToFile("band.txt", "model1_lc2");
-            borderSegments.SaveToFile("border.txt", "model1_lc2");
+            // borderSegments.SaveToFile("border.txt", "model1_lc2");
+            lcSet.SaveToFile(ellipse, "band_lc.txt", "model1_lc2");
         }
 
         private static (IList<(double D12, double Eps)> Points, ChartForm chart) Test8_Parallel(double d12Start,
@@ -1223,7 +1225,7 @@ namespace DS.Tests.Charts.Model1
             var eigenvalues = eigenvalueDecomposition.RealEigenvalues;
             var eigenvectors = eigenvalueDecomposition.Eigenvectors;
 
-            return ScatterEllipse.Get(point, eigenvalues[0], eigenvalues[1],
+            return SensivityBand.Get(point, eigenvalues[0], eigenvalues[1],
                 eigenvectors.GetColumn(0), eigenvectors.GetColumn(1), model.Eps).ToList();
         }
 

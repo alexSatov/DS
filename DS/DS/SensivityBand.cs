@@ -8,7 +8,7 @@ using DS.Models;
 
 namespace DS
 {
-    public static class ScatterEllipse
+    public static class SensivityBand
     {
         /// <summary>
         /// Построение эллипса рассеивания
@@ -104,10 +104,10 @@ namespace DS
             var lcEllipsePoints = GetLcEllipseMap(model, lcSet, eps, kq);
             var borderPoints = lcSet.GetBorderPoints();
 
-            foreach (var borderPoint in borderPoints)
-                if (lcEllipsePoints.ContainsKey(borderPoint.LcType))
-                    yield return new LcPoint(borderPoint.LcType, borderPoint.LcIndex, borderPoint.Index,
-                        lcEllipsePoints[borderPoint.LcType][borderPoint.LcIndex, borderPoint.Index]);
+            return borderPoints
+                .Where(p => lcEllipsePoints.ContainsKey(p.LcType) && p.LcIndex != 0)
+                .Select(p => new LcPoint(p.LcType, p.LcIndex, p.Index,
+                    lcEllipsePoints[p.LcType][p.LcIndex, p.Index]));
         }
 
         private static Dictionary<LcType, PointX[,]> GetLcEllipseMap(BaseModel model, LcSet lcSet,
