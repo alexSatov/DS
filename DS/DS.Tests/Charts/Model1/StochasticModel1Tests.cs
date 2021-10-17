@@ -1079,7 +1079,8 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test14_1()
         {
-            const double eps = 0.6, d12 = 0.00222, d21 = 0.0073;
+            const int markerSize = 8;
+            const double eps = 1, d12 = 0.00222, d21 = 0.0073;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
@@ -1093,19 +1094,19 @@ namespace DS.Tests.Charts.Model1
             var i = 0;
             var attractor = PhaseTrajectory.Get(dModel, new PointX(35.7819, 38.6575), 5000, 10000);
             var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
-            var lc0H = dModel.GetLc0H(11.35, 35.84);
-            var lc0V = dModel.GetLc0V(29.22, 67.39);
-            var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V);
+            var lc0H = dModel.GetLc0H(11.35, 35.84, 50);
+            var lc0V = dModel.GetLc0V(29.22, 67.39, 50);
+            var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V, withoutIntersection: true);
             var borderSegments = lcSet.GetBorderSegments();
             var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor2, 0, 40, 0, 80);
-            // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
-            // Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
-            // Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
-            // Chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
-            // Chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
-            // Chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
+            // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, markerSize);
+            // Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, markerSize);
+            // Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, markerSize);
+            // Chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, markerSize);
+            // Chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, markerSize);
+            // Chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, markerSize);
 
             foreach (var borderSegment in borderSegments)
                 Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
@@ -1115,7 +1116,7 @@ namespace DS.Tests.Charts.Model1
 
             // attractor2.SaveToFile("eq_with_noise.txt", "model1_lc1");
             // lcSet.SaveToFile("lc.txt", "model1_lc1");
-            // ellipse.SaveToFile("band.txt", "model1_lc1");
+            ellipse.SaveToFile("band.txt", "model1_lc1");
             // borderSegments.SaveToFile("border.txt", "model1_lc1");
         }
 
@@ -1126,7 +1127,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test14_2()
         {
-            const double eps = 0.6, d12 = 0.002271, d21 = 0.0073;
+            const double eps = 0.1, d12 = 0.002271, d21 = 0.0073;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
@@ -1141,14 +1142,14 @@ namespace DS.Tests.Charts.Model1
             var attractor = PhaseTrajectory.Get(dModel, new PointX(36.9259, 66.6076), 5000, 10000);
             var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
 
-            // 0.1
-            // var lc0H = dModel.GetLc0H(12.08, 27.42);
-            // var lc0V = dModel.GetLc0V(25.20, 52.68);
-            // 0.6
-            var lc0H = dModel.GetLc0H(12.08, 36.64);
-            var lc0V = dModel.GetLc0V(25.20, 67.22);
+            // 0.1 - 4
+            var lc0H = dModel.GetLc0H(12.08, 27.42, 50);
+            var lc0V = dModel.GetLc0V(25.20, 52.68, 50);
+            // 0.6 - 2
+            // var lc0H = dModel.GetLc0H(12.08, 36.64, 50);
+            // var lc0V = dModel.GetLc0V(25.20, 67.22, 50);
 
-            var lcSet = LcSet.FromAttractor(dModel, attractor2, 2, lc0H: lc0H, lc0V: lc0V);
+            var lcSet = LcSet.FromAttractor(dModel, attractor2, 4, lc0H: lc0H, lc0V: lc0V, withoutIntersection: true);
             var borderSegments = lcSet.GetBorderSegments2();
             var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 

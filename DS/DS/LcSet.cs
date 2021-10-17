@@ -115,39 +115,68 @@ namespace DS
                 .All(deltaPoint => IsOutOrBorderPoint(deltaPoint, allSegments));
         }
 
-        public static LcSet FromAttractor(BaseModel baseModel, IList<PointX> attractor, int count,
-            int lcPointsCount = 100, double eps = 0.1, Lc lc0H = null, Lc lc0V = null)
+        public static LcSet FromAttractor(BaseModel model, IList<PointX> attractor, int count,
+            int lcPointsCount = 100, double eps = 0.1, Lc lc0H = null, Lc lc0V = null, bool withoutIntersection = false)
         {
-            if (baseModel.LcH == null && baseModel.LcV == null)
+            if (model.LcH == null && model.LcV == null)
                 throw new InvalidOperationException("Model must implement at least one LC_-1 function");
 
-            if (baseModel.LcH != null && lc0H == null)
+            if (model.LcH != null && lc0H == null)
             {
                 var lc0HRawPoints = attractor
-                    .Where(p => Math.Abs(p.X2 - baseModel.LcH(p.X1)) < eps)
+                    .Where(p => Math.Abs(p.X2 - model.LcH(p.X1)) < eps)
                     .ToList();
 
                 if (lc0HRawPoints.Count != 0)
                 {
                     var (minX1, maxX1) = (lc0HRawPoints.Min(p => p.X1), lc0HRawPoints.Max(p => p.X1));
-                    lc0H = baseModel.GetLc0H(minX1, maxX1, lcPointsCount);
+                    lc0H = model.GetLc0H(minX1, maxX1, lcPointsCount);
                 }
             }
 
-            if (baseModel.LcV != null && lc0V == null)
+            if (model.LcV != null && lc0V == null)
             {
                 var lc0VRawPoints = attractor
-                    .Where(p => Math.Abs(p.X1 - baseModel.LcV(p.X2)) < eps)
+                    .Where(p => Math.Abs(p.X1 - model.LcV(p.X2)) < eps)
                     .ToList();
 
                 if (lc0VRawPoints.Count != 0)
                 {
                     var (minX2, maxX2) = (lc0VRawPoints.Min(p => p.X2), lc0VRawPoints.Max(p => p.X2));
-                    lc0V = baseModel.GetLc0V(minX2, maxX2, lcPointsCount);
+                    lc0V = model.GetLc0V(minX2, maxX2, lcPointsCount);
                 }
             }
 
-            return FromZeroLc(baseModel, lc0H, lc0V, count);
+            if (withoutIntersection)
+            {
+                (lc0H, lc0V) = HandleIntersection(lc0H, lc0V, model);
+            }
+
+            return FromZeroLc(model, lc0H, lc0V, count);
+        }
+
+        private static (Lc lc0H, Lc lc0V) HandleIntersection(Lc lc0H, Lc lc0V, BaseModel model)
+        {
+            var lc0HSegment = new Segment(lc0H[0], lc0H[^1]);
+            var lc0VSegment = new Segment(lc0V[0], lc0V[^1]);
+            var intersection = lc0HSegment.GetIntersection(lc0VSegment);
+
+            if (!intersection.IsIntersect || !intersection.Point.HasValue)
+            {
+                return (lc0H, lc0V);
+            }
+
+            var lc0HLeftDelta = Math.Abs(intersection.Point.Value.X - lc0HSegment.Start.X);
+            var lc0HRightDelta = Math.Abs(intersection.Point.Value.X - lc0HSegment.End.X);
+            var lc0VBottomDelta = Math.Abs(intersection.Point.Value.Y - lc0VSegment.Start.Y);
+            var lc0VTopDelta = Math.Abs(intersection.Point.Value.Y - lc0VSegment.End.Y);
+
+            return (lc0HLeftDelta > lc0HRightDelta
+                    ? model.GetLc0H(lc0HSegment.Start.X, intersection.Point.Value.X, lc0H.Count)
+                    : model.GetLc0H(intersection.Point.Value.X, lc0HSegment.End.X, lc0H.Count),
+                lc0VBottomDelta > lc0VTopDelta
+                    ? model.GetLc0V(lc0VSegment.Start.Y, intersection.Point.Value.Y, lc0V.Count)
+                    : model.GetLc0V(intersection.Point.Value.Y, lc0VSegment.End.Y, lc0V.Count));
         }
 
         private static LcSet FromZeroLc(BaseModel baseModel, Lc lc0H, Lc lc0V, int count)
@@ -281,38 +310,5 @@ namespace DS
                 Segment = segment;
             }
         }
-
-        //public List<Segment> GetBorderSegments3(bool closeBorder = true)
-        //{
-        //    var borderSegments = new List<Segment>();
-        //    var pointSet = GetBorderPoints()
-        //        .GroupBy(t => t.Type)
-        //        .ToDictionary(g => g.Key, g => g
-        //            .GroupBy(t => t.LcIndex)
-        //            .ToDictionary(g => g.Key, g => g.Select(t => (t.Index, t.Point)).ToList()));
-
-        //    foreach (var lcType in Enum.GetValues(typeof(LcType)).Cast<LcType>())
-        //    {
-        //        if (!pointSet.ContainsKey(lcType))
-        //            continue;
-
-        //        for (var lcIndex = 0; lcIndex < pointSet[lcType].Count; lcIndex++)
-        //        {
-        //            for (var i = 0; i < pointSet[lcType][lcIndex].Count - 1; i++)
-        //            {
-        //                var start = pointSet[lcType][lcIndex][i];
-        //                var end = pointSet[lcType][lcIndex][i + 1];
-
-        //                if (end.Index - start.Index == 1)
-        //                    borderSegments.Add(new Segment(start.Point, end.Point));
-        //            }
-        //        }
-        //    }
-
-        //    if (closeBorder)
-        //        CloseBorder(borderSegments);
-
-        //    return borderSegments;
-        //}
     }
 }

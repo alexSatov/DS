@@ -1,4 +1,5 @@
 ﻿using System;
+using Accord.Math;
 using DS.MathStructures.Points;
 
 namespace DS.MathStructures.Vectors
@@ -8,6 +9,7 @@ namespace DS.MathStructures.Vectors
         public double X { get; }
         public double Y { get; }
 
+        public double Angle => Tools.Angle(X, Y);
         public double Length => Math.Sqrt(X * X + Y * Y);
 
         public Vector2D(double x, double y)

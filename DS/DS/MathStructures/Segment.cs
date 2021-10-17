@@ -60,9 +60,7 @@ namespace DS.MathStructures
 
                 if (sr < 0)
                 {
-                    var _ = t0;
-                    t0 = t1;
-                    t1 = _;
+                    (t0, t1) = (t1, t0);
                 }
 
                 return new IntersectPoint(t1 >= 0 && t0 <= 1, null);
