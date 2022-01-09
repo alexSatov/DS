@@ -46,14 +46,14 @@ namespace DS.Helpers
 
         public static void SaveToFile(this LcSet lcSet, string filename, string dir = null)
         {
-            var lines = new List<string>();
-
-            foreach (var lcType in lcSet.Keys)
-                for (var i = 0; i < lcSet[lcType].Count; i++)
-                    foreach (var point in lcSet[lcType][i])
-                        lines.Add($"{lcType:D} {i} {point.X1.Format()} {point.X2.Format()}");
-
-            WriteToFile(lines, filename, dir);
+            foreach (var type in lcSet.Keys)
+            {
+                for(var i = 0; i < lcSet[type].Count; i++)
+                {
+                    var lines = lcSet[type][i].Select(p => $"{p.X1.Format()} {p.X2.Format()}");
+                    WriteToFile(lines, $"{filename}_type{type:D}_lc{i}", dir);
+                }
+            }
         }
 
         public static void SaveToFile(this LcSet lcSet, IEnumerable<LcPoint> points, string filename, string dir = null)

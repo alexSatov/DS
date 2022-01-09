@@ -292,7 +292,9 @@ namespace DS.Tests.Charts.Model1
             Chart.AddSeries("lc5", lcList[5], Color.Gold, SeriesChartType.Line, 6, 3);
             Chart.AddSeries("lc6", lcList[6], Color.Orange, SeriesChartType.Line, 6, 3);
             Chart.AddSeries("lc7", lcList[7], Color.Violet, SeriesChartType.Line, 6, 3);
-            Chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 6, 3);
+            //Chart.AddSeries("lc8", lcList[8], Color.DarkViolet, SeriesChartType.Line, 6, 3);
+
+            //lcSet.SaveToFile("chaos_lc", "algo");
         }
 
         /// <summary>
@@ -306,7 +308,7 @@ namespace DS.Tests.Charts.Model1
 
             var i = 0;
             var attractor = PhaseTrajectory.Get(model, new PointX(34, 61), 50000, 50000);
-            var lcList = LcSet.FromAttractor(model, attractor, 9);
+            var lcList = LcSet.FromAttractor(model, attractor, 8);
             var borderSegments = lcList.GetBorderSegments();
 
             var chart = new ChartForm(attractor, 32.8, 38.4, 25, 50.5);
@@ -316,6 +318,9 @@ namespace DS.Tests.Charts.Model1
                     SeriesChartType.FastLine, borderWidth: 3);
 
             Chart = chart;
+
+            // attractor.SaveToFile("chaos", "algo");
+            borderSegments.SaveToFile("segment", "algo");
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using DS.Extensions;
 using DS.MathStructures;
 using DS.MathStructures.Points;
 using DS.Models;
@@ -219,6 +220,13 @@ namespace DS
                         && IsOutOrBorderPoint(t.IntersectionPoint.Point.Value, allSegments))
                     .ToList();
 
+                if (halfBorderSegmentIntersections.Count > 1)
+                {
+                    Console.WriteLine($"Warning: multiple halfBorderSegmentIntersections!\r\n" +
+                        $"segment: ${halfBorderSegmentResult.ToJson()}\r\n" +
+                        $"intersections: ${halfBorderSegmentIntersections.ToJson()}\r\n");
+                }
+
                 var start = halfBorderSegmentResult.FoundOnStart
                     ? halfBorderSegmentResult.Segment.End
                     : halfBorderSegmentResult.Segment.Start;
@@ -231,6 +239,8 @@ namespace DS
 
                     borderSegments.Add(new Segment(start, halfBorderSegmentIntersection.IntersectionPoint.Point.Value));
                     borderSegments.Add(new Segment(halfBorderSegmentIntersection.IntersectionPoint.Point.Value, end));
+
+                    halfBorderSegmentResultSet.Remove(halfBorderSegmentIntersection.HalfBorderSegmentResult);
                 }
             }
         }
@@ -267,10 +277,12 @@ namespace DS
         {
             var pointSet = points.ToHashSet();
             var currentPoint = pointSet.First();
-            pointSet.Remove(currentPoint);
+            var startPoint = currentPoint;
 
-            while (pointSet.Count > 0)
+            while (pointSet.Count > 1)
             {
+                pointSet.Remove(currentPoint);
+
                 var segment = pointSet
                     .Select(p => (Point: p, Distance: currentPoint.GetDistanceWith(p)))
                     .OrderBy(t => t.Distance)
@@ -282,7 +294,6 @@ namespace DS
                     Console.WriteLine($"Error: point {currentPoint} haven't neighbor!");
 
                     currentPoint = pointSet.First();
-                    pointSet.Remove(currentPoint);
 
                     continue;
                 }
@@ -290,7 +301,12 @@ namespace DS
                 yield return segment;
 
                 currentPoint = segment.End;
-                pointSet.Remove(currentPoint);
+            }
+
+            var lastSegment = new Segment(currentPoint, startPoint);
+            if (IsOutOrBorderPoint(lastSegment.Center, allSegments))
+            {
+                yield return lastSegment;
             }
         }
 

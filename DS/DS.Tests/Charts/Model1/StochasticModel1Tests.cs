@@ -931,6 +931,54 @@ namespace DS.Tests.Charts.Model1
         }
 
         /// <summary>
+        /// Построение критических линий (для хаоса d12 = 0.002538, d21 = 0.0055 - сложный)
+        /// и эллипса рассеивания вокруг границы. Новый метод
+        /// </summary>
+        [Test]
+        public void Test10_1()
+        {
+            const double eps = 0.05, d12 = 0.002538, d21 = 0.0055;
+
+            dModel.D12 = d12;
+            dModel.D21 = d21;
+
+            sModel.D12 = d12;
+            sModel.D21 = d21;
+            sModel.Sigma1 = 1;
+            sModel.Sigma2 = 1;
+            sModel.Eps = eps;
+
+            var i = 0;
+            var attractor = PhaseTrajectory.Get(dModel, new PointX(36, 40), 50000, 50000);
+            // var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 50000);
+            var lcSet = LcSet.FromAttractor(dModel, attractor, 4, withoutIntersection: true);
+            var borderSegments = lcSet.GetBorderSegments();
+            // var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
+
+            Chart = new ChartForm(attractor, 10, 44, 0, 64);
+            // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
+            // Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
+            // Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
+            // Chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
+            // Chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
+            // Chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
+            // Chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
+            // Chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
+            // Chart.AddSeries("4H", lcSet[LcType.H][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            // Chart.AddSeries("4V", lcSet[LcType.V][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+
+            foreach (var borderSegment in borderSegments)
+                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+                    SeriesChartType.FastLine, 5, 3);
+
+            // Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 5);
+
+            // attractor.SaveToFile("chaos3", "algo3");
+            lcSet.SaveToFile("chaos3s_lc", "algo3");
+            borderSegments.SaveToFile("chaos3s_border", "algo3");
+        }
+
+        /// <summary>
         /// Построение критических линий (для хаоса d12 = 0.0024, d21 = 0.0055)
         /// и эллипса рассеивания вокруг границы.
         /// </summary>
@@ -1039,36 +1087,35 @@ namespace DS.Tests.Charts.Model1
             // var attractor2 = PhaseTrajectory.Get(sModel, attractor[^1], 0, 100000);
             var lcSet = LcSet.FromAttractor(dModel, attractor, 7);
             var borderSegments = lcSet.GetBorderSegments();
-            var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
+            // var ellipse = SensivityBand.GetForChaosLc(dModel, lcSet, eps).ToList();
 
             Chart = new ChartForm(attractor, 0, 31, 20, 81);
-            // Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
-            // Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
-            // Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
-            // Chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
-            // Chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
-            // Chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
-            // Chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
-            // Chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
-            // Chart.AddSeries("4H", lcSet[LcType.H][4], Color.SaddleBrown, SeriesChartType.Line, 4);
-            // Chart.AddSeries("4V", lcSet[LcType.V][4], Color.SaddleBrown, SeriesChartType.Line, 4);
-            // Chart.AddSeries("5H", lcSet[LcType.H][5], Color.DarkOrange, SeriesChartType.Line, 4);
-            // Chart.AddSeries("5V", lcSet[LcType.V][5], Color.DarkOrange, SeriesChartType.Line, 4);
-            // Chart.AddSeries("6H", lcSet[LcType.H][6], Color.Olive, SeriesChartType.Line, 4);
-            // Chart.AddSeries("6V", lcSet[LcType.V][6], Color.Olive, SeriesChartType.Line, 4);
-            // Chart.AddSeries("7H", lcSet[LcType.H][7], Color.Gold, SeriesChartType.Line, 4);
-            // Chart.AddSeries("7V", lcSet[LcType.V][7], Color.Gold, SeriesChartType.Line, 4);
+            Chart.AddSeries("0H", lcSet[LcType.H][0], Color.Red, SeriesChartType.Line, 4);
+            Chart.AddSeries("0V", lcSet[LcType.V][0], Color.Red, SeriesChartType.Line, 4);
+            Chart.AddSeries("1H", lcSet[LcType.H][1], Color.Purple, SeriesChartType.Line, 4);
+            Chart.AddSeries("1V", lcSet[LcType.V][1], Color.Purple, SeriesChartType.Line, 4);
+            Chart.AddSeries("2H", lcSet[LcType.H][2], Color.Green, SeriesChartType.Line, 4);
+            Chart.AddSeries("2V", lcSet[LcType.V][2], Color.Green, SeriesChartType.Line, 4);
+            Chart.AddSeries("3H", lcSet[LcType.H][3], Color.Black, SeriesChartType.Line, 4);
+            Chart.AddSeries("3V", lcSet[LcType.V][3], Color.Black, SeriesChartType.Line, 4);
+            Chart.AddSeries("4H", lcSet[LcType.H][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            Chart.AddSeries("4V", lcSet[LcType.V][4], Color.SaddleBrown, SeriesChartType.Line, 4);
+            Chart.AddSeries("5H", lcSet[LcType.H][5], Color.DarkOrange, SeriesChartType.Line, 4);
+            Chart.AddSeries("5V", lcSet[LcType.V][5], Color.DarkOrange, SeriesChartType.Line, 4);
+            Chart.AddSeries("6H", lcSet[LcType.H][6], Color.Olive, SeriesChartType.Line, 4);
+            Chart.AddSeries("6V", lcSet[LcType.V][6], Color.Olive, SeriesChartType.Line, 4);
+            Chart.AddSeries("7H", lcSet[LcType.H][7], Color.Gold, SeriesChartType.Line, 4);
+            Chart.AddSeries("7V", lcSet[LcType.V][7], Color.Gold, SeriesChartType.Line, 4);
 
-            foreach (var borderSegment in borderSegments)
-                Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
-                    SeriesChartType.FastLine, borderWidth: 3);
+            // foreach (var borderSegment in borderSegments)
+            //     Chart.AddSeries($"border_{i++}", borderSegment.GetBoundaryPoints(), Color.Red,
+            //         SeriesChartType.FastLine, borderWidth: 3);
+            //
+            // Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 4);
 
-            Chart.AddSeries("ellipse", ellipse.Select(t => t.Point), Color.Green, markerSize: 4);
-
-            // attractor.SaveToFile("model1_chaos2\\chaos.txt");
-            // attractor2.SaveToFile("model1_chaos2\\chaos_with_noise.txt");
-            // lcSet.SaveToFile("model1_chaos2\\LC.txt");
-            // lcSet.SaveToFile(ellipse, "model1_chaos2\\LC_border.txt");
+            attractor.SaveToFile("chaos2", "algo2");
+            lcSet.SaveToFile("chaos2_lc", "algo2");
+            borderSegments.SaveToFile("chaos2_border", "algo2");
             // ellipse.SaveToFile("model1_chaos2\\ellipse.txt");
         }
 
@@ -1127,7 +1174,7 @@ namespace DS.Tests.Charts.Model1
         [Test]
         public void Test14_2()
         {
-            const double eps = 0.1, d12 = 0.002271, d21 = 0.0073;
+            const double eps = 0.44, d12 = 0.002271, d21 = 0.0073;
 
             dModel.D12 = d12;
             dModel.D21 = d21;
